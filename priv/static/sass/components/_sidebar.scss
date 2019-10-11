@@ -1,0 +1,408 @@
+/* Sidebar
+   ========================================================================== */
+   
+.page-sidebar {
+    background-color: $sidebar-bg;
+    color: #b4b5b8;
+    display: table-cell;
+    height: 100%;
+    position: relative;
+    vertical-align: top;
+    width: 280px;
+    z-index: 101;
+}
+
+.site-header {
+    overflow: hidden;
+    padding: 25px 20px;
+    position: relative;
+    z-index: 101;
+}
+
+.site-logo {
+    float: left;
+    position: relative;
+}
+
+.page-container.sidebar-collapsed .site-header {
+	padding: 20px;
+}
+
+.page-container.sidebar-collapsed .site-logo {
+    overflow: hidden;
+    width: 0;
+}
+
+.site-logo a {
+    color: #c8c8c8;
+    display: block;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.sidebar-collapse,
+.sidebar-mobile-menu {
+    float: right;
+    position: relative;
+}
+
+.sidebar-collapse a.sidebar-collapse-icon,
+.sidebar-mobile-menu a.mobile-menu-icon {
+	color: #c8c8c8;
+    display: inline-block;
+    font-size: 24px;
+    line-height: 1;
+    text-align: center;
+	@include transition(all 200ms ease-in-out 0s);
+}
+
+.sidebar-collapse a.sidebar-collapse-icon i.icon-menu,
+.sidebar-mobile-menu a.mobile-menu-icon i.icon-menu {
+	margin: 0;
+}
+
+.page-container.horizontal-menu header.navbar {
+	background-color: $sidebar-bg;
+	border: 0 none;
+}
+
+.page-container.horizontal-menu header.navbar .navbar-brand {
+	height: 60px;
+	padding: 18px 20px;
+}
+
+.page-sidebar .sidebar-fixed {
+	position: fixed;
+	height: 100%;
+	width: 280px;
+}
+
+.sidebar-collapsed .page-sidebar,
+.sidebar-collapsed .page-sidebar .sidebar-fixed {
+	width: 66px;
+}
+
+.sidebar-collapsed .page-sidebar .sidebar-fixed {
+	position: relative;
+}
+
+.sidebar-collapsed .sidebar-fixed.ps-container {
+	overflow: visible;
+}
+
+
+/* Sidebar Menu
+   ========================================================================== */
+   
+ul.main-menu {
+    font-size: 14px;
+    list-style: outside none none;
+    margin: 0 0 20px;
+    padding: 0;
+}
+
+ul.main-menu li {
+    position: relative;
+}
+
+ul.main-menu li a {
+    color: #ebebeb;
+    display: block;
+    padding: 12px 20px;
+    text-decoration: none;
+}
+
+ul.main-menu > li.active > a,
+ul.main-menu > li > a:hover,
+ul.main-menu > li > a:focus {
+	background-color: $brand-primary;
+	color: $brand-white;
+}
+
+ul.main-menu .nav > li > a:hover,
+ul.main-menu .nav > li > a:focus,
+ul.main-menu .nav > li.has-sub.active > a {
+	background-color: $nav-hover-bg;
+	color: $brand-white;
+}
+
+ul.main-menu .nav > li > a { color: #a6a5a5; }
+
+ul.main-menu li i {
+	margin-right: 16px;
+	font-size: 15px;
+}
+
+ul.main-menu li ul {
+    list-style: outside none none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    z-index: 1;
+	background-color: $nav-collapse-bg;
+	overflow: hidden;
+}
+
+ul.main-menu > li > ul:before {
+	background-color: #2f2e2e;
+	width: 1px;
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 30px;
+	display: block;
+}
+
+ul.main-menu > li > ul > li:before,
+ul.main-menu > li > ul > li:after {
+    background-color: $nav-collapse-bg;
+    border: 1px solid #2f2e2e;
+    border-radius: 50%;
+    color: #2f2e2e;
+    content: "";
+    font-weight: 400;
+    height: 6px;
+    left: 27px;
+    position: absolute;
+    top: 20px;
+	@include transition(all 0.4s ease 0s);
+    width: 6px;
+    z-index: 2;
+}
+
+ul.main-menu li ul li:after {
+    border: 0 none;
+    height: 8px;
+    left: 26px;
+    top: 19px;
+    width: 8px;
+    z-index: 1;
+}
+
+ul.main-menu li ul li.active span.title {
+	font-weight: 600;
+}
+
+ul.main-menu li ul li.active:after {
+	background-color: $brand-white;
+	z-index: 2;
+	left: 25px;
+	top: 18px;
+	height: 10px;
+	width: 10px;
+}
+
+ul.main-menu li  ul li.active > a { color: $brand-white; }
+
+ul.main-menu li ul > li > a {
+	padding-left: 56px;
+}
+
+ul.main-menu li ul > li > ul > li > a {
+	padding-left: 76px;
+}
+
+ul.main-menu li ul > li > ul > li > ul > li > a {
+	padding-left: 96px;
+}
+
+ul.main-menu li ul > li > ul > li > ul > li > ul > li > a {
+	padding-left: 116px;
+}
+
+
+ul.main-menu li.has-sub > a:before,
+.page-container.horizontal-menu header.navbar .navbar-nav > li ul li.has-sub > a:before {
+    color: #ebebeb;
+    content: "\e75e";
+    display: inline-block;
+    float: right;
+    font-family: "entypo";
+    font-size: 15px;
+    margin-left: 10px;
+    position: relative;
+    @include transition(all 300ms ease-in-out);
+    font-weight: normal;
+}
+
+ul.main-menu li.active.has-sub > a:before {
+ 	@include rotate(90deg);
+}
+
+.sidebar-collapsed .page-sidebar .main-menu > li > a > span.title {
+    background-color: $brand-primary;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: block;
+    left: 66px;
+    zoom: 1;
+    @include opacity(0);
+    padding: 13px 20px;
+    position: absolute;
+    top: 0;
+    visibility: hidden;
+    width: 240px;
+}
+
+.sidebar-collapsed .page-sidebar .main-menu > li > a > span.label {
+	left: 240px;
+    zoom: 1;
+    @include opacity(0);
+    position: absolute;
+    top: 15px;
+    visibility: hidden;
+}
+
+.sidebar-collapsed .page-sidebar .main-menu > li.has-sub:hover > a,
+.sidebar-collapsed .page-sidebar .main-menu > li:hover > a {
+	background-color: $brand-primary;
+}
+
+.sidebar-collapsed .page-sidebar .main-menu > li.has-sub:hover > a > span.title,
+.sidebar-collapsed .page-sidebar .main-menu > li:hover > a > span.title,
+.sidebar-collapsed .page-sidebar .main-menu > li:hover > a > span.label {
+  visibility: visible;
+  zoom: 1;
+  @include opacity(1);
+}
+
+.sidebar-collapsed .page-sidebar .main-menu > li > ul {
+    display: block;
+    height: 0;
+    left: 66px;
+    zoom: 1;
+    @include opacity(0);
+    position: absolute;
+    top: auto;
+    visibility: hidden;
+    width: 240px;
+}
+
+.sidebar-collapsed .page-sidebar .main-menu > li.has-sub:hover > ul,
+.sidebar-collapsed .page-sidebar .main-menu > li:hover > ul {
+  visibility: visible;
+  zoom: 1;
+  @include opacity(1);
+  height: auto;
+}
+
+
+.sidebar-collapsed .page-sidebar  ul.main-menu > li > ul > li > a {
+	padding-left: 20px;
+}
+
+.sidebar-collapsed .page-sidebar ul.main-menu li ul > li > ul > li > a {
+	padding-left: 40px;
+}
+
+.sidebar-collapsed .page-sidebar ul.main-menu li ul > li > ul > li > ul > li > a {
+	padding-left: 60px;
+}
+
+.sidebar-collapsed .page-sidebar ul.main-menu li ul > li > ul > li > ul > li > ul > li > a {
+	padding-left: 80px;
+}
+
+.sidebar-collapsed .page-sidebar ul.main-menu > li.has-sub > a:before,
+.sidebar-collapsed .page-sidebar ul.main-menu li ul li:before, 
+.sidebar-collapsed .page-sidebar ul.main-menu li ul li:after,
+.sidebar-collapsed .page-sidebar ul.main-menu li ul:before {
+	display: none;
+}
+
+.page-container.horizontal-menu header.navbar .navbar-nav li {
+	position: relative;
+}
+
+.page-container.horizontal-menu header.navbar .navbar-nav > li ul {
+	display: none;
+    background-color: $nav-collapse-bg;
+    display: none;
+    left: 0;
+    list-style: outside none none;
+    margin: 0;
+    min-width: 250px;
+    padding: 0;
+    position: absolute;
+    top: auto;
+}
+
+.page-container.horizontal-menu header.navbar .navbar-nav > li ul a {
+	color: #a6a5a5;
+}
+
+.page-container.horizontal-menu header.navbar .navbar-nav > li ul a:hover,
+.page-container.horizontal-menu header.navbar .navbar-nav > li ul li:hover > a {
+	background-color: #242424;
+	color: $brand-white;
+}
+
+.page-container.horizontal-menu header.navbar .navbar-nav  > li.active > a,
+.page-container.horizontal-menu header.navbar .navbar-nav  > li:hover > a,
+.page-container.horizontal-menu header.navbar .navbar-nav li > ul li.active  a {
+	background-color: $brand-primary;
+    color: $brand-white;
+}
+
+.page-container.horizontal-menu header.navbar .navbar-nav > li:hover > ul {
+	display: block;
+}
+
+.page-container.horizontal-menu header.navbar .navbar-nav > li ul li:hover ul {
+	display: block;
+	left: 100%;
+	top: 0;
+}
+
+
+.page-container.horizontal-menu header.navbar .navbar-nav {
+	list-style: none;
+	padding: 0;
+}
+
+.page-container.horizontal-menu header.navbar .navbar-nav > li > a {
+    color: #ebebeb;
+    display: block;
+    padding: 20px;
+    position: relative;
+    z-index: 10;
+}
+
+.page-container.horizontal-menu header.navbar .navbar-toggle {
+	font-size: 30px;
+	color: #c8c8c8;
+	margin: 0;
+	padding: 8px 10px;
+}
+
+.navbar-toggle i.icon-menu {
+	line-height: 1;
+}
+
+@media screen and (max-width: $screen-sm-max) {
+
+	.page-sidebar .sidebar-fixed {
+		position: relative;
+		width: 100%;
+		height: auto;
+	}
+	
+	.sidebar-fixed.ps-container {
+		overflow: visible !important;
+	}
+}
+
+@media screen and (max-width: $screen-xs-max) {
+	
+	.site-header { padding: 15px 20px; }
+	
+	.page-sidebar { display: block; width: 100%;  height: auto; }
+	
+	ul.main-menu { 
+		margin-bottom: 0; 
+		border: 0 none; 
+        @include box-shadow(none);
+	}
+	
+	
+}

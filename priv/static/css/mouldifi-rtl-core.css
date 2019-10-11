@@ -1,0 +1,530 @@
+/*=============================================================
+    Table of Contents:
+    =============================
+    01. Global
+    02. Sidebar
+    03. Header
+    04. Dashboard
+    05. Views
+    06. Breadcrumbs
+    07. Panels
+	08. Tables
+	09. Forms
+	10. Navs
+	11. Buttons
+	12. Mailbox
+	13. Vactor Map
+	14. Carousel
+  =============================================================*/
+
+/* 01. Global
+   ========================================================================== */
+
+.pull-right {
+  float: left !important;
+}
+.pull-left {
+  float: right !important;
+}
+
+.m-l-20 {
+    margin-right: 20px;
+	margin-left: 0;
+}
+
+.m-r-15 {
+    margin-right: 0;
+	margin-left: 15px;
+}
+
+.icons-showcase > div > i {
+	margin-left: 10px;
+	margin-right: 0;
+}
+
+.page-heading .btn-add {
+	margin-left: 0;
+	margin-right: 15px;
+}
+
+/* 02. Sidebar
+   ========================================================================== */
+
+/**
+ * Sidebar Menu
+ */
+ 
+ul.main-menu li i {
+    margin-left: 16px;
+	margin-right: 0.25em;
+}
+
+ul.main-menu li.has-sub > a:before {
+	float: left;
+	margin-left: 0;
+	margin-right: 10px;
+} 
+
+.sidebar-collapsed .page-sidebar .main-menu > li > a > span.title,
+.sidebar-collapsed .page-sidebar .main-menu > li > ul {
+	left: auto;
+	right: 66px;
+}
+
+ul.main-menu li ul > li > a {
+	padding-left: 20px;
+    padding-right: 56px;
+}
+
+ul.main-menu li ul > li > ul > li > a {
+	padding-left: 20px;
+    padding-right: 76px;
+}
+
+ul.main-menu li ul > li > ul > li > ul > li > a {
+	padding-left: 20px;
+    padding-right: 96px;
+}
+
+ul.main-menu li ul > li > ul > li > ul > li > ul > li > a {
+	padding-left: 20px;
+    padding-right: 116px;
+}
+
+.sidebar-collapsed .page-sidebar ul.main-menu > li > ul > li > a {
+    padding-right: 20px;
+	padding-left: 20px;
+}
+
+.sidebar-collapsed .page-sidebar ul.main-menu li ul > li > ul > li > a {
+	padding-right: 40px;
+	padding-left: 20px;
+}
+
+.sidebar-collapsed .page-sidebar ul.main-menu li ul > li > ul > li > ul > li > a {
+	padding-right: 60px;
+	padding-left: 20px;
+}
+.sidebar-collapsed .page-sidebar ul.main-menu li ul > li > ul > li > ul > li > ul > li > a {
+	padding-right: 80px;
+	padding-left: 20px;
+}
+
+ul.main-menu > li > ul:before {
+	right: 30px;
+	left: auto;
+}
+
+ul.main-menu > li > ul > li:before,
+ul.main-menu > li > ul > li:after {
+	right: 27px;
+	left: auto;
+}
+
+ul.main-menu li ul li:after {
+	right: 26px;
+}
+
+ul.main-menu li ul li.active:after {
+	right: 25px;
+	left: auto;
+}
+
+/* 03. Header
+   ========================================================================== */
+
+.site-logo {
+	float: right;
+}
+
+.sidebar-collapse, 
+.sidebar-mobile-menu {
+	float: left;
+}
+
+.notifications.dropdown .dropdown-menu > li .media-list .media-left {
+	padding-left: 0;
+	padding-right: 18px;
+}
+
+.profile-info img.avatar {
+	margin-right: 0;
+	margin-left: 8px;
+}
+
+.profile-info.dropdown .dropdown-menu li a i {
+    margin-left: 6px;
+    margin-right: 0;
+}
+
+/* 04. Dashboard
+   ========================================================================== */
+   
+.dropdown-menu-right,
+.pull-right > .dropdown-menu {
+	float: right;
+	left: 0;
+	right: auto;
+}
+
+ul.removeable-list li {
+    padding-left: 50px;
+    padding-right: 0;
+}
+
+ul.removeable-list li > .remove {
+    left: 5px;
+	right: auto;
+}
+
+.comment-footer .btn + .btn, .feed-footer .btn + .btn {
+    margin-right: 8px;
+	margin-left: 0;
+}
+
+ul.member-list div.user-avatar, 
+.user-view div.user-avatar, 
+.product-view .product-thumb,
+ul.message-list li > .icon-mail {
+    float: right;
+	margin-left: 12px;
+	margin-right: 0;
+}
+
+.col-with-divider div[class*="col-"] {
+    border-right: 1px solid #ddd;
+	border-left: none;
+}
+
+.bar-chart-icon, .like-icon {
+	left: 20px;
+	right: auto;
+}
+
+.has-doughnut-legend {
+	margin-left: 80px;
+	margin-right: 0;
+}
+
+ul.doughnut-legend {
+	left: 28px;
+	right: auto;
+}
+
+ul.doughnut-legend li span,
+div.entry-meta > span i {
+	margin-right: 0;
+	margin-left: 8px;
+}
+
+div.entry-meta > span {
+	margin-left: 20px;
+	margin-right: 0;
+}
+
+.sm-progress .bar-label {
+	float: right;
+	margin-right: 10px;
+	margin-left: 0;
+}
+
+.lockup-video .lockup-thumbnail {
+	float: right;
+	margin-left: 12px;
+	margin-right: 0;
+}
+
+/* 05. Views
+   ========================================================================== */
+
+.card-header .card-photo {
+    margin-left: 15px;
+	margin-right: 0;
+}
+
+.primary-view .action-dropdown {
+	left: 15px;
+	right: auto;
+}
+
+.short-view .primary-view .action-dropdown {
+	right: auto;
+	left: 8px;
+}
+
+.card .badges .badge-bordered + .badge {
+    margin-right: 10px;
+	margin-left: 0;
+}
+
+.card-short-description .user-name + .badge {
+	margin-right: 12px;
+	margin-left: 0;
+}
+
+.cards-container .card-short-description, 
+.cards-container .card-content {
+	 margin-left: 0;
+	 margin-right: 76px;
+}
+
+.cards-container.grid-view .card-content {
+	margin-right: 0;
+}
+
+.datatable-wrapper .data-col-first, 
+.datatable-wrapper .data-col-last,
+.col-selectbox {
+    float: right;
+}
+
+.datatable-wrapper .data-col-last {
+    float: left;
+}
+
+.col-checkbox {
+    float: right;
+    margin-right: 0;
+	margin-left: 20px;
+}
+
+.col-selectbox + .col-selectbox {
+    margin-right: 15px;
+	margin-left: 0;
+}
+
+.col-checkbox.col-space {
+    padding-right: 8px;
+	padding-left: 0;
+}
+
+.filter-wrapper .form-inline .form-group {
+	margin-left: 40px;
+	margin-right: 0;
+}
+
+.filter-wrapper .form-inline .filter-btn {
+	margin-left: 0;
+}
+
+.form-inline .checkbox-replace {
+    margin-left: 20px;
+	margin-right: 0;
+}
+
+.form-inline .checkbox-replace:last-child {
+    margin-left: 0;
+}
+
+@media screen and (max-width: 767px) {
+  .filter-wrapper .form-inline .form-group {
+	  margin-left: 0;
+  }
+}
+
+@media screen and (max-width: 479px) {
+	.cards-container .card-content {
+		margin-right: 0;
+	}
+}
+
+/* 06. Breadcrumbs
+   ========================================================================== */
+.breadcrumb-2 {
+	padding-left: 15px;
+	padding-right: 0;
+}
+.breadcrumb i.fa {
+	margin-right: 0;
+	margin-left: 6px;
+}
+
+
+/* 07. Panels
+   ========================================================================== */
+
+.panel-heading > .panel-title {
+	float: right;
+}
+
+.panel-minimal > .panel-heading > .nav-right {
+	float: left;
+}
+
+.panel-heading .panel-tool-options {
+    float: left;
+	margin-right: 0;
+    margin-left: -0.5em;
+}
+
+/* 08. Tables
+   ========================================================================== */
+
+.dataTables_wrapper .html5buttons {
+    float: left;
+    margin-right: 12px;
+	margin-left: 0;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_info {
+    float: right;
+}
+
+.dataTables_wrapper .dataTables_filter {
+    float: left;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    margin-right: 0.5em;
+	margin-left: 0;
+}
+
+.indent-row .table-users > thead > tr > th:first-child, .indent-row .table-users > thead > tr > td:first-child, .indent-row .table-users > tbody > tr > th:first-child, .indent-row .table-users > tbody > tr > td:first-child, .indent-row .table-users > tfoot > tr > th:first-child, .indent-row .table-users > tfoot > tr > td:first-child {
+	padding-right: 18px;
+	padding-left: 8px;
+}
+.indent-row .table-users > thead > tr > th:last-child, .indent-row .table-users > thead > tr > td:last-child, .indent-row .table-users > tbody > tr > th:last-child, .indent-row .table-users > tbody > tr > td:last-child, .indent-row .table-users > tfoot > tr > th:last-child, .indent-row .table-users > tfoot > tr > td:last-child {
+	padding-left: 18px;
+	padding-right: 8px;
+}
+
+table.table-mails tr td.mail-select {
+	padding-right: 20px;
+	padding-left: 12px;
+}
+table.table-mails tr td:last-of-type {
+	padding-left: 20px;
+	padding-right: 12px;
+}
+
+
+/* 09. Forms
+   ========================================================================== */
+
+.checkbox-replace,
+.radio-replace {
+	padding-right: 20px;
+	padding-left: 0;
+}
+
+.checkbox-replace label,
+.radio-replace label {
+	padding-right: 5px;
+}
+
+.checkbox-replace label:before,
+.checkbox-replace label:after,
+.radio-replace label:before,
+.radio-replace label:after {
+	left: auto;
+	right: 0;
+	margin-right: -20px;
+	margin-left: 0;
+}
+
+.checkbox-replace label:after,
+.radio-replace label:after {
+	right: 3px;
+}
+
+.input-group-addon:last-child,
+.input-group-addon:first-child {
+	border-color: #ccc;
+}
+
+.datepicker-dropdown,
+.colorpicker {
+    left: 0;
+    right: auto;
+}
+
+.form-wizard .tab-content .pager.wizard .first a {
+	margin-left: 8px;
+	margin-right: 0;
+}
+
+.form-wizard .tab-content .pager.wizard .last a {
+    margin-right: 8px;
+	margin-left: 0;
+}
+
+/* 10. Navs
+   ========================================================================== */
+
+.nav-pills-default > li + li {
+	border-right: 1px solid #c7c6c6;
+	border-left: none; 
+}
+
+.nav-pills-default > li:first-child > a {
+	-webkit-border-radius: 0 3px 3px 0;
+	-moz-border-radius: 0 3px 3px 0;
+	-ms-border-radius: 0 3px 3px 0;
+	border-radius: 0 3px 3px 0;
+}
+
+.nav-pills-default > li:last-child > a {
+	-webkit-border-radius: 3px 0 0 3px;
+	-moz-border-radius: 3px 0 0 3px;
+	-ms-border-radius: 3px 0 0 3px;
+	border-radius: 3px 0 0 3px;
+}
+
+.accordion-heading .accordion-toggle:before {	
+	float: left;
+	margin-right: 10px;
+	margin-left: 0;
+}
+
+.pagination > li:first-child > a, 
+.pagination > li:first-child > span {
+	margin-right: 0;
+}
+
+/* 11. Buttons
+   ========================================================================== */
+
+.bs-example .btn, .bs-example-group .btn-group {
+	margin-right: 0;
+	margin-left: 8px;
+}
+
+/* 12. Mailbox
+   ========================================================================== */
+
+ul.mail-list li .fa, 
+ul.category-list li .fa {
+    margin-left: 10px;
+	margin-right: 0;
+}
+
+h3.mail-title {
+    float: right;
+    padding-left: 20px;
+	padding-right: 0;
+}
+
+ul.wysihtml5-toolbar > li {
+	float: right;
+	margin-left: 5px;
+	margin-right: 0;
+}
+
+/* 13. Vactor Map
+   ========================================================================== */
+
+.jvectormap-zoomin, 
+.jvectormap-zoomout, 
+.jvectormap-goback {
+	right: 10px;
+	left: auto;
+}
+
+/* 14. Carousel
+   ========================================================================== */
+.carousel-controller {
+    float: right;
+    margin-right: 0;
+	margin-left: 12px;
+}

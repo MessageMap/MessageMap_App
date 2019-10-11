@@ -1,0 +1,23 @@
+{application, ethandb,
+ [{description, "Message Map Next generation Database application"},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {mod, { ethandb_app, []}},
+  {applications,
+   [kernel,
+    stdlib,
+    ewt,
+    sasl,
+    ranch,
+    cowboy,
+    mnesia,
+    jiffy,
+    jesse,
+    throttle
+   ]},
+  {env,[]}, %% TODO: MAKE NOTE OF CHANGE
+  {modules, []},
+  {maintainers, [ "Ben@MessageMap.io" ]},
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.

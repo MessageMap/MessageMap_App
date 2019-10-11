@@ -1,0 +1,49 @@
+/* Progress bars
+   ========================================================================== */
+   
+.progress, 
+.progress-bar {
+	@include box-shadow(none);
+}
+
+
+.sm-progress {
+	height: 10px;
+	background-color: transparent;
+	@include border-radius(0);
+	margin-bottom: 8px;
+}
+
+.sm-progress .bar-label {
+	color: #808383;
+	font-size: 12px;
+	float: left;
+	text-transform: uppercase;
+	margin: -1px 0 0 10px;
+	font-weight: 600;
+	line-height: 1;
+}
+
+/**
+ * Variations
+ */
+
+.progress-bar-success {
+  @include progress-bar-variant($progress-bar-success-bg);
+}
+
+.progress-bar-info {
+  @include progress-bar-variant($progress-bar-info-bg);
+}
+
+.progress-bar-warning {
+  @include progress-bar-variant($progress-bar-warning-bg);
+}
+
+.progress-bar-danger {
+  @include progress-bar-variant($progress-bar-danger-bg);
+}
+
+.progress-bar-default .progress-bar {
+	background-color: #babbba;
+}

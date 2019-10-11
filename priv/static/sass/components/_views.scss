@@ -1,0 +1,248 @@
+/* User views
+   ========================================================================== */
+.cards-container .card-header {
+	position: relative;
+	clear: both;
+	min-height: 92px;
+	padding: 18px 15px 2px;
+}
+
+.cards-container .card {
+	margin-bottom: 25px;
+}
+
+.cards-container .primary-view {
+	border: solid 2px #00b8ce;
+	@include border-radius(4px);
+}
+
+.cards-container .primary-view .card-header {
+	background-color: $brand-primary;
+	color: #FFF;
+	border-color: $brand-primary;
+}
+
+.cards-container .primary-view .card-header a,
+.cards-container .primary-view .card-header a:hover {
+	color: #FFF;
+}
+
+.cards-container.default-view .card {
+	border-bottom: 1px solid #ebebeb;
+}
+
+.cards-container.box-view .card {
+	border: solid 1px #bababa;
+	@include border-radius(4px);
+	@include box-shadow(0 0 8px #d2d2d2);
+}
+
+.cards-container.box-view .card:hover {
+	background-color: #e9fcf6;
+}
+
+.card-header .card-photo {
+	float: left;
+	width: 60px;
+	margin: 0 15px 12px 0;
+	position: absolute;
+}
+
+.cards-container .card-short-description, 
+.cards-container .card-content {
+	position: relative;
+	margin-left: 76px;
+}
+
+.cards-container .card-content {
+	padding: 0 15px 2px;
+}
+
+.cards-container.grid-view .card-content {
+	margin-left: 0;
+	font-size: 13px;
+	padding: 12px 15px;
+}
+
+.cards-container.grid-view .card-header {
+	border-bottom: 1px solid #dedede;
+	padding-bottom: 12px;
+}
+
+.cards-container.grid-view.short-view .card-header {
+	border-color: $brand-primary; 
+}
+
+.cards-container.short-view .card-header {
+	min-height: 95px;
+}
+
+.card .badge {
+	padding: 4px 8px;
+	text-transform: uppercase;
+}
+
+.card-short-description .user-name {
+	display: inline-block;
+	vertical-align: middle;
+	font-weight: 600;
+}
+
+.cards-container .card-short-description, 
+.card-short-description h5 { 
+	font-size: 16px; 
+	font-weight: 400; 
+}
+
+.cards-container.grid-view .card-short-description, 
+.cards-container.grid-view .card-short-description h5 { 
+	font-size: 14px; 
+}
+
+.cards-container.grid-view .card-short-description {
+	margin-top: 8px;
+}
+
+.cards-container.grid-view .card-short-description h5 {
+	margin-bottom: 2px;
+}
+
+.cards-container.grid-view .card-short-description p {
+	margin-bottom: 5px;
+}
+
+.cards-container.grid-view .card-short-description p .badge {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.card-short-description .user-name + .badge { margin-left: 12px; }
+
+ul.list-action {
+	text-transform: uppercase;
+	font-size: 12px;
+}
+
+ul.list-action li a,
+.card-short-description .user-name a:hover {
+	color: $brand-primary;
+}
+
+ul.list-action li a:hover {
+	color: #333;
+}
+
+.cards-container .card-footer {
+	background-color: $brand-primary;
+	color: #FFF;
+	padding: 5px 15px;
+	@include border-radius(0 0 3px 3px);
+}
+
+.cards-container .card-footer ul.list-inline > li > a {
+	color: #FFF;
+}
+
+.cards-container .card-footer ul.list-inline {
+	margin-bottom: 0;
+}
+
+.cards-container .card-footer  .list-inline > li {
+	padding-left: 0;
+	padding-right: 0;
+}
+
+.primary-view .action-dropdown {
+	position: absolute;
+	bottom: -10px;
+	right: 15px;
+	z-index: 101;
+}
+
+.primary-view .action-dropdown > a {
+    background-color: #fff;
+    border: 1px solid #9d9e9d;
+    @include border-radius(50%);
+    color: #9d9e9d !important;
+    padding: 3px 3px 4px 1px;
+	display: inline-block;
+}
+
+.primary-view .action-dropdown .dropdown-menu {
+	margin-top: 5px;
+}
+
+.primary-view .action-dropdown .dropdown-menu > li > a {
+	color:  #333 !important;
+}
+
+.short-view .primary-view .action-dropdown > a {
+	background-color: transparent;
+	border: 0 none;
+	color: #FFF !important;
+}
+
+.short-view .primary-view .action-dropdown {
+	right: 8px;
+	top: 40px;
+	bottom: auto;
+}
+
+i.icon-dot-3.icon-more {
+	left: 2px;
+    position: relative;
+	@include rotate(90deg);
+	font-size: 15px;
+}
+
+.col-checkbox {
+	float: left;
+	margin-right: 20px;
+}
+
+.col-checkbox.col-space {
+	padding-left: 8px;
+}
+
+.col-selectbox {
+	float: left;
+}
+
+.col-selectbox  .form-control {
+    display: inline-block;
+    vertical-align: middle;
+    width: auto;
+}
+
+.col-selectbox + .col-selectbox {
+	margin-left: 15px;
+}
+
+.datatable-wrapper { margin-bottom: 20px; }
+
+.datatable-wrapper .data-col-first,
+.datatable-wrapper .data-col-last {
+	postion: relative;
+	float: left;
+}
+
+.datatable-wrapper .data-col-last {
+	float: right;
+}
+
+@media screen and (max-width: 479px) {
+
+  .datatable-wrapper .data-col-first,
+  .datatable-wrapper .data-col-last {
+  	  float: none;
+  }
+
+  .datatable-wrapper .data-col-first {
+  	  margin-bottom: 15px;
+  }
+   
+  .cards-container .card-content {
+      margin-left: 0;
+  }
+
+}

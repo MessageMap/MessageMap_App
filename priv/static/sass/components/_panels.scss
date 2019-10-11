@@ -1,0 +1,186 @@
+/* Panels
+   ========================================================================== */
+
+.panel {
+  @include border-radius(0);
+  @include box-shadow(2px 1px 5px rgba(0, 0, 0, 0.25));
+  margin-bottom: 25px;
+}
+
+.shadowless,
+.panel-minimal {
+	@include box-shadow(none);
+}
+
+.panel-body {
+	position: relative;
+	padding: $panel-heading-padding;
+}
+
+.panel-minimal > .panel-heading  {
+	border-color: #ddd;
+}
+
+.panel-minimal > .panel-heading,
+.panel-minimal > .panel-body {
+	padding-left: 0;
+	padding-right: 0;
+}
+
+.panel-minimal > .panel-heading > .nav-right {
+	float: right;
+	margin: -1px 0 -13px;
+}
+
+.panel-minimal > .panel-heading > .nav-tabs > li > a {
+	padding: 6px 15px;
+}
+
+.minimal .panel-body {
+	padding: 15px;
+}
+
+.panel-group .panel + .panel {
+	margin-top: 0;
+}
+
+.panel-heading, .panel-group .panel {
+	@include border-radius(0);
+}
+
+.panel-group .panel:first-child {
+	@include border-radius(4px 4px 0 0);
+}
+
+.panel-group .panel:last-child {
+	@include border-radius(0 0 4px 4px);
+}
+
+.panel-heading {
+	padding: 12px 24px;
+}
+
+.minimal .panel-heading {
+	padding: 10px 15px;
+}
+
+.panel-heading > .panel-title {
+    float: left;
+	font-size: 14px;
+}
+
+.panel-heading > .panel-title-center {
+	font-size: 18px;
+	display: inline-block;
+	margin: 5px 10px 0;
+}
+
+.panel-heading > h2.panel-title {
+	font-size: 24px;
+}
+
+.panel-heading > h3.panel-title {
+	font-size: 18px;
+	font-weight: 400;
+}
+
+.panel-heading .panel-tool-options {
+	float: right;
+	list-style: none;
+	padding: 0;
+	margin-bottom: 0;
+	margin-right: -0.5em;
+}
+
+.panel-heading .panel-tool-options > li > a {
+	color: #434343;
+}
+
+.panel-success .panel-tool-options > li > a,
+.panel-primary .panel-tool-options > li > a,
+.panel-danger .panel-tool-options > li > a,
+.panel-warning .panel-tool-options > li > a,
+.panel-info .panel-tool-options > li > a {
+	color: inherit;
+}
+
+.panel-heading .panel-tool-options > li {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.panel-heading .panel-tool-options .dropdown-menu > li > a {
+	padding: 5px 12px;
+}
+
+.minimal .panel-heading .panel-tool-options {
+	margin-right: -0.25em;
+}
+
+.panel-default > .panel-heading {
+	background-color: #FFF;
+}
+
+.panel-invert { 
+	border-color: $brand-primary;
+	background-color: $brand-primary;
+	color: #FFF;
+}
+
+.panel-invert > .panel-heading { 
+	background-color: $brand-primary;
+	color: #FFF;
+}
+
+.panel-content.panel-content {
+	padding-top: 0;
+}
+
+.panel-content.panel-content  h1 { margin-bottom: 5px; }
+
+.panel > .panel-body.with-table {
+    border: 0 none;
+    margin: -1px;
+    padding: 0;
+}
+
+.panel-body.with-table .table { margin-bottom: 0; }
+
+.panel-update-content {
+	padding: 8px 15px;
+	font-weight: 600;
+	color: #9ea7b3;
+}
+
+.panel-update-content h5 {
+	font-weight: 600;
+}
+
+.panel-update-content h1 {
+	color: #00b8ce;
+	font-weight: 600;
+	font-size: 34px;
+	line-height: 1;
+	margin-bottom: 8px;
+}
+
+// Contextual variations
+.panel-default {
+  @include panel-variant($panel-default-border, $panel-default-text, $panel-default-heading-bg, $panel-default-border);
+}
+.panel-primary {
+  @include panel-variant($panel-primary-border, $panel-primary-text, $panel-primary-heading-bg, $panel-primary-border);
+}
+.panel-success {
+  @include panel-variant($panel-success-border, $panel-success-text, $panel-success-heading-bg, $panel-success-border);
+}
+.panel-info {
+  @include panel-variant($panel-info-border, $panel-info-text, $panel-info-heading-bg, $panel-info-border);
+}
+.panel-warning {
+  @include panel-variant($panel-warning-border, $panel-warning-text, $panel-warning-heading-bg, $panel-warning-border);
+}
+.panel-danger {
+  @include panel-variant($panel-danger-border, $panel-danger-text, $panel-danger-heading-bg, $panel-danger-border);
+}
+
