@@ -181,11 +181,11 @@ var controller = {
                 <p>Topic Name: <select id="subscribeTopicId" class="topicSubscribeList"> \
                 </select></p> \
               </div> \
-            </div> \
               <div class="modal-footer"> \
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
                 <button type="button" class="btn btn-primary" id="subscribedAdd">Add Topic to Subscribe List</button> \
               </div> \
+							</div> \
             </div><!-- /.modal-content --> \
           </div><!-- /.modal-dialog --> \
 				</div>';
