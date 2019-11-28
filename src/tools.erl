@@ -11,7 +11,7 @@
 -export([log/2, pull_global_stats/0, resp_headers/0, integer_check/1, verifyAuthAdmin/1, verifyAuth/1, version/0, convertDateTime/1]).
 
 -define(server, "MessageMap.io").
--define(version, "0.0.1 Alpha").
+-define(version, "0.0.1 Beta").
 -define(hostname, os:getenv("MM_HOSTNAME")).
 
 resp_headers()->

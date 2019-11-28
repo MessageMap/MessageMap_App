@@ -13,7 +13,8 @@
     mnesia,
     jiffy,
     jesse,
-    throttle
+    throttle,
+    sync
    ]},
   {env,[]}, %% TODO: MAKE NOTE OF CHANGE
   {modules, []},
