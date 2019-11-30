@@ -8,31 +8,19 @@
 %%%-------------------------------------------------------------------
 -module(user_handler).
 
--behaviour(cowboy_http_handler).
+-export([init/2]).
 
--export([init/3]).
--export([handle/2]).
--export([terminate/3]).
-
--record(state, {}).
-
-init(_, Req, _Opts) ->
-  {ok, Req, #state{}}.
-
-handle(Req, State=#state{}) ->
-  { Method, _ } = cowboy_req:method(Req),
+init(Req, Opts) ->
+  Method = cowboy_req:method(Req),
   Result = processRequest(Method, Req),
   { ok, ReqFinal } = cowboy_req:reply(200, tools:resp_headers(),
       Result,
       Req),
-  {ok, ReqFinal, State}.
-
-terminate(_Reason, _Req, _State) ->
-  ok.
+  {ok, ReqFinal, Opts}.
 
 % Internal functions
 processRequest(<<"POST">>, Req) ->
-  {ok, Body, _} = cowboy_req:body_qs(Req),
+  {ok, Body, _} = cowboy_req:read_urlencoded_body(Req),
   {_, Username} = lists:keyfind(<<"username">>, 1, Body),
   {_, Password} = lists:keyfind(<<"password">>, 1, Body),
   database:saveDB(binary:bin_to_list(Username), binary:bin_to_list(Username), [], binary:bin_to_list(Password)),

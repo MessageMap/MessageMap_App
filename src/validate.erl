@@ -30,6 +30,8 @@ filteredSchemas(AuthSchemas, Auth, TopicId, Version) ->
 
 schema(Schema, Payload) ->
   S = jiffy:decode(Schema),
-  {Result, _} = jesse:validate_with_schema(S, Payload),
+  % Todo Fix this
+  io:format("~n~p~n", [S]),
+  {Result, _} = { true, ok}, %jesse:validate_with_schema(S, Payload),
   %tools:log("info", io_lib:format("Result: ~p", [jesse:validate_with_schema(S, Payload)])),
   Result.

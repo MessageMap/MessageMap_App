@@ -1,21 +1,20 @@
 %%%-------------------------------------------------------------------
 %%% @author Benjamin Adams
-%%% @copyright (C) 2017, MessageMap.io
+%%% @copyright (C) 2019, MessageMap.io
 %%% @doc
-%%%  This Intercepts Requests for Handeling messages
+%%%  Endpoint to just pull messages from the queue
 %%% @end
-%%% Created : 16. Aug 2017
+%%% Created : 29. Nov 2019
 %%%-------------------------------------------------------------------
--module(messages_handler).
+-module(pull_only_messages_handler).
 
 -export([init/2]).
 
 init(Req, Opts) ->
   Method = cowboy_req:method(Req),
-  Version = cowboy_req:binding(version, Req),
-  Topic = cowboy_req:binding(topic, Req),
   AuthToken = cowboy_req:header(<<"authorization">>, Req, []),
   Auth = encryption:ewtDecode(AuthToken),
+  #{limit := Limit} = cowboy_req:match_qs([{limit, int, 10}], Req),
   if
     AuthToken == [] ->
        Req2 = cowboy_req:reply(401, tools:resp_headers(),
@@ -29,9 +28,8 @@ init(Req, Opts) ->
        {ok, Req2, Opts};
     true ->
       if
-        Method == <<"POST">> ->
-          {ok,  [{ Payload, _}] , _} = cowboy_req:read_urlencoded_body(Req),
-          Result = messages:push(Version, Topic, Auth, Payload),
+        Method == <<"GET">> ->
+          Result = messages:pull(Auth, Limit),
           Req2 = cowboy_req:reply(200, tools:resp_headers(),
             jiffy:encode(Result),
             Req),

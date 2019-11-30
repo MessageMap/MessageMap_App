@@ -53,6 +53,7 @@ init(Config) ->
   application:set_env(mnesia, dir, ?MNESIA_DIR),
   mnesia:create_schema([node()]), %TODO: Dynamicly add new nodes
   mnesia:start(),
+  timer:seconds(15),
   try
     mnesia:table_info(type, organization),
     mnesia:table_info(type, accounts),
@@ -93,16 +94,17 @@ init(Config) ->
       mnesia:create_table(counter_published,
         [
           {attributes, record_info(fields, counter_published)}, % Try to Change others to this method
-  				{disc_copies, [node()]}
+          {disc_copies, [node()]}
         ]),
       mnesia:create_table(counter_consumed,
         [
           {attributes, record_info(fields, counter_consumed)},
-  				{disc_copies, [node()]}
+          {disc_copies, [node()]}
         ]),
       % Set all counters
       timer:apply_after(2000, mnesia, dirty_update_counter, [{counter_published, all}, 0]),
       timer:apply_after(2000, mnesia, dirty_update_counter, [{counter_consumed, all}, 0]),
+      %% TODO Only run if first run
       setup_admin()
   end.
 

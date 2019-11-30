@@ -1,9 +1,9 @@
 %%%-------------------------------------------------------------------
-%% @doc ethandb public API
+%% @doc messageMap public API
 %% @end
 %%%-------------------------------------------------------------------
 
--module(ethandb_app).
+-module(messagemap_app).
 
 -behaviour(application).
 
@@ -20,8 +20,8 @@
 start(_StartType, _StartArgs) ->
     appmanager:start(), % On boot run startup scripts
     Routes = [
-     {"/", cowboy_static, {priv_file, ethandb, "index.html" }},
-     {"/static/[...]", cowboy_static, {priv_dir, ethandb, "static",
+     {"/", cowboy_static, {priv_file, messagemap, "index.html" }},
+     {"/static/[...]", cowboy_static, {priv_dir, messagemap, "static",
       [{mimetypes, cow_mimetypes, web}]
      }},
      {"/ws", ws_handler, []},
@@ -42,6 +42,7 @@ start(_StartType, _StartArgs) ->
      {"/api/auth/token", token_handler, []},
      {"/messages/:version/:topic", messages_handler, []},
      {"/messages/:topic", messages_noversion_handler, []},
+     {"/messages", pull_only_messages_handler, []},
      %{"/message/:topic/stats, messagestats_handler, []},
      {"/api/sum", messages_sum_handler, []},
      %% Start Admin API Section
@@ -52,18 +53,16 @@ start(_StartType, _StartArgs) ->
   Dispatch = cowboy_router:compile([
      {'_', Routes}
   ]),
-  {ok, _} = cowboy:start_http(ethandb_listener, 100, [
-            { port, erlang:list_to_integer(?PORT_NUM) }
-  ], [
-     {compress, true},
-     {env, [{dispatch, Dispatch}]}
-  ]),
-  ethandb_sup:start_link().
+  {ok, _} = cowboy:start_clear(http, [ { port, erlang:list_to_integer(?PORT_NUM) }], #{
+    env => #{dispatch => Dispatch},
+    stream_handlers => [cowboy_compress_h, cowboy_stream_h]
+  }),
+  messagemap_sup:start_link().
 
 %%--------------------------------------------------------------------
 stop(_State) ->
     appmanager:stop(), % On boot run startup scripts
-    ok.
+    ok = cowboy:stop_listener(http).
 
 %%====================================================================
 %% Internal functions

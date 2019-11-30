@@ -8,45 +8,43 @@
 %%%-------------------------------------------------------------------
 -module(token_handler).
 
--behaviour(cowboy_http_handler).
+-export([init/2]).
 
--export([init/3]).
--export([handle/2]).
--export([terminate/3]).
-
--record(state, {}).
 -define(access_exp, 5*60). % set to 5 mins
 -define(refresh_exp, 14*24*60*60). % set to 14 Days
 
-init(_, Req, _Opts) ->
-  {ok, Req, #state{}}.
-
-handle(Req, State=#state{}) ->
-  { Method, _ } = cowboy_req:method(Req),
+init(Req, Opts) ->
+  Method = cowboy_req:method(Req),
   if
     Method == <<"POST">> ->
-      { Client_id, _ } = cowboy_req:qs_val(<<"client_id">>, Req, <<"none">>),
-      { Grant_type, _ } = cowboy_req:qs_val(<<"grant_type">>, Req),
-      { Code, _ } = cowboy_req:qs_val(<<"code">>, Req, <<"none">>),
-      { Refresh_token, _ } = cowboy_req:qs_val(<<"refresh_token">>, Req, <<"none">>),
+      #{ 
+         client_id := Client_id,
+         grant_type := Grant_type,
+         code := Code,
+         refresh_token := Refresh_token
+       } = cowboy_req:match_qs([
+              { client_id, [], <<"none">> },
+              { grant_type, [] },
+              { code, [], <<"none">> },
+              { refresh_token, [], <<"none">> }
+              ], Req),
       { StatusCode, Result } = getResponse(Client_id, Grant_type, Code, Refresh_token),
-      {ok, Req2} = cowboy_req:reply(StatusCode, tools:resp_headers(),
+      Req2 = cowboy_req:reply(StatusCode, tools:resp_headers(),
         jiffy:encode(Result),
         Req),
-      {ok, Req2, State};
+      {ok, Req2, Opts};
     true ->
-     {ok, Req2} = cowboy_req:reply(405, tools:resp_headers(),
+     Req2 = cowboy_req:reply(405, tools:resp_headers(),
        jiffy:encode(#{ message => <<"Invalid Method">> }),
        Req),
-     {ok, Req2, State}
+     {ok, Req2, Opts}
   end.
-
-terminate(_Reason, _Req, _State) ->
-  ok.
 
 %%%%%%%%%%%%%%%%%%% Internal Functions
 %% Build Response
 getResponse(Client_id, <<"refresh_token">>, Code, Refresh_token) ->
+  io:format("ClientID is not used: ~p~n", [Client_id]),
+  io:format("Code is not used: ~p~n", [Code]),
   Claims = encryption:ewtDecode(Refresh_token),
   { _, App } = maps:find(app, Claims),
   returnApp(App);
