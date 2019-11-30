@@ -9,7 +9,8 @@
 -module(messages).
 
 -export([push/4]).
--export([pull/4]).
+%-export([pull/4]).
+-export([pull/2]).
 -export([stats/2]).
 
 -define(MAX_WAITING, 20000).
@@ -96,28 +97,34 @@ push(Version, TopicName, Auth, Payload) ->
       }
   end.
 
-pull(Version, TopicName, Auth, Limit) ->
-  %io:format("Pulling Messages Count: ~p", [Limit]),
-  { _, Scope } = maps:find(scope, Auth),
-  Check =  check_scope("PULL", Scope),
-  if
-    Check ->
-      {App, TopicId} = pullIds(Auth, TopicName, topicsSubscribed),
-      if
-        TopicId /= fail ->
-          [{_,AppId,_,_,_,_,_,_}] = App,
-          Tbl = database:check_dyn_table(AppId),
-          database:get_dyn_table(Tbl, Limit);
-        true ->
-          #{
-            status => 'Post Message Error'
-          }
-    end;
-    true ->
-      #{
-        status => 'Application Not Subscribed to topic'
-      }
-  end.
+pull(Auth, Limit) ->
+  AppId = pullAppId(Auth),
+  Tbl = database:check_dyn_table(AppId),
+  database:get_dyn_table(Tbl, Limit).
+
+%% TODO: Delete this in the future no need to pull by Version/TopicName
+%pull(Version, TopicName, Auth, Limit) ->
+%  %io:format("Pulling Messages Count: ~p", [Limit]),
+%  { _, Scope } = maps:find(scope, Auth),
+%  Check =  check_scope("PULL", Scope),
+%  if
+%    Check ->
+%      {App, TopicId} = pullIds(Auth, TopicName, topicsSubscribed),
+%      if
+%        TopicId /= fail ->
+%          [{_,AppId,_,_,_,_,_,_}] = App,
+%          Tbl = database:check_dyn_table(AppId),
+%          database:get_dyn_table(Tbl, Limit);
+%        true ->
+%          #{
+%            status => 'Post Message Error'
+%          }
+%    end;
+%    true ->
+%      #{
+%        status => 'Application Not Subscribed to topic'
+%      }
+%  end.
 
 stats(TopicName, Auth) ->
   { _, Scope } = maps:find(scope, Auth),
@@ -161,6 +168,10 @@ pullIds(Auth, TopicName, Method) ->
         ValidTopicId = check_topicId_in_App(TopicId, App, Method),
         {App, ValidTopicId}
     end.
+
+pullAppId(Auth) ->
+    { ok, AppId } = maps:find(id, Auth),
+    AppId.
 
 check_topicId_in_App(TopicId, App, Method) ->
   [{_,_,_,_,_,Ownedtopics,SubscribedTopics,_}] = App,

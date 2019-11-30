@@ -1,9 +1,9 @@
 %%%-------------------------------------------------------------------
-%% @doc ethandb top level supervisor.
+%% @doc messageMap top level supervisor.
 %% @end
 %%%-------------------------------------------------------------------
 
--module(ethandb_sup).
+-module(messagemap_sup).
 
 -behaviour(supervisor).
 

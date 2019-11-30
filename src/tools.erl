@@ -15,12 +15,12 @@
 -define(hostname, os:getenv("MM_HOSTNAME")).
 
 resp_headers()->
-  [
-    {<<"content-type">>, <<"application/json">>},
-    {<<"company">>, <<"MessageMap.io">>},
-    {<<"server">>, <<?server>>},
-    {<<"version">>, <<?version>>}
-  ].
+  #{
+    <<"content-type">> => <<"application/json">>,
+    <<"company">> => <<"MessageMap.io">>,
+    <<"server">> => <<?server>>,
+    <<"version">> => <<?version>>
+  }.
 
 log(Level="info", MsgRaw)->
   Msg = erlang:binary_to_list(erlang:iolist_to_binary(MsgRaw)),
@@ -29,28 +29,28 @@ log(Level="info", MsgRaw)->
 
 verifyAuth(Req) ->
   tools:log("info", io_lib:format("Pulling user Token", [])),
-  { AuthValue, Req2 } = cowboy_req:cookie(<<"MessageMapAuth">>, Req, <<"Bad">>),
+  #{messageMapAuth := AuthValue } = cowboy_req:match_cookies([{messageMapAuth, [], <<"Bad">>}], Req),
   tools:log("info", io_lib:format("Cookie: ~p", [AuthValue])),
   if
     AuthValue == <<"Bad">> ->
-      { AuthValue, Req2 };
+      { AuthValue, Req };
     true ->
       Claims = encryption:ewtDecode(AuthValue),
       tools:log("info", io_lib:format("Claims: ~p~n", [Claims])),
-      { Claims, Req2 }
+      { Claims, Req }
   end.
 
 verifyAuthAdmin(Req) ->
   tools:log("info", io_lib:format("Pull Admin Token", [])),
-  { AuthValue, Req2 } = cowboy_req:cookie(<<"AdminMessageMapAuth">>, Req, <<"Bad">>),
+  #{adminMessageMapAuth := AuthValue } = cowboy_req:match_cookies([{adminMessageMapAuth, [], <<"Bad">>}], Req),
   tools:log("info", io_lib:format("Admin Cookie: ~p", [AuthValue])),
   if
     AuthValue == <<"Bad">> ->
-      { AuthValue, req2 };
+      { AuthValue, Req };
     true ->
       Claims = encryption:adminEwtDecode(AuthValue),
       tools:log("info", io_lib:format("Admin Claims: ~p~n", [Claims])),
-      { Claims, Req2}
+      { Claims, Req }
   end.
 
 integer_check({ Num, <<>>}) ->
@@ -73,9 +73,9 @@ pull_global_stats() ->
         {_, Id, Name, _, _, _, _, _} = A,
         Tbl = database:check_dyn_table(Id),
         [{_,_,Published}] = mnesia:dirty_read({counter_published, Tbl}),
-  	[{_,_,Consumed}] = mnesia:dirty_read({counter_consumed, Tbl}),
-	{
-	  {<<"id">>, Id},
+        [{_,_,Consumed}] = mnesia:dirty_read({counter_consumed, Tbl}),
+        {
+          {<<"id">>, Id},
           {<<"name">>, Name},
           {<<"queue">>, mnesia:table_info(Tbl, size)},
           {<<"published">>,  Published},

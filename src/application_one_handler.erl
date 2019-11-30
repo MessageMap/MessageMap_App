@@ -8,29 +8,17 @@
 %%%-------------------------------------------------------------------
 -module(application_one_handler).
 
--behaviour(cowboy_http_handler).
+-export([init/2]).
 
--export([init/3]).
--export([handle/2]).
--export([terminate/3]).
-
--record(state, {}).
-
-init(_, Req, _Opts) ->
-  {ok, Req, #state{}}.
-
-handle(Req, State=#state{}) ->
+init(Req, Opts) ->
   { Claims, Req2 } = tools:verifyAuth(Req),
-  { Method, _ } = cowboy_req:method(Req),
-  { AppId, _} = cowboy_req:binding(appId, Req),
+  Method = cowboy_req:method(Req),
+  AppId = cowboy_req:binding(appId, Req),
   Result = processRequest(Method, Claims, AppId, Req),
-  { ok, ReqFinal } = cowboy_req:reply(200, tools:resp_headers(),
+  ReqFinal = cowboy_req:reply(200, tools:resp_headers(),
       Result,
       Req2),
-  {ok, ReqFinal, State}.
-
-terminate(_Reason, _Req, _State) ->
-  ok.
+  {ok, ReqFinal, Opts}.
 
 % Internal functions
 processRequest(<<"GET">>, _, AppId, _) ->
@@ -38,7 +26,7 @@ processRequest(<<"GET">>, _, AppId, _) ->
   Result = buildResponse(element(1, list_to_tuple(AppData))),
   jiffy:encode(Result);
 processRequest(<<"PUT">>, _, AppId, Req) ->
-  {ok, Body, _} = cowboy_req:body_qs(Req),
+  {ok, Body, _} = cowboy_req:read_urlencoded_body(Req),
   {_, Name} = lists:keyfind(<<"name">>, 1, Body),
   { _, Description } = lists:keyfind(<<"description">>, 1, Body),
   { _, OwnedTopics } = lists:keyfind(<<"ownedTopics">>, 1, Body),
