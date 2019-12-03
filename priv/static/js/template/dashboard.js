@@ -272,6 +272,8 @@ var controller = {
         // Show a disconnected message when the WebSocket is closed.
         socket.onclose = function(event) {
           console.error('Disconnected from WebSocket.');
+          console.error('Reconnecting');
+          socket = new WebSocket('wss://'+window.location.hostname+':'+window.location.port+'/ws');
         };
     }
 };
