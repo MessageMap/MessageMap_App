@@ -20,14 +20,11 @@ websocket_init(State) ->
     {[], State}.
 
 websocket_handle(_, State) ->
-    io:format("2", []),
     Data = pullData(),
-    io:format("~p~n", [Data]),
     erlang:start_timer(10000, self(), jiffy:encode(Data)),
     {[{text, jiffy:encode(Data)}], State}.
 
 websocket_info({timeout, _Ref, _}, State) ->
-    io:format("3", []),
     Data = pullData(),
     erlang:start_timer(10000, self(), jiffy:encode(Data)),
     {[{text, jiffy:encode(Data)}], State};

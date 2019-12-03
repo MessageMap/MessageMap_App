@@ -48,8 +48,6 @@ var controller = {
   'script': function(id) {
     if (id) {
       $('#newTopic').hide();
-      //TODO: Build UI for looking at one topic
-      console.error("Loading ID: " + id);
       //UI for seeing One Topic
       $.get('/api/topic/' + id, function(topic) {
         $('#noData').hide();
@@ -121,14 +119,15 @@ var controller = {
               </div> \
               <div class="modal-body"> \
                 <p>Version: <input type="text" id="schemaVersion" /></p> \
+                <p><span id="schemaVersionError" class="alert alert-danger" style="display:none" /></p> \
                 <p>Validation (JSON): <br /> \
                 <textarea placeholder="Textarea" style="height: 200px" id="schemaValidation" class="form-control"></textarea>  \
                 </p> \
               </div> \
-            </div> \
               <div class="modal-footer"> \
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
                 <button type="button" class="btn btn-primary" id="schemaAdd">Add Schema</button> \
+              </div> \
               </div> \
             </div><!-- /.modal-content --> \
           </div><!-- /.modal-dialog --> \
@@ -143,18 +142,18 @@ var controller = {
               success: function(schema) {
                 var schemaHtml = '<tr class="schemaRow" id="' + schema.id + '">  \
                   <th scope="row">' + schema.id + '</th>  \
-                  <td>' + schema.version + '</td>  \
+                  <td class="schemaVersions">' + schema.version + '</td>  \
                   <td style="text-align:right">0</td>  \
                   <!--td><button type="submit" class="btn btn-info" id="viewSchema">View schema</button></td-->  \
                   <td><button type="submit" class="btn btn-danger" id="deleteSchema">Remove schema</button></td>  \
                 </tr>';
                 $('#schemaRows').append(schemaHtml);
+                $('#deleteTopic').prop('disabled', true);
               }
             })
           });
           $(document).on('click', '#deleteSchema', function(e) {
             e.preventDefault();
-	    if( id != '5cabed43-c268-41a4-ad1f-dc34cb98d37e'){ 
             var schemaid = $(this).closest('tr').attr('id');
             $.ajax({
               url: '/api/schema/' + schemaid,
@@ -181,13 +180,21 @@ var controller = {
                 });
               }
             });
-	   }
           });
         }
         $('#schemaAdd').on('click', function(e) {
           e.preventDefault();
-          if(id != '5cabed43-c268-41a4-ad1f-dc34cb98d37e') {
-          $.ajax({
+          var schemaVersion = $('#schemaVersion').val();
+          var schemaAlreadyFound = false;
+          $('.schemaVersions').each(function(e){
+            if (schemaVersion == $(this).html()){
+                schemaAlreadyFound = true;
+            }
+          });
+          if (schemaAlreadyFound){
+            $('#schemaVersionError').html('Schema Version Already Inuse').show();
+          } else{
+            $.ajax({
             url: '/api/schema',
             type: 'POST',
             contentType: "application/json",
@@ -216,21 +223,18 @@ var controller = {
               });
             }
           });
-	  }
+          }
         });
         $('#deleteTopic').on('click', function(e) {
           e.preventDefault();
-          if(id != '5cabed43-c268-41a4-ad1f-dc34cb98d37e') {
           $.ajax({
             url: '/api/topic/' + id,
             type: 'DELETE'
           });
           window.location.hash = '#/topics';
-          }
         });
         $('#saveTopic').on('click', function(e) {
           e.preventDefault();
-          if(id != '5cabed43-c268-41a4-ad1f-dc34cb98d37e') {
           var currentSchemaIds = $.map($(".schemaRow"), function(n, i) {
             return n.id;
           });
@@ -246,7 +250,6 @@ var controller = {
               "schemaid": currentSchemaIds.join(",")
             }
           });
-          }
         });
         $('#cancelTopic').on('click', function(e) {
           e.preventDefault();

@@ -96,11 +96,10 @@ var controller = {
                   <div class="well well-lg text-center alert alert-success"><h1>Storage Percentage<br /><span id="storage_stat">0 %</span></h1></div> \
                 </div> \
 							<div class="line-dashed"></div> \
-              <div class="form-group> \
-        				<div class="panel panel-default"> \
+        				<div class=""> \
         					<div class="panel-heading clearfix"> \
-        						<h3 class="panel-title float-left">Topics Owned</h3> \
-                    <button id="newTopic" data-toggle="modal" data-target="#newTopicModal" class="btn btn-primary btn-md btn-add text-right float-right">Add New Owned Topic</button> \
+        						<h2 style="padding-bottom: 5px;" class="panel-title float-left">Topics Owned</h2><div class="clearfix"></div> \
+                    <button id="newTopic" data-toggle="modal" data-target="#newTopicModal" class="btn btn-primary btn-md btn-add">Add New Owned Topic</button> \
         					</div> \
         					<div class="panel-body"> \
         						<div class="table-responsive"> \
@@ -119,11 +118,10 @@ var controller = {
         					</div> \
         				</div> \
 							<div class="line-dashed"></div> \
-              <div class="form-group> \
-        				<div class="panel panel-default"> \
+        				<div class=""> \
         					<div class="panel-heading clearfix"> \
-        						<h3 class="panel-title">Topics Subscribed</h3> <br /> <br /> \
-                    <button id="newSubscribe" data-toggle="modal" data-target="#newSubscribeTopicModal" class="btn btn-primary btn-md btn-add">Add New Subscrition</button> \
+        						<h2 style="padding-bottom: 5px;" class="panel-title">Topics Subscribed</h2><div class="clearfix"></div> \
+                    <button id="newSubscribe" data-toggle="modal" data-target="#newSubscribeTopicModal" class="btn btn-primary btn-md btn-add">Add New Subscription</button> \
         					</div> \
         					<div class="panel-body"> \
         						<div class="table-responsive"> \
@@ -206,8 +204,6 @@ var controller = {
         $.get('/api/stats/'+app.id, function(result){
           var wait = result.messages_waiting
           var percentFull = parseFloat((wait/20000)*100).toFixed(2);
-					console.error("________________");
-					console.error(percentFull);
           $('#con_stat').html(result.consumed_messages.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
           $('#pub_stat').html(result.published_messages.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
           $('#wait_stat').html(result.messages_waiting.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
@@ -284,17 +280,14 @@ var controller = {
         //End Owned Topics
         $('#deleteApplication').on('click', function(e) {
           e.preventDefault();
-	  if(id != 'ca8afc18-c933-4b14-bc67-61df99937df0'){
           $.ajax({
             url: '/api/application/' + id,
             type: 'DELETE'
           });
           window.location.hash = '#/applications';
-	  }
         });
         $('#saveApplication').on('click', function(e) {
           e.preventDefault();
-          if(id != 'ca8afc18-c933-4b14-bc67-61df99937df0'){ 
           var currentTopicIds = $.map($(".ownedTopicRow"), function(n, i) {
             return n.id;
           });
@@ -315,7 +308,6 @@ var controller = {
               window.location.hash = '#/applications';
             }
           });
-	  }
         });
         $('#cancelApplication').on('click', function(e) {
           e.preventDefault();
@@ -330,13 +322,11 @@ var controller = {
         $('.cards-container').empty();
         $.each(result, function(idx, app) {
           var Pub = "";
-	  var Sub = "";
-
+	      var Sub = "";
           if(app.ownedTopics.length > 0)
             Pub = '<span class="badge badge-primary">Publisher</span>';
           if(app.subscribedTopics.length > 0)
             Sub = '<span class="badge badge-warning">Subscriber</span>';
-
           var addApp = '<!-- Card --> \
     					<div class="card"> \
     						<!-- Card Header --> \
@@ -344,8 +334,8 @@ var controller = {
     							<!-- Card Short Description --> \
     							<div class="card-short-description"> \
     								<h5> \
-                      <span class="app-name"><a href="#/applications/' + app.id + '">' + app.name + '</a></span>' + Pub + Sub + ' \
-                    </h5> \
+                                    <span class="app-name"><a class="appNameFull" href="#/applications/' + app.id + '">' + app.name + '</a></span>' + Pub + Sub + ' \
+                                    </h5> \
     								<p>API KEY: ' + app.apiKeys + '</p> \
     							</div> \
     							<!-- /card short description --> \
@@ -365,12 +355,18 @@ var controller = {
 
       $('#appNameAdd').click(function(e) {
         e.preventDefault();
+        // TODO: Finish Name check for Duplicates
+//        var appN = $('#appName').val();
+//        var namecheck = false;
+//        $('.appNameFull').each(function(e){
+//        });
+ //       }
         $.post('/api/application', {
           appName: $('#appName').val()
         }, function(app) {
           $('#appModal').find(".close").click();
-          var Pub = '<span class="badge badge-primary">Publisher</span>';
-          var Sub = '<span class="badge badge-warning">Subscriber</span>';
+          var Pub = '<span class="badge badge-primary" style="display:none">Publisher</span>';
+          var Sub = '<span class="badge badge-warning" style="display:none">Subscriber</span>';
           var addApp = '<!-- Card --> \
     					<div class="card"> \
     						<!-- Card Header --> \
@@ -378,8 +374,8 @@ var controller = {
     							<!-- Card Short Description --> \
     							<div class="card-short-description"> \
     								<h5> \
-                      <span class="app-name"><a href="#/applications/' + app.id + '">' + app.name + '</a></span>' + Pub + Sub + ' \
-                    </h5> \
+                                    <span class="app-name"><a href="#/applications/' + app.id + '">' + app.name + '</a></span>' + Pub + Sub + ' \
+                                    </h5> \
     								<p>API KEY: ' + app.apiKeys + '</p> \
     							</div> \
     							<!-- /card short description --> \

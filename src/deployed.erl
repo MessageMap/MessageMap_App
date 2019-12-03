@@ -33,6 +33,9 @@ rebuild() ->
                       compile:file(erlang:list_to_atom(lists:nth(1, string:tokens(F, "."))))
               end, SrcFiles).
 
+%TODO: Start using this as a normal backup
+% -- Top Application Plus pay also backup db to cloud
+% -- Support Restore also to prompt to new env
 backupdb() ->
   {{Year, Month, Day}, {Hour, Minute, Second}} = calendar:now_to_datetime(os:timestamp()),
   StrTime = lists:flatten(io_lib:format("~4..0w-~2..0w-~2..0wT~2..0w:~2..0w:~2..0w",[Year,Month,Day,Hour,Minute,Second])),
