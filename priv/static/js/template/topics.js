@@ -35,6 +35,7 @@ var controller = {
             <h4 class="modal-title">Add Topic</h4> \
           </div> \
           <div class="modal-body"> \
+            <p style="display:none;" class="alert alert-danger" id="topicNameError"></p> \
             <p>Topic Name: <input type="text" id="topicName" /></p> \
           </div> \
           <div class="modal-footer"> \
@@ -70,6 +71,12 @@ var controller = {
 								</div>  \
 							</div> \
 						 	<div class="form-group">  \
+								<label class="col-sm-2 control-label">Created/Modified on: </label>  \
+								<div class="col-sm-10">  \
+									<span style="font-size:14px">' + topic.createdOn + '</span>  \
+								</div>  \
+							</div> \
+						 	<div class="form-group">  \
 								<label class="col-sm-2 control-label">Description: </label>  \
 								<div class="col-sm-10">  \
                 <textarea placeholder="Textarea" id="topicDescription" class="form-control">' + topic.description + '</textarea>  \
@@ -101,7 +108,7 @@ var controller = {
         					</div> \
         				</div> \
 							<div class="line-dashed"></div> \
-              <div class="form-group"> \
+                                <div class="form-group"> \
 								<div class="col-sm-4"> \
 									<button type="submit" class="btn btn-white" id="cancelTopic">Cancel</button> \
 									<button type="submit" class="btn btn-primary" id="saveTopic">Save changes</button> \
@@ -270,7 +277,7 @@ var controller = {
     							<!-- Card Short Description --> \
     							<div class="card-short-description"> \
     								<h5> \
-                      <span class="app-name"><a href="#/topics/' + topic.id + '">' + topic.name + '</a></span> \
+                      <span class="app-name"><a class="topicNameFull" href="#/topics/' + topic.id + '">' + topic.name + '</a></span> \
                     </h5> \
         						<div class="card-content"> \
         							<p>' + topic.description + '</p> \
@@ -290,6 +297,15 @@ var controller = {
 
       $('#topicNameAdd').click(function(e) {
         e.preventDefault();
+        var appN = $('#topicName').val().trim();
+        var namecheck = false;
+        $('.topicNameFull').each(function(e){
+          checkname = $(this).html().trim();
+          if (checkname == appN) {
+            namecheck = true;
+          }
+        });
+        if (namecheck == false){
         $.post('/api/topic', {
           topicName: $('#topicName').val()
         }, function(topic) {
@@ -318,6 +334,10 @@ var controller = {
           $('#noData').hide();
           $('.cards-container').append(addTopic);
         });
+        } else {
+          $('#topicNameError').html("Topic Name is already in use");
+          $('#topicNameError').show();
+        }
       });
     }
   }

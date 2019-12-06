@@ -35,6 +35,7 @@ var controller = {
             <h4 class="modal-title">Add Application</h4> \
           </div> \
           <div class="modal-body"> \
+            <p style="display:none;" class="alert alert-danger" id="appNameError"></p> \
             <p>Application Name: <input type="text" id="appName" /></p> \
           </div> \
           <div class="modal-footer"> \
@@ -67,6 +68,12 @@ var controller = {
 								<label class="col-sm-2 control-label">Application Name: </label>  \
 								<div class="col-sm-10">  \
 									<input type="text" placeholder="Placeholder" id="appName" value="' + app.name + '" class="form-control">  \
+								</div>  \
+							</div> \
+						 	<div class="form-group">  \
+								<label class="col-sm-2 control-label">Created/Modified on: </label>  \
+								<div class="col-sm-10">  \
+									<span style="font-size:14px">' + app.createdOn + '</span>  \
 								</div>  \
 							</div> \
 						 	<div class="form-group">  \
@@ -355,12 +362,15 @@ var controller = {
 
       $('#appNameAdd').click(function(e) {
         e.preventDefault();
-        // TODO: Finish Name check for Duplicates
-//        var appN = $('#appName').val();
-//        var namecheck = false;
-//        $('.appNameFull').each(function(e){
-//        });
- //       }
+        var appN = $('#appName').val().trim();
+        var namecheck = false;
+        $('.appNameFull').each(function(e){
+          checkname = $(this).html().trim();
+          if (checkname == appN) {
+            namecheck = true;
+          }
+        });
+        if (namecheck == false){
         $.post('/api/application', {
           appName: $('#appName').val()
         }, function(app) {
@@ -392,6 +402,10 @@ var controller = {
           $('#noData').hide();
           $('.cards-container').append(addApp);
         });
+        } else {
+          $('#appNameError').html("Application Name is already in use");
+          $('#appNameError').show();
+        }
       });
     }
   }
