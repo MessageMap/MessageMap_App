@@ -230,7 +230,7 @@ var controller = {
           $.get('/api/topic', function(result) {
             $('.topicSubscribeList').html('');
             $.each(result, function(idx, topic) {
-              $('.topicSubscribeList').append('<option value="' + topic.id + '">' + topic.name + '</option>');
+               $('.topicSubscribeList').append('<option value="' + topic.id + '">' + topic.name + '</option>');
             });
           });
         });
@@ -266,9 +266,19 @@ var controller = {
         $('#newTopic').on('click', function(e) {
           e.preventDefault();
           $.get('/api/topic', function(result) {
+            var owned_topics = [];
+            $.get('/api/application', function(Apps){
+              Apps.forEach(function(Amulti){
+                Amulti.ownedTopics.toString().split(',').forEach(function(A){
+                owned_topics.push(A);
+                });
+              });
             $('.topicList').html('');
             $.each(result, function(idx, topic) {
-              $('.topicList').append('<option value="' + topic.id + '">' + topic.name + '</option>');
+              if(owned_topics.indexOf(topic.id) == -1){
+                $('.topicList').append('<option value="' + topic.id + '">' + topic.name + '</option>');
+              }
+            });
             });
           });
         });
