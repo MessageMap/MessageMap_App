@@ -23,7 +23,7 @@ ewtCreate(Name, Email, Permissions) ->
   ewt:token(Expiration, Claims, ?ewtKey, sha256).
 
 ewtDecode(Ewt) ->
-  Value = ewt:claims(lists:nth(2, string:tokens(Ewt, " ")), ?ewtKey),
+  Value = ewt:claims(Ewt, ?ewtKey),
   pullDecodeResponse(Value).
 
 adminEwtDecode(Ewt) ->
