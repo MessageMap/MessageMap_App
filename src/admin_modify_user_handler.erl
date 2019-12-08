@@ -37,6 +37,12 @@ processRequest(<<"PUT">>, _, Req) ->
       U = lists:flatten(io_lib:format("~s", [Username])),
       P = lists:flatten(io_lib:format("~s", [Password])),
       database:deleteDBUser(U),
-      database:storeDB(U, U, ["Admin"], P),
-      jiffy:encode(#{ update => true })
+      DelCheck = lists:nth(1, string:tokens(U, "_")),
+      if
+        DelCheck =:= "DEL!" ->
+          jiffy:encode(#{ update => true });
+        true ->
+          database:storeDB(U, U, ["Admin"], P),
+          jiffy:encode(#{ update => true })
+      end
   end.
