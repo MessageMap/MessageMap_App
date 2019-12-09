@@ -100,31 +100,12 @@ push(Version, TopicName, Auth, Payload) ->
 pull(Auth, Limit) ->
   AppId = pullAppId(Auth),
   Tbl = database:check_dyn_table(AppId),
-  database:get_dyn_table(Tbl, Limit).
-
-%% TODO: Delete this in the future no need to pull by Version/TopicName
-%pull(Version, TopicName, Auth, Limit) ->
-%  %io:format("Pulling Messages Count: ~p", [Limit]),
-%  { _, Scope } = maps:find(scope, Auth),
-%  Check =  check_scope("PULL", Scope),
-%  if
-%    Check ->
-%      {App, TopicId} = pullIds(Auth, TopicName, topicsSubscribed),
-%      if
-%        TopicId /= fail ->
-%          [{_,AppId,_,_,_,_,_,_}] = App,
-%          Tbl = database:check_dyn_table(AppId),
-%          database:get_dyn_table(Tbl, Limit);
-%        true ->
-%          #{
-%            status => 'Post Message Error'
-%          }
-%    end;
-%    true ->
-%      #{
-%        status => 'Application Not Subscribed to topic'
-%      }
-%  end.
+  if
+    Limit < 100 ->
+      database:get_dyn_table(Tbl, Limit);
+    true ->
+      database:get_dyn_table(Tbl, 100)
+  end.
 
 stats(TopicName, Auth) ->
   { _, Scope } = maps:find(scope, Auth),
