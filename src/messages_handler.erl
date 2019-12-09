@@ -14,7 +14,8 @@ init(Req, Opts) ->
   Method = cowboy_req:method(Req),
   Version = cowboy_req:binding(version, Req),
   Topic = cowboy_req:binding(topic, Req),
-  AuthToken = cowboy_req:header(<<"authorization">>, Req, []),
+  FullAuthToken = cowboy_req:header(<<"authorization">>, Req, []),
+  AuthToken = lists:last(string:tokens(FullAuthToken, " ")),
   Auth = encryption:ewtDecode(AuthToken),
   if
     AuthToken == [] ->
