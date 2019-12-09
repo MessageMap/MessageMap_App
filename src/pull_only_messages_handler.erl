@@ -12,8 +12,9 @@
 
 init(Req, Opts) ->
   Method = cowboy_req:method(Req),
-  AuthToken = cowboy_req:header(<<"authorization">>, Req, []),
-  Auth = encryption:ewtDecode(AuthToken),
+  FullAuthToken = cowboy_req:header(<<"authorization">>, Req, []),
+  AuthToken = lists:last(string:tokens(binary:bin_to_list(FullAuthToken), " ")),
+  Auth = encryption:ewtDecode(binary:list_to_bin(AuthToken)),
   #{limit := Limit} = cowboy_req:match_qs([{limit, int, 10}], Req),
   if
     AuthToken == [] ->

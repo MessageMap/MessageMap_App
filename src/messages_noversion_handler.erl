@@ -14,8 +14,8 @@ init(Req, Opts) ->
   Method = cowboy_req:method(Req),
   Topic = cowboy_req:binding(topic, Req),
   FullAuthToken = cowboy_req:header(<<"authorization">>, Req, []),
-  AuthToken = lists:last(string:tokens(FullAuthToken, " ")),
-  Auth = encryption:ewtDecode(AuthToken),
+  AuthToken = lists:last(string:tokens(binary:bin_to_list(FullAuthToken), " ")),
+  Auth = encryption:ewtDecode(binary:list_to_bin(AuthToken)),
   if
     AuthToken == [] ->
        Req2 = cowboy_req:reply(401, tools:resp_headers(),
