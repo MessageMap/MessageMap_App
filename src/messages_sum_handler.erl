@@ -16,10 +16,12 @@ init(Req, Opts) ->
   Apps = length(database:getAllAppDB()), 
   Sum = lists:sum([Pub, Sub]),
   Users = mnesia:table_info(accounts, size)-1,
+  UserNames = lists:map(fun(K) -> binary:list_to_bin(K) end, lists:append(database:getAllUsers())),
   Result = {[
                 {<<"total_apps">>, Apps},
                 {<<"total_messages">>,Sum},
-                {<<"total_users">>,Users}
+                {<<"total_users">>,Users},
+                {<<"usernames">>, UserNames}
 	]},
   Req2 = cowboy_req:reply(200, tools:resp_headers(),
     jiffy:encode(Result),

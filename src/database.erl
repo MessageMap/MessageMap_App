@@ -20,6 +20,7 @@
 -export([saveApp/4]).
 -export([getAppDB/1]).
 -export([getAppDBAppId/1]).
+-export([getAllUsers/0]).
 -export([get_dyn_table/2]).
 -export([insert_dyn_table/5]).
 -export([getAllAppDB/0]).
@@ -348,6 +349,21 @@ getDB(Email) ->
   end,
   {atomic, Results} = mnesia:transaction(PULL),
   Results.
+
+getAllUsers() ->
+  PULL = fun() ->
+    Query = qlc:q([[X#accounts.name] || X <- mnesia:table(accounts),
+      string:to_lower(X#accounts.name) =/= string:to_lower("admin"),
+      string:to_lower(X#accounts.name) =/= string:to_lower("MessageMap")
+    ]),
+    qlc:e(Query)
+         end,
+  {atomic, Results} = mnesia:transaction(PULL),
+  Results.
+%
+%  PULL = fun() -> mnesia:select(accounts,[{'_',[],['$_']}]) end,
+%  {atomic, Results} = mnesia:transaction(PULL),
+%  Results.
 
 login(Email, Password) ->
   PULL = fun() ->

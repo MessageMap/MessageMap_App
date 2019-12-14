@@ -40,6 +40,7 @@ bootup() ->
   tools:log("info", "Start to setup ACME"),
   os:cmd("cp ../../../../../sysconfig/acme-client.conf /etc/acme-client.conf"),
   os:cmd("sed -i -e 's/DNS/$(hostname).msgmap.io/g' /etc/acme-client.conf"),
+  % TODO: On start configs where not setup Need to retry acme if no: /etc/ssl/cert.fullchain.cert
   os:cmd("acme-client -ADv $(hostname).msgmap.io"),
   timer:sleep(1000),
   tools:log("info", "Starting Nginx configuration"),
