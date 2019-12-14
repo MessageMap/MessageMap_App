@@ -34,8 +34,8 @@ processRequest(<<"POST">>, _, Req) ->
     Password =:= 1 ->
       jiffy:encode(#{ "Error" => "Bad Password"});
     true ->
-      U = lists:flatten(io_lib:format("~s", [Username])),
-      P = lists:flatten(io_lib:format("~s", [Password])),
+      U = lists:flatten(base64:decode_to_string(Username)),
+      P = lists:flatten(base64:decode_to_string(Password)),
       database:storeDB(U, U, ["Admin"], P),
       jiffy:encode(#{ update => true })
   end.
