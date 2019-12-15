@@ -360,10 +360,6 @@ getAllUsers() ->
          end,
   {atomic, Results} = mnesia:transaction(PULL),
   Results.
-%
-%  PULL = fun() -> mnesia:select(accounts,[{'_',[],['$_']}]) end,
-%  {atomic, Results} = mnesia:transaction(PULL),
-%  Results.
 
 login(Email, Password) ->
   PULL = fun() ->

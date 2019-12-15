@@ -96,8 +96,7 @@ var controller = {
         									<tr>  \
         										<th>#</th>  \
         										<th>Version</th>  \
-        										<th>Number of Messages</th>  \
-        										<!--th>View Schema</th-->  \
+        										<th>View Schema</th>  \
         										<th>Remove Schema</th>  \
         									</tr>  \
         								</thead>  \
@@ -138,7 +137,28 @@ var controller = {
               </div> \
             </div><!-- /.modal-content --> \
           </div><!-- /.modal-dialog --> \
-				</div>';
+				</div> \
+				<div id="viewSchema" class="modal fade" tabindex="-1" role="dialog" style="display: none;"> \
+                          <div class="modal-dialog"> \
+                            <div class="modal-content"> \
+                              <div class="modal-header"> \
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button> \
+                                <h4 class="modal-title">Schema:</h4> \
+                              </div> \
+                              <div class="modal-body"> \
+                                <p>Version: <input type="text" class="schemaTitle" disabled /></p> \
+                                <p>DateTime: <input type="text" class="schemaCreatedOn" disabled /></p> \
+                                <p>Validation (JSON): <br /> \
+                                <code style="height: 200px" class="schemaViewValidation form-control"></code>  \
+                                </p> \
+                              </div> \
+                              <div class="modal-footer"> \
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
+                              </div> \
+                              </div> \
+                            </div><!-- /.modal-content --> \
+                          </div><!-- /.modal-dialog --> \
+                				</div>';
         $('.cards-container').empty();
         $('.cards-container').html(Topic);
         if (topic.schemaId) {
@@ -150,8 +170,7 @@ var controller = {
                 var schemaHtml = '<tr class="schemaRow" id="' + schema.id + '">  \
                   <th scope="row">' + schema.id + '</th>  \
                   <td class="schemaVersions">' + schema.version + '</td>  \
-                  <td style="text-align:right">0</td>  \
-                  <!--td><button type="submit" class="btn btn-info" id="viewSchema">View schema</button></td-->  \
+                  <td><button data-toggle="modal" data-target="#viewSchema" type="submit" class="btn btn-info" id="btnViewSchema">View schema</button></td>  \
                   <td><button type="submit" class="btn btn-danger" id="deleteSchema">Remove schema</button></td>  \
                 </tr>';
                 $('#schemaRows').append(schemaHtml);
@@ -159,6 +178,19 @@ var controller = {
               }
             })
           });
+          $(document).on('click', '#btnViewSchema', function(e) {
+            e.preventDefault();
+            var schemaId = $(this).closest('tr').attr('id');
+             $.ajax({
+                  url: '/api/schema/' + schemaId,
+                  type: 'GET',
+                  success: function(schema) {
+                   $('.schemaTitle').val(schema.version);
+                   $('.schemaCreatedOn').val(schema.createdOn);
+                   $('.schemaViewValidation').html(schema.validation);
+                }
+              });
+        });
           $(document).on('click', '#deleteSchema', function(e) {
             e.preventDefault();
             var schemaid = $(this).closest('tr').attr('id');
@@ -189,6 +221,7 @@ var controller = {
             });
           });
         }
+
         $('#schemaAdd').on('click', function(e) {
           e.preventDefault();
           var schemaVersion = $('#schemaVersion').val();
