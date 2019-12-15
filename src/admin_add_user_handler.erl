@@ -36,6 +36,10 @@ processRequest(<<"POST">>, _, Req) ->
     true ->
       U = lists:flatten(base64:decode_to_string(Username)),
       P = lists:flatten(base64:decode_to_string(Password)),
-      database:storeDB(U, U, ["Admin"], P),
+      DelCheck = lists:nth(1, string:tokens(U, "_")),
+      if
+        DelCheck =/= "DEL!" ->
+          database:storeDB(U, U, ["Admin"], P)
+      end,
       jiffy:encode(#{ update => true })
   end.

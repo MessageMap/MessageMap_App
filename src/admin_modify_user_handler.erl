@@ -36,12 +36,14 @@ processRequest(<<"PUT">>, _, Req) ->
     true ->
       U = lists:flatten(base64:decode_to_string(Username)),
       P = lists:flatten(base64:decode_to_string(Password)),
-      database:deleteDBUser(U),
       DelCheck = lists:nth(1, string:tokens(U, "_")),
       if
         DelCheck =:= "DEL!" ->
+          Uname = lists:nth(2, string:tokens(U, "_")),
+          database:deleteDBUser(Uname),
           jiffy:encode(#{ update => true });
         true ->
+          database:deleteDBUser(U),
           database:storeDB(U, U, ["Admin"], P),
           jiffy:encode(#{ update => true })
       end
