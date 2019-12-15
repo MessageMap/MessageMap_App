@@ -108,10 +108,13 @@ var controller = {
         				</div> \
 							<div class="line-dashed"></div> \
                                 <div class="form-group"> \
+                                <div class="col-sm-12 deleteWarning"> \
+                                <h5> Delete All Schema And Save Before Deleting Topic </h5> \
+                                </div> \
 								<div class="col-sm-4"> \
 									<button type="submit" class="btn btn-white" id="cancelTopic">Cancel</button> \
 									<button type="submit" class="btn btn-primary" id="saveTopic">Save changes</button> \
-                  <button type="submit" class="btn btn-danger" id="deleteTopic">Delete Topic</button> \
+                                    <button type="submit" class="btn btn-danger" id="deleteTopic">Delete Topic</button> \
 								</div> \
 							</div> \
 						</form> \
@@ -161,7 +164,9 @@ var controller = {
                 				</div>';
         $('.cards-container').empty();
         $('.cards-container').html(Topic);
+          $('.deleteWarning').hide();
         if (topic.schemaId) {
+          $('.deleteWarning').show();
           topic.schemaId.split(',').forEach(function(schemaId) {
             $.ajax({
               url: '/api/schema/' + schemaId,
@@ -175,6 +180,7 @@ var controller = {
                 </tr>';
                 $('#schemaRows').append(schemaHtml);
                 $('#deleteTopic').prop('disabled', true);
+                $
               }
             })
           });
