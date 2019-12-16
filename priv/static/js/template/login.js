@@ -2,7 +2,7 @@ var controller = {
     'template' : '<div class="login-container"> \
 	<div class="login-branding"> \
 		<!-- Place Logo here when We have one --> \
-    <img src="static/images/MessageMap_logo.png" alt="MessageMap" title="MessageMap.io"> \
+    <img src="static/images/logos/cover.png" alt="MessageMap" title="MessageMap.io"> \
 	</div> \
 	<div class="login-content"> \
 		<h2 class="text-center"> Login </h2> \
