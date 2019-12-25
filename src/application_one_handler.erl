@@ -31,16 +31,29 @@ processRequest(<<"PUT">>, _, AppId, Req) ->
   { _, Description } = lists:keyfind(<<"description">>, 1, Body),
   { _, OwnedTopics } = lists:keyfind(<<"ownedTopics">>, 1, Body),
   { _, SubscribedTopics } = lists:keyfind(<<"subscribedTopics">>, 1, Body),
-  { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics),
-  Result = buildResponse(element(1, list_to_tuple(AppData))),
-  jiffy:encode(Result);
+  { _, Encrypt } = lists:keyfind(<<"encryption">>, 1, Body),
+  % TODO: Fix if Encryption is empty
+  case Encrypt of
+    '\n' ->
+      Encrypt = []
+  end,
+  io:format(Encrypt),
+  try encryption:msgEncryption("Testing", Encrypt) of
+    _ ->
+      { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Encrypt),
+      Result = buildResponse(element(1, list_to_tuple(AppData))),
+      jiffy:encode(Result)
+  catch
+    _:_ ->
+      jiffy:encode(#{ result => bad })
+  end;
 processRequest(<<"DELETE">>, _, AppId, _) ->
   database:deleteAppDBAppId(binary:bin_to_list(AppId)),
   jiffy:encode([]).
 
 % %% Internal functions
 buildResponse(Data) ->
-  {_,Id,Name,Description,ApiKeys,Ownedtopics,SubscribedTopics,CreatedOn} = element(1, list_to_tuple([Data])),
+  {_,Id,Name,Description,ApiKeys,Ownedtopics,SubscribedTopics,CreatedOn,Encrypt} = element(1, list_to_tuple([Data])),
   #{
     id => binary:list_to_bin(Id),
     name => binary:list_to_bin(Name),
@@ -48,4 +61,5 @@ buildResponse(Data) ->
     apiKeys => binary:list_to_bin(ApiKeys),
     ownedTopics => binary:list_to_bin(Ownedtopics),
     subscribedTopics => binary:list_to_bin(SubscribedTopics),
+    encrypt => binary:list_to_bin(Encrypt),
     createdOn => binary:list_to_bin(tools:convertDateTime(CreatedOn))}.

@@ -35,7 +35,7 @@ websocket_info(_Info, State) ->
 pullData() ->
   AllApps = database:getAllAppDB(),
   AppStats = lists:map(fun(A) ->
-    {_,App,AppName,_,_,_,_,_} = A,
+    {_,App,AppName,_,_,_,_,_,_} = A,
     Tbl = database:check_dyn_table(App),
     PubPull = mnesia:dirty_read({counter_published, Tbl}),
     Pub = resultConversion(PubPull),

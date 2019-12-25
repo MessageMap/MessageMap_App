@@ -31,6 +31,7 @@ start(_StartType, _StartArgs) ->
      {"/api/me", me_handler, []},
      {"/api/application", application_handler, []},
      {"/api/application/:appId", application_one_handler, []},
+     {"/api/validateEncryption", validate_encryption, []},
      {"/api/topic", topic_handler, []},
      {"/api/topic/:topicId", topic_one_handler, []},
      {"/api/schema", schema_handler, []},

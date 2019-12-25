@@ -15,7 +15,8 @@
                   apikeys=[],
                   ownedTopics=[],
                   subscribedTopics=[],
-                  createdOn}).
+                  createdOn,
+                  encrypt=[]}).
 -record(tblschemas, {id,
                   validation,
                   version,
