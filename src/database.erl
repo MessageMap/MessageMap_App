@@ -403,7 +403,8 @@ check_dyn_table(Name) ->
   Tbl.
 
 get_dyn_table(Tbl, Limit) ->
-  PULL = fun() -> mnesia:first(Tbl,[{'_',[],['$_']}], Limit, read) end,
+  % change to First Select Here
+  PULL = fun() -> mnesia:select(Tbl,[{'_',[],['$_']}], Limit, read) end,
   {atomic, Results} = mnesia:sync_transaction(PULL),
   getResult(Tbl, Results).
 

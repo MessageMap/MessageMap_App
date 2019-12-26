@@ -33,7 +33,7 @@ push(Version, TopicName, Auth, Payload) ->
               Apps = database:getAllAppDB(),
               lists:foreach(fun(App) ->
                 %TODO: Add Push functions here (metrics, Notification, Websockets
-                {_,FoundAppId,_,_,_,_,SubscribedTopics,_} = App,
+                {_,FoundAppId,_,_,_,_,SubscribedTopics,_,_} = App,
                 case lists:member(hd(TopicId), SubscribedTopics) of
                   true ->
                     %Insert data by App For Pulling
@@ -155,7 +155,7 @@ pullAppId(Auth) ->
     AppId.
 
 check_topicId_in_App(TopicId, App, Method) ->
-  [{_,_,_,_,_,Ownedtopics,SubscribedTopics,_}] = App,
+  [{_,_,_,_,_,Ownedtopics,SubscribedTopics,_,_}] = App,
   ArrayOfIds = if
     Method == topicsSubscribed ->
       SubscribedTopics;
