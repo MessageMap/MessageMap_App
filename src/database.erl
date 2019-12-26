@@ -278,14 +278,21 @@ validateAppDBAppIdApiKey(AppId, Apikey) ->
     qlc:e(Query)
   end,
   {atomic, Results} = mnesia:sync_transaction(PULL),
-  OneResult = lists:last(Results),
-  #{
-    id => OneResult#applications.id,
-    name => OneResult#applications.name,
-    ownedTopics => OneResult#applications.ownedTopics,
-    subscribedTopics => OneResult#applications.subscribedTopics,
-    encrypt => OneResult#applications.encrypt
-  }.
+  R = case Results of
+    [] ->
+      #{};
+    _ ->
+      OneResult = lists:last(Results),
+      #{
+        id => OneResult#applications.id,
+        name => OneResult#applications.name,
+        ownedTopics => OneResult#applications.ownedTopics,
+        subscribedTopics => OneResult#applications.subscribedTopics,
+        encrypt => OneResult#applications.encrypt
+      }
+  end,
+  io:format("~p~n", [R]),
+  R.
 
 getAllAppDB() ->
   PULL = fun() -> mnesia:select(applications,[{'_',[],['$_']}]) end,
@@ -313,7 +320,7 @@ updateAppDBAppId(AppId, Name, Description, OwnedTopics, SubscribedTopics, Encryp
                     ownedTopics=binary:bin_to_list(OwnedTopics),
                     subscribedTopics=binary:bin_to_list(SubscribedTopics),
                     createdOn=CreatedOn,
-                    encrypt=binary:bin_to_list(Encrypt)})
+                    encrypt=Encrypt})
       end,
     mnesia:sync_transaction(INS),
     getAppDBAppId(AppId)

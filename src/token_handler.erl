@@ -60,6 +60,12 @@ getResponse(_, _, _, _) ->
   }.
 
 % Build Return response for the application
+returnApp(ResultFromDB) when ResultFromDB =:= #{} ->
+  { 401,
+    #{
+      error => <<"Application Not Found">>
+    }
+  };
 returnApp([]) ->
   { 401,
     #{

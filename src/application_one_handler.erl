@@ -32,20 +32,25 @@ processRequest(<<"PUT">>, _, AppId, Req) ->
   { _, OwnedTopics } = lists:keyfind(<<"ownedTopics">>, 1, Body),
   { _, SubscribedTopics } = lists:keyfind(<<"subscribedTopics">>, 1, Body),
   { _, Encrypt } = lists:keyfind(<<"encryption">>, 1, Body),
-  % TODO: Fix if Encryption is empty
   case Encrypt of
     '\n' ->
-      Encrypt = []
-  end,
-  io:format(Encrypt),
-  try encryption:msgEncryption("Testing", Encrypt) of
-    _ ->
-      { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Encrypt),
+        { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, []),
+        Result = buildResponse(element(1, list_to_tuple(AppData))),
+        jiffy:encode(Result);
+    <<>> ->
+      { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, []),
       Result = buildResponse(element(1, list_to_tuple(AppData))),
-      jiffy:encode(Result)
-  catch
-    _:_ ->
-      jiffy:encode(#{ result => bad })
+      jiffy:encode(Result);
+    true ->
+      try encryption:msgEncryption("Testing", Encrypt) of
+        _ ->
+          { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, binary:bin_to_list(Encrypt)),
+          Result = buildResponse(element(1, list_to_tuple(AppData))),
+          jiffy:encode(Result)
+      catch
+        _:_ ->
+          jiffy:encode(#{ result => bad })
+      end
   end;
 processRequest(<<"DELETE">>, _, AppId, _) ->
   database:deleteAppDBAppId(binary:bin_to_list(AppId)),
