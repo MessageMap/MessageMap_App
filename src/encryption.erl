@@ -59,7 +59,7 @@ msgEncryption(Msg, PKey) ->
 %Function: generatePass
 % reverseString, base64encode, PullValues 3-8
 generatePass(Value) ->
-  lists:sublist(binary:bin_to_list(base64:encode(string:join(lists:reverse(string:tokens(string:lowercase(Value), ".")), ""))), 3, 8).
+  lists:sublist(binary:bin_to_list(base64:encode(string:join(lists:reverse(string:tokens(string:to_lower(Value), ".")), ""))), 3, 8).
 
 %%%% Internal Functions
 pullDecodeResponse(bad) ->
