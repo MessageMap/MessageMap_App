@@ -50,12 +50,12 @@ push(Version, TopicName, Auth, Payload) ->
           end;
         true ->
           #{
-            status => 'Insert Error'
+            status => 'Application Doesn\'t Own the Topic'
           }
     end;
     true ->
       #{
-        status => 'Insert Error'
+        status => 'Application Doesn\'t Own the Topic'
       }
   end.
 
@@ -159,4 +159,5 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
       _ ->
         true
     end
-  end, Apps).
+  end, Apps),
+  database:add_published_counter(AppId).

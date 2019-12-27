@@ -91,16 +91,16 @@ var controller = {
                             </div> \
                             <div class="line-dashed"></div> \
                 <div class="col-sm-3">  \
-                  <div class="well well-lg text-center alert alert-info"><h1>Published<br /><span id="pub_stat">0</span></h1></div> \
+                  <div class="well well-lg text-center alert alert-info"><h1>Published<br /><span id="pub_stat_'+ app.id + '">0</span></h1></div> \
                 </div> \
                 <div class="col-sm-3">  \
-                  <div class="well well-lg text-center alert alert-info"><h1>Consumed<br /><span id="con_stat">0</span></h1></div> \
+                  <div class="well well-lg text-center alert alert-info"><h1>Consumed<br /><span id="con_stat_'+ app.id + '">0</span></h1></div> \
                 </div> \
                 <div class="col-sm-3">  \
-                  <div class="well well-lg text-center alert alert-info"><h1>Waiting<br /><span id="wait_stat">0</span></h1></div> \
+                  <div class="well well-lg text-center alert alert-info"><h1>Waiting<br /><span id="wait_stat_'+ app.id + '">0</span></h1></div> \
                 </div> \
                 <div class="col-sm-3">  \
-                  <div class="well well-lg text-center alert alert-success"><h1>Storage Percentage<br /><span id="storage_stat">0 %</span></h1></div> \
+                  <div class="well well-lg text-center alert alert-success"><h1>Storage Percentage<br /><span id="storage_stat_'+ app.id + '">0 %</span></h1></div> \
                 </div> \
                             <div class="line-dashed"></div> \
                         <div class=""> \
@@ -275,14 +275,14 @@ var controller = {
         $.get('/api/stats/'+app.id, function(result){
           var wait = result.messages_waiting
           var percentFull = parseFloat((wait/20000)*100).toFixed(2);
-          $('#con_stat').html(result.consumed_messages.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-          $('#pub_stat').html(result.published_messages.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-          $('#wait_stat').html(result.messages_waiting.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-          $('#storage_stat').html(percentFull.toString()+' %');
+          $('#con_stat_'+app.id).html(result.consumed_messages.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+          $('#pub_stat_'+app.id).html(result.published_messages.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+          $('#wait_stat_'+app.id).html(result.messages_waiting.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+          $('#storage_stat_'+app.id).html(percentFull.toString()+' %');
           if(parseInt(percentFull) > 90){
-            $('#storage_stat').parent().parent().addClass('alert-danger').removeClass('alert-success');
+            $('#storage_stat_'+app.id).parent().parent().addClass('alert-danger').removeClass('alert-success');
           } else {
-            $('#storage_stat').parent().parent().addClass('alert-success').removeClass('alert-danger');
+            $('#storage_stat_'+app.id).parent().parent().addClass('alert-success').removeClass('alert-danger');
           }
         });
         $(document).on('click', '#deleteSubscribed', function(e) {

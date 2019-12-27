@@ -13,6 +13,7 @@
 -include("db/datatables.hrl").
 
 -export([init/1]).
+-export([add_published_counter/1]).
 -export([storeDB/4]).
 -export([setup_admin/0]).
 -export([check_dyn_table/1]).
@@ -424,11 +425,13 @@ insert_dyn_table(Tbl, AppId, TopicId, SchemaId, Payload) ->
   mnesia:sync_transaction(INS),
   %Update counters
   mnesia:dirty_update_counter({counter_published, all}, 1),
-  PubTbl = check_dyn_table(AppId),
-  mnesia:dirty_update_counter({counter_published, PubTbl}, 1), %TODO: Change to AppId or publishing application
   #{
     result => true
   }.
+
+add_published_counter(AppId) ->
+  PubTbl = check_dyn_table(AppId),
+  mnesia:dirty_update_counter({counter_published, PubTbl}, 1).
 
 async_dyn_delete(Tbl, Results) ->
     DELETE = fun() ->
