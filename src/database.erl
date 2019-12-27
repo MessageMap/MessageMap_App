@@ -397,6 +397,7 @@ check_dyn_table(Name) ->
     exit: _ ->
       mnesia:create_table(Tbl,
           [
+            {type, ordered_set},
             {attributes, [rowId, pubId, topicId, schemaId, payload, createdOn]},
             {disc_copies, [node()]}
           ])
