@@ -9,7 +9,14 @@
 -module(encryption).
 -include_lib("public_key/include/public_key.hrl").
 
--export([create/1, ewtCreate/3, adminEwtDecode/1, ewtDecode/1, oauthCreate/2, validate/2, msgEncryption/2]).
+-export([create/1]).
+-export([ewtCreate/3]).
+-export([adminEwtDecode/1]).
+-export([ewtDecode/1]).
+-export([generatePass/1]).
+-export([oauthCreate/2]).
+-export([validate/2]).
+-export([msgEncryption/2]).
 
 -define(saltround, 10).
 -define(ewtKey, os:getenv("MM_ENCRYPTION")).
@@ -48,6 +55,11 @@ msgEncryption(Msg, PKey) ->
   NewKey = public_key:pem_entry_decode(Entry),
   CMsg = public_key:encrypt_public(Msg, NewKey),
   base64:encode_to_string(CMsg).
+
+%Function: generatePass
+% reverseString, base64encode, PullValues 3-8
+generatePass(Value) ->
+  lists:sublist(binary:bin_to_list(base64:encode(string:join(lists:reverse(string:tokens(string:lowercase(Value), ".")), ""))), 3, 8).
 
 %%%% Internal Functions
 pullDecodeResponse(bad) ->

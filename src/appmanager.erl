@@ -12,8 +12,7 @@
 
 start() ->
   tools:log("info", io_lib:format("Startup Script Has begun", [])),
-  SetupConfig = "password:Value", %deployed:pullConfig(), % TODO: Remove this line and have it work with custom admin Passwords
-  database:init(SetupConfig),
+  database:init(),
   bootup(),
   timer:sleep(1000),
   tools:log("info", io_lib:format("Startup Script Has Finished", [])),

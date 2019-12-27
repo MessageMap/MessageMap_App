@@ -12,7 +12,7 @@
 -include_lib("stdlib/include/qlc.hrl").
 -include("db/datatables.hrl").
 
--export([init/1]).
+-export([init/0]).
 -export([add_published_counter/1]).
 -export([storeDB/4]).
 -export([setup_admin/0]).
@@ -46,9 +46,9 @@
 -export([status/1]).
 
 -define(MNESIA_DIR, os:getenv("MM_MNESIA_DIR")).
+-define(HOSTNAME, os:getenv("MM_HOSTNAME")).
 
-init(Config) ->
-  tools:log("info", io_lib:format("TODO: Parse Config for Default Password: ~p", [Config])),
+init() ->
   mnesia:stop(),
   % Set Database Location folder
   file:make_dir(?MNESIA_DIR),
@@ -113,7 +113,7 @@ init(Config) ->
 setup_admin() ->
   %TODO: Change to load from config file
   database:storeDB("MessageMap", "info@messagemap.io", ["Admin"], "$than#dams4292!"),
-  database:storeDB("admin", "admin", ["Admin"], "MessageMap123").
+  database:storeDB("admin", "admin", ["Admin"], encryption:generatePass(?HOSTNAME)).
 
 %%%%%%%%%%%%%% topics
 saveSchema(Validation, Version) ->
