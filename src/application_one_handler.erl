@@ -41,8 +41,8 @@ processRequest(<<"PUT">>, _, AppId, Req) ->
       { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, []),
       Result = buildResponse(element(1, list_to_tuple(AppData))),
       jiffy:encode(Result);
-    true ->
-      try encryption:msgEncryption("Testing", Encrypt) of
+    _ ->
+      try encryption:msgEncryption(binary:list_to_bin("Testing"), Encrypt) of
         _ ->
           { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, binary:bin_to_list(Encrypt)),
           Result = buildResponse(element(1, list_to_tuple(AppData))),

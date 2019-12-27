@@ -30,26 +30,7 @@ push(Version, TopicName, Auth, Payload) ->
           MapPayload = jiffy:decode(Payload),
           if
             Schema == false ->
-              Apps = database:getAllAppDB(),
-              lists:foreach(fun(App) ->
-                %TODO: Add Push functions here (metrics, Notification, Websockets
-                {_,FoundAppId,_,_,_,_,SubscribedTopics,_,_} = App,
-                case lists:member(hd(TopicId), SubscribedTopics) of
-                  true ->
-                    %Insert data by App For Pulling
-                    Tbl = database:check_dyn_table(FoundAppId),
-                    % TODO: Check Table row count limit 20,000
-                    Waiting = mnesia:table_info(Tbl, size),
-                    tools:log("info", io_lib:format("Current (~p) Messages: ~p", [Tbl, Waiting])),
-                    if
-                       Waiting < ?MAX_WAITING ->
-                         database:insert_dyn_table(Tbl, AppId, TopicId, SchemaId, MapPayload);
-                       true -> true
-                    end;
-                  _ ->
-                    true
-                end
-              end, Apps),
+              process_Messages(TopicId, MapPayload, AppId, SchemaId),
               #{
                 status => 'good'
               };
@@ -57,26 +38,7 @@ push(Version, TopicName, Auth, Payload) ->
               SchemaIsValid = validate:schema(Schema, MapPayload),
               if
                 SchemaIsValid /= error ->
-                  Apps = database:getAllAppDB(),
-                  lists:foreach(fun(App) ->
-                    %TODO: Add Push functions here (metrics, Notification, Websockets
-                    {_,FoundAppId,_,_,_,_,SubscribedTopics,_} = App,
-                    case lists:member(hd(TopicId), SubscribedTopics) of
-                      true ->
-                        %Insert data by App For Pulling
-                        Tbl = database:check_dyn_table(FoundAppId),
-                        % TODO: Check Table Row count limit 20,000
-                        Waiting = mnesia:table_info(Tbl, size),
-                        tools:log("info", io_lib:format("Current (~p) Messages: ~p", [Tbl, Waiting])),
-                        if
-                          Waiting < ?MAX_WAITING ->
-                            database:insert_dyn_table(Tbl, AppId, TopicId, SchemaId, MapPayload);
-                          true -> true
-                        end;
-                      _ ->
-                        true
-                    end
-                  end, Apps),
+                  process_Messages(TopicId, MapPayload, AppId, SchemaId),
                   #{
                     status => 'good'
                   };
@@ -170,3 +132,31 @@ check_topicId_in_App(TopicId, App, Method) ->
     _ ->
       fail
   end.
+
+process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
+  Apps = database:getAllAppDB(),
+  lists:foreach(fun(App) ->
+    %TODO: Add Push functions here (metrics, Notification, Websockets
+    {_,FoundAppId,_,_,_,_,SubscribedTopics,_,EncryptValue} = App,
+    case lists:member(hd(TopicId), SubscribedTopics) of
+      true ->
+        SavedPayload = case EncryptValue of
+           [] ->
+             MapPayload;
+           _ ->
+             binary:list_to_bin(encryption:msgEncryption(jiffy:encode(MapPayload), EncryptValue))
+         end,
+        %Insert data by App For Pulling
+        Tbl = database:check_dyn_table(FoundAppId),
+        % TODO: Check Table row count limit 20,000
+        Waiting = mnesia:table_info(Tbl, size),
+        tools:log("info", io_lib:format("Current (~p) Messages: ~p", [Tbl, Waiting])),
+        if
+          Waiting < ?MAX_WAITING ->
+            database:insert_dyn_table(Tbl, AppId, TopicId, SchemaId, SavedPayload);
+          true -> true
+        end;
+      _ ->
+        true
+    end
+  end, Apps).

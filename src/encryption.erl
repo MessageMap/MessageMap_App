@@ -43,12 +43,10 @@ oauthCreate(Claims, Exp) ->
   ewt:token(Expiration, Claims, ?ewtKey, sha256).
 
 msgEncryption(Msg, PKey) ->
-  % TODO MOVE PKey to Arguments
-%  PKey = "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAotc2xze6HnqoZQJegMYZ\nFf34lRbqtgXLqXO6K26Pa0sawjb/W5VoaVhbm9Fi6TuZCPKT/vc4D08CHzBnZToG\ng25ZsL5B9Qjf6I4s416RnEkE/sHvv7J0ALThad9lScOBmYSUOl2bSvOUuiVakMhb\n9sPqJTr9h/Got3DTIewgmTOByloK0sihlZS1ITWhMtV+OiJ296Dz4/iJvQTJAoaA\n7VrrO68tuB08PKe2dKjFlh4zcTO7QMiZ77YQ7xcmn4KfZQoFTH9UnSwIxeYZnYV6\nqWI5107LKGGxwRrp+53MACqbab07OgRUbB5NUskZkk7bVmU6zDZWR/tjw1XBylDg\nxQIDAQAB\n-----END PUBLIC KEY-----",
   EE = iolist_to_binary(PKey),
   [Entry] = public_key:pem_decode(EE),
   NewKey = public_key:pem_entry_decode(Entry),
-  CMsg = public_key:encrypt_public(binary:list_to_bin(Msg), NewKey),
+  CMsg = public_key:encrypt_public(Msg, NewKey),
   base64:encode_to_string(CMsg).
 
 %%%% Internal Functions

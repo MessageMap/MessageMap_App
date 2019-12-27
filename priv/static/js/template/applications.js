@@ -192,10 +192,14 @@ var controller = {
                 <li>paste content below </li> \
                 </ol> \
                  </p> \
-                 <p> \
+                 <p><h2>How to Decrypt Message using an Private Key </h2> \
                  Note: \
                   Messages will be encrypt and base64 encoded at rest.  Messages being pulled will be in the same format. <br /> \
-                  You will need to unbase64 the messages and use your private key created above to read the messages \
+                  You will need to unbase64 the messages and use your private key created above to read the messages <br /> \
+                 Example Of Decrypting Messages with your Private Key: \
+                   (File Message is the response from MessageMap Subscriber) <br /> \
+                   $ base64 -d message | openssl rsautl -decrypt -out decrypted -inkey private.pem <br /> \
+                  File decrypt will have the Message sent in unencrypted \
                  </p> \
                  <p id="encryptionError"> </p> \
                 <p>Enter in your Certificate Value: <br /> <textarea  rows="15" class="form-control" id="EncryptionValue" /> \
