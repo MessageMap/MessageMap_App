@@ -56,10 +56,9 @@ msgEncryption(Msg, PKey) ->
   CMsg = public_key:encrypt_public(Msg, NewKey),
   base64:encode_to_string(CMsg).
 
-%Function: generatePass
-% reverseString, base64encode, PullValues 3-8
 generatePass(Value) ->
-  lists:sublist(binary:bin_to_list(base64:encode(string:join(lists:reverse(string:tokens(string:to_lower(Value), ".")), ""))), 3, 8).
+  ShortName = lists:nth(1, string:tokens(string:to_lower(Value), ".")),
+  lists:sublist(binary:bin_to_list(base64:encode(ShortName ++ ShortName ++ ShortName)), 3, 10).
 
 %%%% Internal Functions
 pullDecodeResponse(bad) ->
