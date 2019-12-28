@@ -30,6 +30,7 @@ push(Version, TopicName, Auth, Payload) ->
           MapPayload = jiffy:decode(Payload),
           if
             Schema == false ->
+              % Update to Say Queue status Max waiting or message size if Encryption enabled
               process_Messages(TopicId, MapPayload, AppId, SchemaId),
               #{
                 status => 'good'
@@ -144,7 +145,7 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
            [] ->
              MapPayload;
            _ ->
-             binary:list_to_bin(encryption:msgEncryption(jiffy:encode(MapPayload), EncryptValue))
+             binary:list_to_bin(encryption:msgEncryption(jiffy:encode(MapPayload), binary:list_to_bin(EncryptValue)))
          end,
         %Insert data by App For Pulling
         Tbl = database:check_dyn_table(FoundAppId),
@@ -152,9 +153,11 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
         Waiting = mnesia:table_info(Tbl, size),
         tools:log("info", io_lib:format("Current (~p) Messages: ~p", [Tbl, Waiting])),
         if
-          Waiting < ?MAX_WAITING ->
+          Waiting < ?MAX_WAITING andalso SavedPayload =/= "Payload Is To Long" ->
             database:insert_dyn_table(Tbl, AppId, TopicId, SchemaId, SavedPayload);
-          true -> true
+          true ->
+            tools:log("info", io_lib:format("Table: ~p Queue has payload to long or Queue is Maxed: ~p", [Tbl, Waiting])),
+            true
         end;
       _ ->
         true

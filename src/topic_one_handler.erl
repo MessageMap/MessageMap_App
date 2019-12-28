@@ -45,4 +45,5 @@ buildResponse(Data) ->
     name => binary:list_to_bin(Name),
     description => binary:list_to_bin(Description),
     schemaId => binary:list_to_bin(SchemaId),
-    createdOn => binary:list_to_bin(tools:convertDateTime(CreatedOn))}.
+    createdOn => binary:list_to_bin(tools:convertDateTime(CreatedOn))
+}.
