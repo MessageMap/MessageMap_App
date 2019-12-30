@@ -9,7 +9,6 @@
 -module(messages).
 
 -export([push/4]).
-%-export([pull/4]).
 -export([pull/2]).
 -export([stats/2]).
 

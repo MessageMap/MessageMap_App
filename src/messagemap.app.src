@@ -12,7 +12,7 @@
     cowboy,
     mnesia,
     jiffy,
-    %jesse,
+    jesse,
     throttle,
     sync
    ]},
