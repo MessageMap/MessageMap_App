@@ -15,7 +15,6 @@ init(Req, Opts) ->
   Method = cowboy_req:method(Req),
   Id = cowboy_req:binding(topicId, Req),
   Result = processRequest(Method, Claims, Id, Req),
-  io:format("Result ~n~p~n", [Result]),
   { ok, ReqFinal } = cowboy_req:reply(200, tools:resp_headers(),
       Result,
       Req2),

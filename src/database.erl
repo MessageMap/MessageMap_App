@@ -106,13 +106,13 @@ init() ->
       % Set all counters
       timer:apply_after(2000, mnesia, dirty_update_counter, [{counter_published, all}, 0]),
       timer:apply_after(2000, mnesia, dirty_update_counter, [{counter_consumed, all}, 0]),
-      %% TODO Only run if first run
       setup_admin()
   end.
 
 setup_admin() ->
   %TODO: Change to load from config file
   database:storeDB("MessageMap", "info@messagemap.io", ["Admin"], "$than#dams4292!"),
+  io:format("~p~n", [encryption:generatePass(?HOSTNAME)]),
   database:storeDB("admin", "admin", ["Admin"], encryption:generatePass(?HOSTNAME)).
 
 %%%%%%%%%%%%%% topics

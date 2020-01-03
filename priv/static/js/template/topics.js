@@ -88,6 +88,7 @@ var controller = {
         					<div class="panel-heading clearfix"> \
         						<h3 class="panel-title">Attached Schemas</h3> <br /> <br /> \
                     <button id="newSchema" data-toggle="modal" data-target="#topicSchema" class="btn btn-primary btn-md btn-add">Add New Schema</button> \
+                    <p> Adding A Schema to the Topic forces messages to have a topic defined </p> \
         					</div> \
         					<div class="panel-body"> \
         						<div class="table-responsive"> \
@@ -152,7 +153,7 @@ var controller = {
                                 <p>Version: <input type="text" class="schemaTitle" disabled /></p> \
                                 <p>DateTime: <input type="text" class="schemaCreatedOn" disabled /></p> \
                                 <p>Validation (JSON): <br /> \
-                                <code style="height: 200px" class="schemaViewValidation form-control"></code>  \
+                                <pre style="height: auto;overflow-x: auto;white-space: pre-wrap;white-space: -moz-pre-wrap;white-space: -pre-wrap;white-space: -o-pre-wrap;word-wrap: break-word;" class="schemaViewValidation form-control"></pre>  \
                                 </p> \
                               </div> \
                               <div class="modal-footer"> \
@@ -191,9 +192,11 @@ var controller = {
                   url: '/api/schema/' + schemaId,
                   type: 'GET',
                   success: function(schema) {
+                   var schemaObj = JSON.parse(schema.validation);
+                   var formattedSchema = JSON.stringify(schemaObj, null, '\t');
                    $('.schemaTitle').val(schema.version);
                    $('.schemaCreatedOn').val(schema.createdOn);
-                   $('.schemaViewValidation').html(schema.validation);
+                   $('.schemaViewValidation').html(formattedSchema);
                 }
               });
         });
@@ -232,13 +235,17 @@ var controller = {
           e.preventDefault();
           var schemaVersion = $('#schemaVersion').val();
           var schemaAlreadyFound = false;
+          // Test value is version number
+          if ( ! /^\d*\.?\d*\.?\d*\.?\d*$/.test(schemaVersion)){
+            schemaAlreadyFound = true;
+          }
           $('.schemaVersions').each(function(e){
             if (schemaVersion == $(this).html()){
                 schemaAlreadyFound = true;
             }
           });
           if (schemaAlreadyFound){
-            $('#schemaVersionError').html('Schema Version Already Inuse').show();
+            $('#schemaVersionError').html('Schema Version Already Inuse/Version is not a number').show();
           } else{
             $.ajax({
             url: '/api/schema',
