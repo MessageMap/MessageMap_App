@@ -10,6 +10,8 @@
 
 -export([lookup/3, schema/2]).
 
+lookup(_, _, "None") ->
+  { false, false };
 lookup(Auth, TopicId, Version) ->
   { ok , Info } = maps:find(info, Auth),
   { ok, AuthSchemas } = maps:find(schemas, Info),
