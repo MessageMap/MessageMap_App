@@ -31,8 +31,8 @@ init(Req, Opts) ->
       if
         Method == <<"POST">> ->
           {ok, [{ Payload, _}] , _} = cowboy_req:read_urlencoded_body(Req),
-          Result = messages:push("latest", Topic, Auth, Payload),
-          Req2 = cowboy_req:reply(200, tools:resp_headers(),
+          {Status, Result } = messages:push("latest", Topic, Auth, Payload),
+          Req2 = cowboy_req:reply(Status, tools:resp_headers(),
             jiffy:encode(Result),
             Req),
           {ok, Req2, Opts};

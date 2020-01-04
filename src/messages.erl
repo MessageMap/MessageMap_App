@@ -14,6 +14,11 @@
 
 -define(MAX_WAITING, 20000).
 
+% Don't allow latest yet
+push("latest", _, _ , _) ->
+  { 422, #{
+    status => 'Topic Is attached to Schemas Send message with schema: /messages/{SchemaVersion}/{topicName}'
+  } };
 push(Version, TopicName, Auth, Payload) ->
   { _, Scope } = maps:find(scope, Auth),
   Check = check_scope("PUSH", Scope),
@@ -24,39 +29,44 @@ push(Version, TopicName, Auth, Payload) ->
       % Add Schemas (For Validation)
       if
         TopicId /= fail ->
-          % Get List of All Applications subscribed to Topic
           { SchemaId, Schema } = validate:lookup(Auth, TopicId, Version),
           MapPayload = jiffy:decode(Payload),
           if
             Schema == false ->
               % Update to Say Queue status Max waiting or message size if Encryption enabled
               process_Messages(TopicId, MapPayload, AppId, SchemaId),
-              #{
+              { 200, #{
                 status => 'good'
-              };
+              } };
+            Schema == "Schema Version Not Found" ->
+              { 422, #{
+                status => 'Invalid Schema Name'
+              } };
             true ->
+              %%%%%%%%%%%%%% CONTINUE HERE
               SchemaIsValid = validate:schema(Schema, MapPayload),
+              io:format("Validate: ~p~n", [SchemaIsValid]),
               if
                 SchemaIsValid /= error ->
                   process_Messages(TopicId, MapPayload, AppId, SchemaId),
-                  #{
+                  { 200, #{
                     status => 'good'
-                  };
+                  } };
                 true ->
-                  #{
+                  { 422, #{
                     status => 'JSON Schema Validation'
-                  }
+                  } }
                 end
           end;
         true ->
-          #{
+          { 422, #{
             status => 'Application Doesn\'t Own the Topic'
-          }
+          } }
     end;
     true ->
-      #{
+      {422, #{
         status => 'Application Doesn\'t Own the Topic'
-      }
+      } }
   end.
 
 pull(Auth, Limit) ->

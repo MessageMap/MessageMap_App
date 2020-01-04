@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
 %%% @author Benjamin Adams
-%%% @copyright (C) 2017, MessageMap.io
+%%% @copyright (C) 2020, MessageMap.io
 %%% @doc
 %%%  Used to validate post payload with version
 %%% @end
-%%% Created : 12/14/2017
+%%% Created : 1/4/2020 12:51
 %%%-------------------------------------------------------------------
 -module(validate).
 
@@ -12,26 +12,38 @@
 
 lookup(Auth, TopicId, Version) ->
   { ok , Info } = maps:find(info, Auth),
-  % TODO: test Multi topic with topic Id matching attached schema
   { ok, AuthSchemas } = maps:find(schemas, Info),
+  io:format("~p~n", [AuthSchemas]),
   filteredSchemas(AuthSchemas, Auth, TopicId, Version).
 
 filteredSchemas([], _, _, _) ->
-  { false, false };
+  { false, "Schema Version Not Found" };
+filteredSchemas(_,_,_,"latest") ->
+  %TODO: Remove this for when we have latest added Next Version
+  { false, "Schema Version Not Found" };
 filteredSchemas(AuthSchemas, Auth, TopicId, Version) ->
   tools:log("info", io_lib:format("AuthSchema: ~p - Auth: ~p - TopicID: ~p Version: ~p", [AuthSchemas, Auth, TopicId, Version])),
-  [AuthV] = lists:filter(fun(S) ->
-    { ok, AuthVersion } = maps:find(v, S),
-    Version == list_to_binary(AuthVersion)
-  end, AuthSchemas),
+  AuthV = lists:filter(fun(X) -> maps:get(v, X) == binary:bin_to_list(Version) end, AuthSchemas),
+  pullSchemaList(AuthV).
+
+pullSchemaList([]) ->
+  { false, "Schema Version Not Found" };
+pullSchemaList(ListAuth) ->
+  [AuthV] = ListAuth,
   {ok, Sid} = maps:find(id, AuthV),
-  [{_, _, _, Schema, _}] = database:getSchemaDBSchemaId(Sid),
-  {Sid, Schema}.
+  {Sid, pullSchema(database:getSchemaDBSchemaId(Sid)) }.
+
+pullSchema([{_,_,_,Schema, _}]) ->
+  Schema;
+pullSchema(_) ->
+  "Schema Not Found".
 
 schema(Schema, Payload) ->
-  S = jiffy:decode(Schema),
-  % Todo Fix this
-  io:format("~n~p~n", [S]),
-  {Result, _} = { true, ok}, %jesse:validate_with_schema(S, Payload),
-  %tools:log("info", io_lib:format("Result: ~p", [jesse:validate_with_schema(S, Payload)])),
+  validateSchema(catch jiffy:decode(Schema), Payload).
+
+validateSchema({ error, _}, _) ->
+  error;
+validateSchema(S, Payload) ->
+  {Result, _} = jesse:validate_with_schema(S, Payload),
+  tools:log("info", io_lib:format("Result: ~p", [Result])),% jesse:validate_with_schema(S, Payload)])),
   Result.
