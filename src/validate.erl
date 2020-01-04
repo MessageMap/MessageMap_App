@@ -22,7 +22,6 @@ filteredSchemas(_,_,_,"latest") ->
   %TODO: Remove this for when we have latest added Next Version
   { false, "Schema Version Not Found" };
 filteredSchemas(AuthSchemas, Auth, TopicId, Version) ->
-  tools:log("info", io_lib:format("AuthSchema: ~p - Auth: ~p - TopicID: ~p Version: ~p", [AuthSchemas, Auth, TopicId, Version])),
   AuthV = lists:filter(fun(X) -> maps:get(v, X) == binary:bin_to_list(Version) end, AuthSchemas),
   pullSchemaList(AuthV).
 
