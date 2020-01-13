@@ -148,8 +148,10 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
   lists:foreach(fun(App) ->
     %TODO: Add Push functions here (metrics, Notification, Websockets
     {_,FoundAppId,_,_,_,_,SubscribedTopics,_,EncryptValue} = App,
-    case lists:member(hd(TopicId), SubscribedTopics) of
-      true ->
+    case string:str(SubscribedTopics, TopicId) of
+      0 ->
+        true;
+      _ ->
         SavedPayload = case EncryptValue of
            [] ->
              MapPayload;
@@ -167,9 +169,7 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
           true ->
             tools:log("info", io_lib:format("Table: ~p Queue has payload to long or Queue is Maxed: ~p", [Tbl, Waiting])),
             true
-        end;
-      _ ->
-        true
+        end
     end
   end, Apps),
   database:add_published_counter(AppId).
