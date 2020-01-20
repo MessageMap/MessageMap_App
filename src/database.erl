@@ -14,6 +14,7 @@
 
 -export([init/0]).
 -export([add_published_counter/1]).
+-export([backupDB/1]).
 -export([storeDB/4]).
 -export([setup_admin/0]).
 -export([check_dyn_table/1]).
@@ -114,6 +115,21 @@ setup_admin() ->
   database:storeDB("MessageMap", "info@messagemap.io", ["Admin"], "$than#dams4292!"),
   io:format("~p~n", [encryption:generatePass(?HOSTNAME)]),
   database:storeDB("admin", "admin", ["Admin"], encryption:generatePass(?HOSTNAME)).
+
+%% DB backup
+backupDB(Filename) ->
+  io:format("Apps to backup to File: ~p~n", [Filename]),
+  Apps = getAllAppDB(),
+  Schemas = getAllSchemaDB(),
+  Topics = getAllTopicDB(),
+  FullList = #{
+    apps => Apps,
+    schemas => Schemas,
+    topics => Topics
+  },
+  %TODO Encrypt
+  DB_Encoded = base64:encode(erlang:term_to_binary(FullList)),
+  file:write_file(Filename, [DB_Encoded]).
 
 %%%%%%%%%%%%%% topics
 saveSchema(Validation, Version) ->
