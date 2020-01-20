@@ -118,7 +118,6 @@ setup_admin() ->
 
 %% DB backup
 backupDB(Filename) ->
-  io:format("Apps to backup to File: ~p~n", [Filename]),
   Apps = getAllAppDB(),
   Schemas = getAllSchemaDB(),
   Topics = getAllTopicDB(),

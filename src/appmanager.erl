@@ -15,8 +15,8 @@ start() ->
   database:init(),
   bootup(),
   timer:sleep(1000),
-  % Start Backup of apps every 24 hours
-  timer:apply_interval(86400000, database, backupDB, ["/tmp/db_app_backup.db"]),
+  % Start Backup of apps every minute
+  timer:apply_interval(60000, database, backupDB, ["/tmp/db_app_backup.db"]),
   tools:log("info", io_lib:format("Startup Script Has Finished", [])),
   tools:log("info", io_lib:format("Welcome to MessageMap !!", [])),
   tools:log("info", io_lib:format("~p", [jiffy:decode(tools:version())])).
