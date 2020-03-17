@@ -138,6 +138,7 @@ var controller = {
                                             <tr>  \
                                                 <th>#</th>  \
                                                 <th>Topic Name</th>  \
+                                                <th>Message Mapping</th> \
                                                 <th>Remove Topic from Subscribe Listing</th>  \
                                             </tr>  \
                                         </thead>  \
@@ -157,6 +158,37 @@ var controller = {
                             </div> \
                         </form> \
                     </div> \
+          <div id="configMessageMapModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;"> \
+          <div class="modal-dialog"> \
+            <div class="modal-content"> \
+              <div class="modal-header"> \
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button> \
+                <h4 class="modal-title">Configuration of Message Mapping</h4> \
+              </div> \
+              <div class="modal-body"> \
+              <row> \
+              <h2>Enter in Key name to search for: </h2>\
+              </row> \
+              <row><input type="text" value="" id="newkey" /> \
+              <select id="typeof"><option>Remove</option><option>Masking</option><option>Rename</option></select> \
+              <span id="htmlModifyValue" style="display:none;">New Key Value: <input type="text" id="ModifyValue" /></span> \
+              <button id="addFilter">Add Option to Filter</button> \
+              </row> \
+              <row> \
+              <hr size=2 /> \
+              <h2>Current Filters:</h2> \
+              <div id="currentFilters"> \
+              </div> \
+              </row> \
+              </div> \
+              <div class="modal-footer"> \
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
+                <button type="button" class="btn btn-default" id="resetMessageMapping" data-dismiss="modal">Reset remove Message Mapping</button> \
+                <button type="button" class="btn btn-primary" id="saveMessageMapping">Save Message Mapping</button> \
+              </div> \
+                            </div> \
+            </div><!-- /.modal-content --> \
+          </div><!-- /.modal-dialog --> \
           <div id="newTopicModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;"> \
           <div class="modal-dialog"> \
             <div class="modal-content"> \
@@ -185,12 +217,60 @@ var controller = {
               </div> \
               <div class="modal-body"> \
                 <p><h2>How to Create an Certificate for Encryption</h2> \
-                <ol> \
-                <li>$ openssl genrsa -out private.pem 2048</li> \
-                <li>$ openssl rsa -in private.pem -out public.pem -outform PEM -pubout</li> \
-                <li>$ cat public.pem</li> \
-                <li>paste content below </li> \
-                </ol> \
+                <h3> Generate New PGP Key </h3> \
+                <pre>$ <b> gpg --gen-key </b> <br /> \
+gpg (GnuPG) 2.2.18; Copyright (C) 2019 Free Software Foundation, Inc. <br /> \
+This is free software: you are free to change and redistribute it. <br /> \
+There is NO WARRANTY, to the extent permitted by law. <br /> \
+<br /> \
+Note: Use "gpg --full-generate-key" for a full featured key generation dialog. <br /> \
+<br /> \
+GnuPG needs to construct a user ID to identify your key. <br /> \
+<br /> \
+Real name: <b> user </b> <br /> \
+Real name: <b> firstname lastname </b> <br /> \
+Email address: <b> youremail@address.com </b> <br /> \
+You selected this USER-ID: <br /> \
+  "firstname lastname <youremail@address.com>" <br /> \
+<br /> \
+Change (N)ame, (E)mail, or (O)kay/(Q)uit? <b> O </b> <br /> \
+We need to generate a lot of random bytes. It is a good idea to perform <br /> \
+some other action (type on the keyboard, move the mouse, utilize the <br /> \
+disks) during the prime generation; this gives the random number <br /> \
+generator a better chance to gain enough entropy. <br /> \
+We need to generate a lot of random bytes. It is a good idea to perform <br /> \
+some other action (type on the keyboard, move the mouse, utilize the <br /> \
+disks) during the prime generation; this gives the random number <br /> \
+generator a better chance to gain enough entropy. <br /> \
+gpg: key D80AF2FFE3F6CE16 marked as ultimately trusted <br /> \
+public and secret key created and signed. <br /> \
+<br /> \
+pub   rsa2048 2020-03-17 [SC] [expires: 2022-03-17] <br /> \
+    0E1962FC2CC51A4CBA22D594D80AF2FFE3F6CE16 <br /> \
+uid                      firstname lastname <youremail@address.com> <br /> \
+sub   rsa2048 2020-03-17 [E] [expires: 2022-03-17] <br /> \
+                </pre> \
+                <h3> Listing the GPG Keys You Current Have Setup </h3> \
+                <pre> \
+$ <b>gpg --fingerprint</b> <br /> \
+----------------------------- <br /> \
+pub   rsa2048 2020-03-17 [SC] [expires: 2022-03-17] <br /> \
+      0E19 62FC 2CC5 1A4C BA22  D594 D80A F2FF E3F6 CE16 <br /> \
+uid           [ultimate] firstname lastname <youremail@address.com> <br /> \
+sub   rsa2048 2020-03-17 [E] [expires: 2022-03-17] <br /> \
+  <br /> \
+</pre> \
+<h3> Get Public Key Block </h3> \
+<pre> \
+$ <b> gpg --armor --export youremail@address.com </b> <br /> \
+-----BEGIN PGP PUBLIC KEY BLOCK-----  <br /> \
+mQENBF5wHCwBCACyluiydmlVaOLQiORepDy+x9DYq86dFnF/J4xRL85sJFjgysSI <br /> \
+. <br /> \
+. <br /> \
+uJD4WeDL52WZlJ/xef9Ge6YLdvs/y5a6W5ubF9o/gX23FIgw+wAgVgrLMIXIQUKt <br /> \
+OtY= <br /> \
+-----END PGP PUBLIC KEY BLOCK----- <br /> \
+</pre> \
                  </p> \
                  <p><h2>How to Decrypt Message using an Private Key </h2> \
                  Note: \
@@ -198,7 +278,7 @@ var controller = {
                   You will need to unbase64 the messages and use your private key created above to read the messages <br /> \
                  Example Of Decrypting Messages with your Private Key: \
                    (File Message is the response from MessageMap Subscriber) <br /> \
-                   $ base64 -d message | openssl rsautl -decrypt -out decrypted -inkey private.pem <br /> \
+                   $ base64 -d message | gpg --decrypt <br /> \
                   File decrypt will have the Message sent in unencrypted \
                  </p> \
                  <p id="encryptionError"> </p> \
@@ -267,11 +347,102 @@ var controller = {
               $('#listSubscribedTopics').append('<tr id="' + result.id + '" class="subscribedTopicRow">  \
                   <th scope="row">' + result.id + '</th>  \
                   <td><a href="#/topics/' + result.id + '">' + result.name + '</a></td>  \
+                  <td><button data-toggle="modal" data-target="#configMessageMapModal" type="button" class="btn btn-info" id="viewConfigMessageMapping">Configure MessageMapping</td> \
                   <td><button  type="button" class="btn btn-danger" id="deleteSubscribed">Remove Topic</button></td>  \
                 </tr>');
             });
           }
         });
+        //Start Message Mapping Configuration
+        $(document).on('change', '#typeof', function(e){
+           e.preventDefault();
+           if($('#typeof').val() != 'Rename'){
+             $('#htmlModifyValue').hide();
+           } else {
+             $('#htmlModifyValue').show();
+           }
+        });
+        $(document).on('click', '#addFilter', function(e){
+           e.preventDefault();
+           if($('#newkey').val().length > 0){
+              if($('#typeof').val() != 'Rename'){
+                 var str = 'Type: <b>'+ $('#typeof').val() + '</b> | Key: <b>'+ $('#newkey').val()+'</b>';
+              } else {
+                 var str = 'Type: <b>'+ $('#typeof').val() + '</b> | Key: <b>'+ $('#newkey').val()+'</b> | New Value: <b>'+$('#ModifyValue').val()+'</b>';
+              }
+              $('#currentFilters').append('<pre class="FilterRow">'+str+'<button class="removeFilter">Clear</button></pre>');
+           }
+          $('#newkey').val('');
+          $('#ModifyValue').val('');
+        });
+        $(document).on('click', ".removeFilter", function(e){
+          e.preventDefault();
+          $(this).closest('pre').remove();
+        });
+        $(document).on('click', '#saveMessageMapping', function(e){
+          e.preventDefault();
+          console.error('Saving message Now');
+          result = [];
+          $('.FilterRow').each(function(e){
+            //TODO: Fix Formatting for serverside Array Object???
+            result.push($(this).html().toString().replace( /(<([^>]+)>)/ig, ''));
+          });
+          if (result.length > 0) {
+            console.error(result);
+          }
+        });
+//        $(document).on('click', '#viewConfigMessageMapping', function(e) {
+//            e.preventDefault();
+//            console.error("Starting Configuration");
+//var add_attr = function(parent, name) {
+//  console.log("Adding HERE");
+//  console.error(parent);
+//  console.error(name);
+//  $('#payloadfilter').html("<span><i class=\"icon-folder-open\"></i> Parent</span> <button type='button' class='btn' id='removeAttr'>Remove</button> \
+//  <ul> \
+//      <li> \
+//        <span><i class=\"icon-minus-sign\"></i> Child</span> <button type='button' class='btn' id='removeAttr'>Remove</button> \
+//          <ul> \
+//              <li> \
+//                <span><i class=\"icon-leaf\"></i> Grand Child</span> <button type='button' class='btn' id='removeAttr'>Remove</button> \
+//              </li> \
+//          </ul> \
+//      </li>");
+//}
+//var looper = function(obj){
+// for (let [key, value] of Object.entries(obj)) {
+//    if (typeof value == "String") {
+//        add_attr(key, value);
+//    }
+//	//console.error(key);
+//    //console.error(value);
+// }
+//}
+//  $('#exampleJsonTopic').keyup(function(){
+//    var value = $('#exampleJsonTopic').val();
+//    try {
+//      var response = jQuery.parseJSON(value);
+//      if(typeof response =='object'){
+//        $('#payloadfilter').val();
+//        add_attr(response);
+//      }
+//    } catch(e) {
+//    return false;
+//    }
+//  });
+//      $('.tree li:has(ul)').addClass('parent_li').find(' > span').attr('title', 'Collapse this branch');
+//      $('.tree li.parent_li > span').on('click', function (e) {
+//          var children = $(this).parent('li.parent_li').find(' > ul > li');
+//          if (children.is(":visible")) {
+//              children.hide('fast');
+//              $(this).attr('title', 'Expand this branch').find(' > i').addClass('icon-plus-sign').removeClass('icon-minus-sign');
+//          } else {
+//              children.show('fast');
+//              $(this).attr('title', 'Collapse this branch').find(' > i').addClass('icon-minus-sign').removeClass('icon-plus-sign');
+//          }
+//          e.stopPropagation();
+//      });
+//        });
         $.get('/api/stats/'+app.id, function(result){
           var wait = result.messages_waiting
           var percentFull = parseFloat((wait/20000)*100).toFixed(2);
@@ -305,6 +476,7 @@ var controller = {
             $('#listSubscribedTopics').append('<tr id="' + result.id + '" class="subscribedTopicRow">  \
                 <th scope="row">' + result.id + '</th>  \
                 <td><a href="#/topics/' + result.id + '">' + result.name + '</a></td>  \
+                <td><button data-toggle="modal" data-target="#configMessageMapModal" type="button" class="btn btn-info" id="viewConfigMessageMapping">Configure MessageMapping</button></td> \
                 <td><button type="button" class="btn btn-danger" id="deleteSubscribed">Remove Topic</button></td>  \
               </tr>');
           });

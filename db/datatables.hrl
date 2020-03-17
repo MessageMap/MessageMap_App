@@ -16,6 +16,7 @@
                   ownedTopics=[],
                   subscribedTopics=[],
                   createdOn,
+                  filters=[],
                   encrypt=[]}).
 -record(tblschemas, {id,
                   validation,

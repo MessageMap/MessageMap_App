@@ -28,7 +28,7 @@ processRequest(<<"POST">>, _, Req) ->
     AppName =:= 1 ->
       jiffy:encode(#{ "Error" => "Bad Application Name or Missing Application name"});
     true ->
-      AppData = database:saveApp(binary:bin_to_list(AppName), "", [], [], []),
+      AppData = database:saveApp(binary:bin_to_list(AppName), "", [], [], [], []),
       Result = buildResponse(element(1, list_to_tuple(AppData))),
       jiffy:encode(Result)
   end;
@@ -44,7 +44,7 @@ buildResponses(Data) ->
   end, Data).
 
 buildResponse(Data) ->
-  {_, Id, Name, Description, ApiKeys, Ownedtopics, SubscribedTopics, CreatedOn, Encrypt} = element(1, list_to_tuple([Data])),
+  {_, Id, Name, Description, ApiKeys, Ownedtopics, SubscribedTopics, CreatedOn, Filter, Encrypt} = element(1, list_to_tuple([Data])),
   #{
     id => binary:list_to_bin(Id),
     name => binary:list_to_bin(Name),
@@ -53,5 +53,6 @@ buildResponse(Data) ->
     ownedTopics => binary:list_to_bin(Ownedtopics),
     subscribedTopics => binary:list_to_bin(SubscribedTopics),
     encrypt => binary:list_to_bin(Encrypt),
+    filters => binary:list_to_bin(Filter),
     createdOn => binary:list_to_bin(tools:convertDateTime(CreatedOn))
   }.

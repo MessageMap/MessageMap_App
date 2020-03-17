@@ -17,6 +17,7 @@
 -export([oauthCreate/2]).
 -export([validate/2]).
 -export([msgEncryption/2]).
+-export([certRenew/0]).
 
 -define(saltround, 10).
 -define(ewtKey, os:getenv("MM_ENCRYPTION")).
@@ -39,7 +40,7 @@ adminEwtDecode(Ewt) ->
   pullDecodeResponse(Value).
 
 validate(Password, ExistingHash) ->
-  ProvidedHash = os:cmd(io_lib:format("openssl passwd -1 -salt ~s ~s", [?ewtKey, Password])),
+  ProvidedHash = create(Password),
   case ProvidedHash == ExistingHash of
     true -> success;
     false -> fail
@@ -50,21 +51,26 @@ oauthCreate(Claims, Exp) ->
   ewt:token(Expiration, Claims, ?ewtKey, sha256).
 
 msgEncryption(Msg, PKey) ->
-  LenPayload = length(erlang:binary_to_list(Msg)),
-  if
-    LenPayload > 500 ->
-      "Publisher Payload is to long to support Encryption (Decrease Publisher Payload to Under 500 Chars to support Encryption)";
-    true ->
-      EE = iolist_to_binary(PKey),
-      [Entry] = public_key:pem_decode(EE),
-      NewKey = public_key:pem_entry_decode(Entry),
-      CMsg = public_key:encrypt_public(Msg, NewKey),
-      base64:encode_to_string(CMsg)
-  end.
+  % TODO: Change encryption to PGP Get around 500 character limit
+  % Same Code just Test with PGP
+  % LenPayload = length(erlang:binary_to_list(Msg)),
+  %if
+  %  LenPayload > 500 ->
+  %    "Publisher Payload is to long to support Encryption (Decrease Publisher Payload to Under 500 Chars to support Encryption)";
+  %  true ->
+  EE = iolist_to_binary(PKey),
+  [Entry] = public_key:pem_decode(EE),
+  NewKey = public_key:pem_entry_decode(Entry),
+  CMsg = public_key:encrypt_public(Msg, NewKey),
+  base64:encode_to_string(CMsg).
+  %end.
 
 generatePass(Value) ->
   ShortName = lists:nth(1, string:tokens(string:to_lower(Value), ".")),
   lists:sublist(binary:bin_to_list(base64:encode(ShortName ++ ShortName ++ ShortName)), 3, 10).
+
+certRenew() ->
+  os:cmd("which acme-client && acme-client -v $(hostname).msgmap.io && nginx -s reload").
 
 %%%% Internal Functions
 pullDecodeResponse(bad) ->

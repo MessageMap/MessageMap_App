@@ -17,6 +17,8 @@ start() ->
   timer:sleep(1000),
   % Start Backup of apps every minute
   timer:apply_interval(60000, database, backupDB, ["/tmp/db_app_backup.db"]),
+  % Run Renew Cert Every 24hrs
+  timer:apply_interval(86400, encryption, certRenew, []),
   tools:log("info", io_lib:format("Startup Script Has Finished", [])),
   tools:log("info", io_lib:format("Welcome to MessageMap !!", [])),
   tools:log("info", io_lib:format("~p", [jiffy:decode(tools:version())])).

@@ -32,19 +32,21 @@ processRequest(<<"PUT">>, _, AppId, Req) ->
   { _, OwnedTopics } = lists:keyfind(<<"ownedTopics">>, 1, Body),
   { _, SubscribedTopics } = lists:keyfind(<<"subscribedTopics">>, 1, Body),
   { _, Encrypt } = lists:keyfind(<<"encryption">>, 1, Body),
+  % TODO Change to Payload
+  Filters = [],
   case Encrypt of
     '\n' ->
-        { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, []),
+        { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Filters, []),
         Result = buildResponse(element(1, list_to_tuple(AppData))),
         jiffy:encode(Result);
     <<>> ->
-      { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, []),
+      { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Filters, []),
       Result = buildResponse(element(1, list_to_tuple(AppData))),
       jiffy:encode(Result);
     _ ->
       try encryption:msgEncryption(binary:list_to_bin("Testing"), Encrypt) of
         _ ->
-          { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, binary:bin_to_list(Encrypt)),
+          { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Filters, binary:bin_to_list(Encrypt)),
           Result = buildResponse(element(1, list_to_tuple(AppData))),
           jiffy:encode(Result)
       catch
@@ -58,7 +60,7 @@ processRequest(<<"DELETE">>, _, AppId, _) ->
 
 % %% Internal functions
 buildResponse(Data) ->
-  {_,Id,Name,Description,ApiKeys,Ownedtopics,SubscribedTopics,CreatedOn,Encrypt} = element(1, list_to_tuple([Data])),
+  {_,Id,Name,Description,ApiKeys,Ownedtopics,SubscribedTopics,CreatedOn,Filters,Encrypt} = element(1, list_to_tuple([Data])),
   #{
     id => binary:list_to_bin(Id),
     name => binary:list_to_bin(Name),
@@ -67,4 +69,6 @@ buildResponse(Data) ->
     ownedTopics => binary:list_to_bin(Ownedtopics),
     subscribedTopics => binary:list_to_bin(SubscribedTopics),
     encrypt => binary:list_to_bin(Encrypt),
-    createdOn => binary:list_to_bin(tools:convertDateTime(CreatedOn))}.
+    filter => binary:list_to_bin(Filters),
+    createdOn => binary:list_to_bin(tools:convertDateTime(CreatedOn))
+  }.
