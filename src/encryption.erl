@@ -51,19 +51,17 @@ oauthCreate(Claims, Exp) ->
   ewt:token(Expiration, Claims, ?ewtKey, sha256).
 
 msgEncryption(Msg, PKey) ->
-  % TODO: Change encryption to PGP Get around 500 character limit
-  % Same Code just Test with PGP
-  % LenPayload = length(erlang:binary_to_list(Msg)),
-  %if
-  %  LenPayload > 500 ->
-  %    "Publisher Payload is to long to support Encryption (Decrease Publisher Payload to Under 500 Chars to support Encryption)";
-  %  true ->
-  EE = iolist_to_binary(PKey),
-  [Entry] = public_key:pem_decode(EE),
-  NewKey = public_key:pem_entry_decode(Entry),
-  CMsg = public_key:encrypt_public(Msg, NewKey),
-  base64:encode_to_string(CMsg).
-  %end.
+  LenPayload = length(erlang:binary_to_list(Msg)),
+  if
+    LenPayload > 500 ->
+      "Publisher Payload is to long to support Encryption (Decrease Publisher Payload to Under 500 Chars to support Encryption)";
+    true ->
+      EE = iolist_to_binary(PKey),
+      [Entry] = public_key:pem_decode(EE),
+      NewKey = public_key:pem_entry_decode(Entry),
+      CMsg = public_key:encrypt_public(Msg, NewKey),
+      base64:encode_to_string(CMsg)
+  end.
 
 generatePass(Value) ->
   ShortName = lists:nth(1, string:tokens(string:to_lower(Value), ".")),

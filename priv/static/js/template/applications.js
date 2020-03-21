@@ -217,60 +217,12 @@ var controller = {
               </div> \
               <div class="modal-body"> \
                 <p><h2>How to Create an Certificate for Encryption</h2> \
-                <h3> Generate New PGP Key </h3> \
-                <pre>$ <b> gpg --gen-key </b> <br /> \
-gpg (GnuPG) 2.2.18; Copyright (C) 2019 Free Software Foundation, Inc. <br /> \
-This is free software: you are free to change and redistribute it. <br /> \
-There is NO WARRANTY, to the extent permitted by law. <br /> \
-<br /> \
-Note: Use "gpg --full-generate-key" for a full featured key generation dialog. <br /> \
-<br /> \
-GnuPG needs to construct a user ID to identify your key. <br /> \
-<br /> \
-Real name: <b> user </b> <br /> \
-Real name: <b> firstname lastname </b> <br /> \
-Email address: <b> youremail@address.com </b> <br /> \
-You selected this USER-ID: <br /> \
-  "firstname lastname <youremail@address.com>" <br /> \
-<br /> \
-Change (N)ame, (E)mail, or (O)kay/(Q)uit? <b> O </b> <br /> \
-We need to generate a lot of random bytes. It is a good idea to perform <br /> \
-some other action (type on the keyboard, move the mouse, utilize the <br /> \
-disks) during the prime generation; this gives the random number <br /> \
-generator a better chance to gain enough entropy. <br /> \
-We need to generate a lot of random bytes. It is a good idea to perform <br /> \
-some other action (type on the keyboard, move the mouse, utilize the <br /> \
-disks) during the prime generation; this gives the random number <br /> \
-generator a better chance to gain enough entropy. <br /> \
-gpg: key D80AF2FFE3F6CE16 marked as ultimately trusted <br /> \
-public and secret key created and signed. <br /> \
-<br /> \
-pub   rsa2048 2020-03-17 [SC] [expires: 2022-03-17] <br /> \
-    0E1962FC2CC51A4CBA22D594D80AF2FFE3F6CE16 <br /> \
-uid                      firstname lastname <youremail@address.com> <br /> \
-sub   rsa2048 2020-03-17 [E] [expires: 2022-03-17] <br /> \
-                </pre> \
-                <h3> Listing the GPG Keys You Current Have Setup </h3> \
-                <pre> \
-$ <b>gpg --fingerprint</b> <br /> \
------------------------------ <br /> \
-pub   rsa2048 2020-03-17 [SC] [expires: 2022-03-17] <br /> \
-      0E19 62FC 2CC5 1A4C BA22  D594 D80A F2FF E3F6 CE16 <br /> \
-uid           [ultimate] firstname lastname <youremail@address.com> <br /> \
-sub   rsa2048 2020-03-17 [E] [expires: 2022-03-17] <br /> \
-  <br /> \
-</pre> \
-<h3> Get Public Key Block </h3> \
-<pre> \
-$ <b> gpg --armor --export youremail@address.com </b> <br /> \
------BEGIN PGP PUBLIC KEY BLOCK-----  <br /> \
-mQENBF5wHCwBCACyluiydmlVaOLQiORepDy+x9DYq86dFnF/J4xRL85sJFjgysSI <br /> \
-. <br /> \
-. <br /> \
-uJD4WeDL52WZlJ/xef9Ge6YLdvs/y5a6W5ubF9o/gX23FIgw+wAgVgrLMIXIQUKt <br /> \
-OtY= <br /> \
------END PGP PUBLIC KEY BLOCK----- <br /> \
-</pre> \
+                <ol> \
+                <li>$ openssl genrsa -out private.pem 2048</li> \
+                <li>$ openssl rsa -in private.pem -out public.pem -outform PEM -pubout</li> \
+                <li>$ cat public.pem</li> \
+                <li>paste content below </li> \
+                </ol> \
                  </p> \
                  <p><h2>How to Decrypt Message using an Private Key </h2> \
                  Note: \
@@ -278,7 +230,7 @@ OtY= <br /> \
                   You will need to unbase64 the messages and use your private key created above to read the messages <br /> \
                  Example Of Decrypting Messages with your Private Key: \
                    (File Message is the response from MessageMap Subscriber) <br /> \
-                   $ base64 -d message | gpg --decrypt <br /> \
+                   $ base64 -d message | openssl rsautl -decrypt -out decrypted -inkey private.pem <br /> \
                   File decrypt will have the Message sent in unencrypted \
                  </p> \
                  <p id="encryptionError"> </p> \
@@ -464,8 +416,16 @@ OtY= <br /> \
           e.preventDefault();
           $.get('/api/topic', function(result) {
             $('.topicSubscribeList').html('');
+            var loadedSubs = [];
+            $('.subscribedTopicRow').each(function(sub){
+              console.error($('.subscribedTopicRow')[sub]);
+              loadedSubs.push($('.subscribedTopicRow')[sub].id);
+            });
+            console.error(loadedSubs);
             $.each(result, function(idx, topic) {
-               $('.topicSubscribeList').append('<option value="' + topic.id + '">' + topic.name + '</option>');
+               if (loadedSubs.indexOf(topic.id) == -1) {
+                $('.topicSubscribeList').append('<option value="' + topic.id + '">' + topic.name + '</option>');
+               }
             });
           });
         });
