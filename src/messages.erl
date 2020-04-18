@@ -127,7 +127,7 @@ pullAppId(Auth) ->
     AppId.
 
 check_topicId_in_App(TopicId, App, Method) ->
-  [{_,_,_,_,_,Ownedtopics,SubscribedTopics,_,_}] = App,
+  [{_,_,_,_,_,Ownedtopics,SubscribedTopics,_,_,_}] = App,
   ArrayOfIds = if
     Method == topicsSubscribed ->
       SubscribedTopics;
@@ -147,7 +147,7 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
   Apps = database:getAllAppDB(),
   lists:foreach(fun(App) ->
     %TODO: Add Push functions here (metrics, Notification, Websockets
-    {_,FoundAppId,_,_,_,_,SubscribedTopics,_,EncryptValue} = App,
+    {_,FoundAppId,_,_,_,_,SubscribedTopics,_,EncryptValue, _} = App,
     case string:str(SubscribedTopics, TopicId) of
       0 ->
         true;
