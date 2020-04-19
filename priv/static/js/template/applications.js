@@ -418,10 +418,8 @@ var controller = {
             $('.topicSubscribeList').html('');
             var loadedSubs = [];
             $('.subscribedTopicRow').each(function(sub){
-              console.error($('.subscribedTopicRow')[sub]);
               loadedSubs.push($('.subscribedTopicRow')[sub].id);
             });
-            console.error(loadedSubs);
             $.each(result, function(idx, topic) {
                if (loadedSubs.indexOf(topic.id) == -1) {
                 $('.topicSubscribeList').append('<option value="' + topic.id + '">' + topic.name + '</option>');
@@ -501,12 +499,12 @@ var controller = {
         });
         $('#saveApplication').on('click', function(e) {
           e.preventDefault();
-          var currentTopicIds = $.map($(".ownedTopicRow"), function(n, i) {
+          var currentTopicIds = $.unique($.map($(".ownedTopicRow"), function(n, i) {
             return n.id;
-          });
-          var subscribedTopicIds = $.map($(".subscribedTopicRow"), function(n, i) {
+          }));
+          var subscribedTopicIds = $.unique($.map($(".subscribedTopicRow"), function(n, i) {
             return n.id;
-          });
+          }));
           $.ajax({
             url: '/api/application/' + id,
             type: 'PUT',

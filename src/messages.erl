@@ -147,7 +147,8 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
   Apps = database:getAllAppDB(),
   lists:foreach(fun(App) ->
     %TODO: Add Push functions here (metrics, Notification, Websockets
-    {_,FoundAppId,_,_,_,_,SubscribedTopics,_,EncryptValue, _} = App,
+    {_,FoundAppId,_,_,_,_,SubscribedTopics,_,_, EncryptValue} = App,
+    io:format("-------~n~p~n~p~n", [TopicId, EncryptValue]),
     case string:str(SubscribedTopics, TopicId) of
       0 ->
         true;
