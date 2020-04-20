@@ -230,7 +230,7 @@ var controller = {
                   You will need to unbase64 the messages and use your private key created above to read the messages <br /> \
                  Example Of Decrypting Messages with your Private Key: \
                    (File Message is the response from MessageMap Subscriber) <br /> \
-                   $ base64 -d message | openssl rsautl -decrypt -out decrypted -inkey private.pem <br /> \
+                   $ echo "message" | base64 -d | openssl rsautl -decrypt -inkey private.pem <br /> \
                   File decrypt will have the Message sent in unencrypted \
                  </p> \
                  <p id="encryptionError"> </p> \
@@ -495,7 +495,9 @@ var controller = {
             url: '/api/application/' + id,
             type: 'DELETE'
           });
-          window.location.hash = '#/applications';
+          setTimeout(function(){
+            window.location.hash = '#/applications';
+          }, 1000);
         });
         $('#saveApplication').on('click', function(e) {
           e.preventDefault();
