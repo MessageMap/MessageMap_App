@@ -322,6 +322,12 @@ deleteAppDBAppId(AppId) ->
     [Obj_to_del] = getAppDBAppId(AppId),
     mnesia:delete_object(applications, Obj_to_del, write)
   end,
+  AppTbl = check_dyn_table(AppId),
+  DelTable = lists:nth(1, [ X || X <- mnesia:system_info(tables), X == AppTbl]),
+  if
+    DelTable =:= AppTbl ->
+      mnesia:delete_table(DelTable)
+  end,
   mnesia:sync_transaction(DELETE).
 
 updateAppDBAppId(AppId, Name, Description, OwnedTopics, SubscribedTopics, Filter, Encrypt) ->
