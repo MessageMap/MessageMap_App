@@ -19,7 +19,7 @@ var controller = {
                       <h1 class="pagetitle"> API Documentation</h1> \
                       </div> \
                                 <hr size="2"> \
-                                         <h2>Authentication</h2> \
+                                         <h2><strong>Authentication</strong></h2> \
                                           <p>Returns json data with authentication token</p> \
                                           <ul> \
                                           <li> \
