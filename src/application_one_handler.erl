@@ -32,8 +32,7 @@ processRequest(<<"PUT">>, _, AppId, Req) ->
   { _, OwnedTopics } = lists:keyfind(<<"ownedTopics">>, 1, Body),
   { _, SubscribedTopics } = lists:keyfind(<<"subscribedTopics">>, 1, Body),
   { _, Encrypt } = lists:keyfind(<<"encryption">>, 1, Body),
-  % TODO Change to Payload
-  Filters = [],
+  { _, Filters } = lists:keyfind(<<"filters">>, 1, Body),
   case Encrypt of
     '\n' ->
         { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Filters, []),

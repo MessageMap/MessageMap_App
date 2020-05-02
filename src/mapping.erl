@@ -25,7 +25,7 @@ runAction("remove", Key, Data) ->
     NewData = maps:remove(Remove, Data),
     io:format("New Data: ~p~n", [NewData]),
     NewData;
-runAction("mask", Key, Data) ->
+runAction("masking", Key, Data) ->
     Elements = string:tokens(Key, "=>"),
     io:format("Starting Masking~n", []),
     Name = lists:nth(1, Elements),
@@ -129,10 +129,10 @@ init() ->
     },
     Filter = [
         "rename^name=>NewName",
-        "mask^age",
+        "masking^age",
         "remove^addr/st",
         "remove^addr/town/zip",
-        "mask^classes/Moving/maskMe"
+        "masking^classes/Moving/maskMe"
     ],
     NewMap = msgMapper(Filter, M_EX),
     io:format("-----------------~nNew:~n~p~n", [NewMap]).

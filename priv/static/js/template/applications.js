@@ -179,6 +179,7 @@ var controller = {
               <h2>Current Filters:</h2> \
               <div id="currentFilters"> \
               </div> \
+              <div id="toSaveFilters" style="hidden:true" /> \
               </row> \
               </div> \
               <div class="modal-footer"> \
@@ -332,15 +333,20 @@ var controller = {
           $(this).closest('pre').remove();
         });
         $(document).on('click', '#saveMessageMapping', function(e){
-          e.preventDefault();
-          console.error('Saving message Now');
+//          e.preventDefault();
           result = [];
           $('.FilterRow').each(function(e){
-            //TODO: Fix Formatting for serverside Array Object???
-            result.push($(this).html().toString().replace( /(<([^>]+)>)/ig, ''));
+            var mapping =  $(this).html().toString().replace( /(<([^>]+)>)/ig, '').split(':');
+            console.error("Converting for save: "+mapping);
+            if ( $.inArray( mapping[1].split('|')[0].toLowerCase().trim(), [ "masking", "remove" ] ) > -1 ){
+              result.push("remove^"+mapping[2].trim());
+            }else if( $.inArray( mapping[1].split('|')[0].toLowerCase().trim(), [ "rename" ] ) > -1 ){
+              result.push("rename^"+mapping[2].trim().replace('| New Value', '=>').trim()+mapping[3].trim());
+            }
           });
           if (result.length > 0) {
             console.error(result);
+            $('#toSaveFilters').html(result);
           }
         });
 //        $(document).on('click', '#viewConfigMessageMapping', function(e) {
