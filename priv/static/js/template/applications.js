@@ -179,7 +179,6 @@ var controller = {
               <h2>Current Filters:</h2> \
               <div id="currentFilters"> \
               </div> \
-              <div id="toSaveFilters" style="hidden:true" /> \
               </row> \
               </div> \
               <div class="modal-footer"> \
@@ -187,7 +186,7 @@ var controller = {
                 <button type="button" class="btn btn-default" id="resetMessageMapping" data-dismiss="modal">Reset remove Message Mapping</button> \
                 <button type="button" class="btn btn-primary" id="saveMessageMapping">Save Message Mapping</button> \
               </div> \
-                            </div> \
+              </div> \
             </div><!-- /.modal-content --> \
           </div><!-- /.modal-dialog --> \
           <div id="newTopicModal" class="modal fade" tabindex="-1" role="dialog" style="display: none;"> \
@@ -300,7 +299,8 @@ var controller = {
               $('#listSubscribedTopics').append('<tr id="' + result.id + '" class="subscribedTopicRow">  \
                   <th scope="row">' + result.id + '</th>  \
                   <td><a href="#/topics/' + result.id + '">' + result.name + '</a></td>  \
-                  <td><button data-toggle="modal" data-target="#configMessageMapModal" type="button" class="btn btn-info" id="viewConfigMessageMapping">Configure MessageMapping</td> \
+                  <td><button data-toggle="modal" data-target="#configMessageMapModal" type="button" class="btn btn-info" id="viewConfigMessageMapping">Configure MessageMapping</button><br /> \
+                      <div id="currentMapCount">(Number of Elements: 0)</div> <div id="toSaveFilters" style="display:none;" /></td> \
                   <td><button  type="button" class="btn btn-danger" id="deleteSubscribed">Remove Topic</button></td>  \
                 </tr>');
             });
@@ -347,6 +347,7 @@ var controller = {
           if (result.length > 0) {
             console.error(result);
             $('#toSaveFilters').html(result);
+            $('#')
           }
         });
 //        $(document).on('click', '#viewConfigMessageMapping', function(e) {
@@ -440,7 +441,8 @@ var controller = {
             $('#listSubscribedTopics').append('<tr id="' + result.id + '" class="subscribedTopicRow">  \
                 <th scope="row">' + result.id + '</th>  \
                 <td><a href="#/topics/' + result.id + '">' + result.name + '</a></td>  \
-                <td><button data-toggle="modal" data-target="#configMessageMapModal" type="button" class="btn btn-info" id="viewConfigMessageMapping">Configure MessageMapping</button></td> \
+                <td><button data-toggle="modal" data-target="#configMessageMapModal" type="button" class="btn btn-info" id="viewConfigMessageMapping">Configure MessageMapping</button><br /> \
+                <div id="currentMapCount" class="'+ result.id +'">(Number of Map Configurations: 0)</div> <div id="toSaveFilters" class="' + result.id + '" style="display:none;" /></td> \
                 <td><button type="button" class="btn btn-danger" id="deleteSubscribed">Remove Topic</button></td>  \
               </tr>');
           });
