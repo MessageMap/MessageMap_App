@@ -45,6 +45,7 @@ buildResponses(Data) ->
 
 buildResponse(Data) ->
   {_, Id, Name, Description, ApiKeys, Ownedtopics, SubscribedTopics, CreatedOn, Filter, Encrypt} = element(1, list_to_tuple([Data])),
+  io:format("Return TODO FIX ON SAVE Filter: ~p~n", [Filter]),
   #{
     id => binary:list_to_bin(Id),
     name => binary:list_to_bin(Name),
@@ -53,6 +54,6 @@ buildResponse(Data) ->
     ownedTopics => binary:list_to_bin(Ownedtopics),
     subscribedTopics => binary:list_to_bin(SubscribedTopics),
     encrypt => binary:list_to_bin(Encrypt),
-    filters => binary:list_to_bin(Filter),
+    filters => binary:list_to_bin([Filter]),
     createdOn => binary:list_to_bin(tools:convertDateTime(CreatedOn))
   }.

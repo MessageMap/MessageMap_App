@@ -48,7 +48,7 @@ var controller = {
                                           <strong>Content:</strong> <code>{ "status": "good" }</code></li> </ul> \
                                           </li> </ul> <hr size="2"> \
                                           <h2><a id="Pull_Message_from_Topic_28"></a><strong>Pull Message from Topic</strong></h2> \
-                                          <p>Retreive a messages from a Topic</p> <ul> <li><strong>URL</strong><br> /messages/<code>TOPIC</code></li> \
+                                          <p>Retreive a messages from a Topic</p> <ul> <li><strong>URL</strong><br> /messages</li> \
                                           <li><strong>Method:</strong><br> <code>GET</code></li> <li><strong>Headers:</strong><br> \
                                           <code>{ "content-type": "application/json", "authentication": "Bearer ACCESS_TOKEN" }</code></li> \
                                           <li><strong>Success Response:</strong> <ul> <li><strong>Code:</strong> 200<br> \

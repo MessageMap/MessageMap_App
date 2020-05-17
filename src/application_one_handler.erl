@@ -33,6 +33,7 @@ processRequest(<<"PUT">>, _, AppId, Req) ->
   { _, SubscribedTopics } = lists:keyfind(<<"subscribedTopics">>, 1, Body),
   { _, Encrypt } = lists:keyfind(<<"encryption">>, 1, Body),
   { _, Filters } = lists:keyfind(<<"filters">>, 1, Body),
+  io:format("Filters: ~p~n", [Filters]),
   case Encrypt of
     '\n' ->
         { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Filters, []),
@@ -68,6 +69,6 @@ buildResponse(Data) ->
     ownedTopics => binary:list_to_bin(Ownedtopics),
     subscribedTopics => binary:list_to_bin(SubscribedTopics),
     encrypt => binary:list_to_bin(Encrypt),
-    filter => binary:list_to_bin(Filters),
+    filter => jiffy:decode(Filters),
     createdOn => binary:list_to_bin(tools:convertDateTime(CreatedOn))
   }.
