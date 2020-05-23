@@ -61,6 +61,7 @@ processRequest(<<"DELETE">>, _, AppId, _) ->
 % %% Internal functions
 buildResponse(Data) ->
   {_,Id,Name,Description,ApiKeys,Ownedtopics,SubscribedTopics,CreatedOn,Filters,Encrypt} = element(1, list_to_tuple([Data])),
+  io:format("Filters: ~p~n", [Filters]),
   #{
     id => binary:list_to_bin(Id),
     name => binary:list_to_bin(Name),
@@ -69,6 +70,6 @@ buildResponse(Data) ->
     ownedTopics => binary:list_to_bin(Ownedtopics),
     subscribedTopics => binary:list_to_bin(SubscribedTopics),
     encrypt => binary:list_to_bin(Encrypt),
-    filter => jiffy:decode(Filters),
+    filter => Filters, %binary:list_to_bin(Filters),
     createdOn => binary:list_to_bin(tools:convertDateTime(CreatedOn))
   }.

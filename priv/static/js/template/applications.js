@@ -300,10 +300,18 @@ var controller = {
                   <th scope="row">' + result.id + '</th>  \
                   <td><a href="#/topics/' + result.id + '">' + result.name + '</a></td>  \
                    <td><span id="saved_mapping_'+result.id+'" style="display:none"></span><button sub_id="' + result.id +'" data-toggle="modal" data-target="#configMessageMapModal" type="button" class="btn btn-info add_config" id="viewConfigMessageMapping">Configure MessageMapping</button><br /> \
-                      <div id="currentMapCount">(Number of Elements: 0)</div> <div id="toSaveFilters" style="display:none;" /></td> \
+                      <div>(Number of Elements: <span class="currentMapCount_'+result.id+'">0</span>)</div> <div id="toSaveFilters" style="display:none;" /></td> \
                   <td><button  type="button" class="btn btn-danger" id="deleteSubscribed">Remove Topic</button></td>  \
                 </tr>');
-            });
+            }).promise().done(function(e){
+ $.each($.parseJSON(app.filter), function(ind, sub){
+         console.error(sub);
+         console.error(sub['id']);
+         console.error(JSON.stringify(sub['value']));
+         $('#saved_mapping_'+sub['id']).text(JSON.stringify(sub['value']));
+         $('.currentMapCount_'+sub['id']).text(sub['value'].length);
+       });
+						});
           }
         });
         //Start Message Mapping Configuration
@@ -355,7 +363,8 @@ var controller = {
           if (result.length > 0) {
               $('#saved_mapping_'+sub_id).text(JSON.stringify(result));
 							$('#configMessageMapModal').find(".close").click();
-          }
+					}
+					$('.currentMapCount_'+sub_id).text(result.length);
         });
         $.get('/api/stats/'+app.id, function(result){
           var wait = result.messages_waiting
@@ -397,7 +406,7 @@ var controller = {
                 <th scope="row">' + result.id + '</th>  \
                 <td><a href="#/topics/' + result.id + '">' + result.name + '</a></td>  \
                 <td><span id="saved_mapping_'+result.id+'" style="display:none"></span><button sub_id="'+result.id+'"  data-toggle="modal" data-target="#configMessageMapModal" type="button" class="btn btn-info add_config" id="viewConfigMessageMapping">Configure MessageMapping</button><br /> \
-                <div id="currentMapCount" class="'+ result.id +'">(Number of Map Configurations: 0)</div> <div id="toSaveFilters" class="' + result.id + '" style="display:none;" /></td> \
+                <div>(Number of Map Configurations: <span class="currentMapCount_'+result.id+'">0</span>)</div> <div id="toSaveFilters" class="' + result.id + '" style="display:none;" /></td> \
                 <td><button type="button" class="btn btn-danger" id="deleteSubscribed">Remove Topic</button></td>  \
               </tr>');
           });
@@ -474,8 +483,10 @@ var controller = {
 					$(subscribedTopicIds).each(function(i){
 					  var id = subscribedTopicIds[i];
 						var val = $('#saved_mapping_'+subscribedTopicIds[i]).text();
-						subArray.push({ "id": id, "value": JSON.parse(val) });
-					});
+						if (val.length > 2){
+							subArray.push({ "id": id, "value": JSON.parse(val) });
+						}
+					}).promise().done(function(e){
           $.ajax({
             url: '/api/application/' + id,
             type: 'PUT',
@@ -492,6 +503,7 @@ var controller = {
               window.location.hash = '#/applications';
             }
           });
+					});
         });
         $('#cancelApplication').on('click', function(e) {
           e.preventDefault();
