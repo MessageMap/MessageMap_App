@@ -305,9 +305,6 @@ var controller = {
                 </tr>');
             }).promise().done(function(e){
  $.each($.parseJSON(app.filter), function(ind, sub){
-         console.error(sub);
-         console.error(sub['id']);
-         console.error(JSON.stringify(sub['value']));
          $('#saved_mapping_'+sub['id']).text(JSON.stringify(sub['value']));
          $('.currentMapCount_'+sub['id']).text(sub['value'].length);
        });
@@ -318,8 +315,19 @@ var controller = {
 				var sub_id;
 				$(document).on('click', '.add_config', function(e){
 				  sub_id = $(this).attr('sub_id');
-					console.error(sub_id);
-				});
+					var values = $('#saved_mapping_'+sub_id).text();
+          $('#currentFilters').html('');
+          if (values.length > 0){
+          $.each(JSON.parse(values), function(i,v){
+               if(v['type'] != 'rename'){
+                  var str = 'Type: <b>'+ v['type'] + '</b> | Key: <b>'+ v['value']+'</b>';
+               } else {
+                  var str = 'Type: <b>'+ v['type'] + '</b> | Key: <b>'+ v['key'] +'</b> | New Value: <b> '+v['value'] + '</b>';
+               }
+               $('#currentFilters').append('<pre class="FilterRow">'+str+'<button class="removeFilter">Clear</button></pre>');
+           });
+           }
+        });
         $(document).on('change', '#typeof', function(e){
            e.preventDefault();
            if($('#typeof').val() != 'Rename'){
@@ -357,13 +365,11 @@ var controller = {
             } else if( $.inArray( mapping[1].split('|')[0].toLowerCase().trim(), [ "rename" ] ) > -1 ){
 						  var old = mapping[2].trim();
 							var value = mapping[3].trim().replace("Clear", "");
-						  result.push({ "type": "rename", "key": old, "value": value});
+						  result.push({ "type": "rename", "key": old.split('|')[0].trim(), "value": value});
             }
           });
-          if (result.length > 0) {
-              $('#saved_mapping_'+sub_id).text(JSON.stringify(result));
-							$('#configMessageMapModal').find(".close").click();
-					}
+          $('#saved_mapping_'+sub_id).text(JSON.stringify(result));
+					$('#configMessageMapModal').find(".close").click();
 					$('.currentMapCount_'+sub_id).text(result.length);
         });
         $.get('/api/stats/'+app.id, function(result){
