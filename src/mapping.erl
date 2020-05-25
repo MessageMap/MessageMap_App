@@ -38,6 +38,17 @@ runAction("rename", Key, Data)->
     NewData = maps:put(NewName, maps:get(OldName, Data), Data),
     maps:remove(OldName, NewData).
 
+runNewAction("remove", Key, Data) ->
+    proplists:delete(Key, Data);
+runNewAction("masking", Key, Data) ->
+    proplists:delete(Key, Data),
+    lists:merge(Data, [{Key, <<"************">>}]);
+runNewAction("rename", Elements, Data) ->
+    OldName = lists:nth(1, Elements),
+    NewName = lists:nth(2, Elements),
+    NewData = maps:put(NewName, maps:get(OldName, Data), Data),
+    maps:remove(OldName, NewData).
+
 filter(Action, PathElements, Data) ->
     if
         length(PathElements) > 0 ->
@@ -82,27 +93,55 @@ checkArray(Action, Element, Data) ->
     end,
     Result.
 
+convertFilter({Filter}, Data) ->
+    {SubData} = Data,
+    Type = proplists:get_value(<<"type">>, Filter), 
+    Value = proplists:get_value(<<"value">>, Filter), 
+    %Result = findKey(binary:bin_to_list(Value), SubData),
+    Key_list = proplists:get_keys(SubData),
+    KeyFound = lists:member(Value, Key_list),
+    io:format("Filter: ~n~p~n", [Filter]),
+    ActionResult = if
+      KeyFound ->
+        runNewAction(binary:bin_to_list(Type), Value, SubData);
+      true ->
+        io:format("Was Not found~n", []),
+        SubData
+    end,
+    io:format("Orignal: ~n~p~n", [Data]),
+    io:format("Result: ~n~p~n", [{ActionResult}]),
+    {ActionResult}.
+
 msgMapper(Filter, Data) ->
     if
         length(Filter) > 0 ->
-            F = lists:nth(1, Filter),
-            Elements = string:tokens(F, "^"),
-            Action = lists:nth(1, Elements),
-            Path = lists:nth(2, Elements),
-            PathElements = string:tokens(Path, "/"),
-            if
-                length(PathElements) > 1 ->
-                    NewData = filter(Action, PathElements, Data);
-                true ->
-                    NewData = runAction(Action, Path, Data)
-            end,
             msgMapper(
-                lists:reverse(lists:droplast(lists:reverse(Filter))),
-                NewData
+                 lists:reverse(lists:droplast(lists:reverse(Filter))),
+                 convertFilter(lists:nth(1, Filter), Data)
             );
-        true ->
+         true ->
             Data
     end.
+    %if
+    %    length(Filter) > 0 ->
+    %        F = lists:nth(1, Filter),
+    %        Elements = string:tokens(F, "^"),
+    %        Action = lists:nth(1, Elements),
+    %        Path = lists:nth(2, Elements),
+    %        PathElements = string:tokens(Path, "/"),
+    %        if
+    %            length(PathElements) > 1 ->
+    %                NewData = filter(Action, PathElements, Data);
+    %            true ->
+    %                NewData = runAction(Action, Path, Data)
+    %        end,
+    %        msgMapper(
+    %            lists:reverse(lists:droplast(lists:reverse(Filter))),
+    %            NewData
+    %        );
+    %    true ->
+    %        Data
+    %end.
 
 init() ->
     M_EX = #{

@@ -143,27 +143,53 @@ check_topicId_in_App(TopicId, App, Method) ->
       fail
   end.
 
+processMessageMap(TopicId, Filter, Payload) ->
+    io:format("Starting ~n~p~n~p~n~p~n", [TopicId, Filter, Payload]),
+    {[ {_, Tid}, {_,Values} ]}  = Filter,
+    LTid = binary:bin_to_list(Tid),
+    if
+      TopicId =:= LTid ->
+        io:format("--~n~p~n", [Values]),
+        io:format("End", []),
+        mapping:msgMapper(Values, Payload);
+      true ->
+        Payload
+    end.
+
 process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
   Apps = database:getAllAppDB(),
   lists:foreach(fun(App) ->
     %TODO: Add Push functions here (metrics, Notification, Websockets
-    {_,FoundAppId,_,_,_,_,SubscribedTopics,_,_, EncryptValue} = App,
-    io:format("-------~n~p~n~p~n", [TopicId, EncryptValue]),
+    io:format("Start----------------------~n", []),
+    {_,FoundAppId,_,_,_,_,SubscribedTopics,_,FilterSettings, EncryptValue} = App,
     case string:str(SubscribedTopics, TopicId) of
       0 ->
         true;
       _ ->
-        SavedPayload = case EncryptValue of
-           [] ->
+        % Start MessageMapping
+        MapMessageResult = case FilterSettings of
+           <<"[]">> ->
              MapPayload;
            _ ->
-             binary:list_to_bin(encryption:msgEncryption(jiffy:encode(MapPayload), binary:list_to_bin(EncryptValue)))
+             JsonFilter = [ processMessageMap(TopicId, X, MapPayload) || X <- jiffy:decode(FilterSettings) ],
+             io:format("MapPayload: ~n Original: ~n~p~n ~n~p~n ", [MapPayload, JsonFilter]),
+             lists:nth(1, JsonFilter)
+        end,
+        % TODO: Match below with TopicId Loop all Filters
+        % [{ [ _, { _, SubFilter } ] }] = jiffy:decode(Filter)
+        % Start Encryption Values
+        SavedPayload = case EncryptValue of
+           [] ->
+             MapMessageResult;
+           _ ->
+             binary:list_to_bin(encryption:msgEncryption(jiffy:encode(MapMessageResult), binary:list_to_bin(EncryptValue)))
          end,
         %Insert data by App For Pulling
         Tbl = database:check_dyn_table(FoundAppId),
         % TODO: Check Table row count limit 20,000
         Waiting = mnesia:table_info(Tbl, size),
-        tools:log("info", io_lib:format("Current (~p) Messages: ~p", [Tbl, Waiting])),
+        % RM for less logs
+        %tools:log("info", io_lib:format("Current (~p) Messages: ~p", [Tbl, Waiting])),
         if
           Waiting < ?MAX_WAITING andalso SavedPayload =/= "Payload Is To Long" ->
             database:insert_dyn_table(Tbl, AppId, TopicId, SchemaId, SavedPayload);

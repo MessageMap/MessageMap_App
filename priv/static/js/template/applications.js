@@ -360,7 +360,7 @@ var controller = {
             var mapping =  $(this).html().toString().replace( /(<([^>]+)>)/ig, '').split(':');
             if ( $.inArray( mapping[1].split('|')[0].toLowerCase().trim(), [ "masking", "remove" ] ) > -1 ){
 							var type = mapping[1].split("|")[0].toLowerCase().trim();
-							var value = mapping[2].toLowerCase().trim().replace("Clear", "");
+							var value = mapping[2].toLowerCase().trim().replace("clear", "");
 							result.push({ "type": type, "value": value });
             } else if( $.inArray( mapping[1].split('|')[0].toLowerCase().trim(), [ "rename" ] ) > -1 ){
 						  var old = mapping[2].trim();
@@ -475,7 +475,7 @@ var controller = {
           });
           setTimeout(function(){
             window.location.hash = '#/applications';
-          }, 1000);
+          }, 3000);
         });
         $('#saveApplication').on('click', function(e) {
           e.preventDefault();
