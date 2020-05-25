@@ -7,36 +7,8 @@
 %%% Created : 10, Nov 2017
 %%%-------------------------------------------------------------------
 -module(mapping).
--export([init/0]).
 -export([msgMapper/2]).
-
-findKey(Key, Data) ->
-    if
-        is_list(Data) ->
-            false;
-        true ->
-            lists:search(fun(K) -> K == Key end, maps:keys(Data))
-    end.
-
-runAction("remove", Key, Data) ->
-    Elements = string:tokens(Key, "=>"),
-    io:format("Starting Remove~n~p~n~p~n", [Elements, Data]),
-    Remove = lists:nth(1, Elements),
-    NewData = maps:remove(Remove, Data),
-    io:format("New Data: ~p~n", [NewData]),
-    NewData;
-runAction("masking", Key, Data) ->
-    Elements = string:tokens(Key, "=>"),
-    io:format("Starting Masking~n", []),
-    Name = lists:nth(1, Elements),
-    maps:update(Name, "***********", Data);
-runAction("rename", Key, Data)->
-    Elements = string:tokens(Key, "=>"),
-    io:format("Starting Rename~n", []),
-    OldName = lists:nth(1, Elements),
-    NewName = lists:nth(2, Elements),
-    NewData = maps:put(NewName, maps:get(OldName, Data), Data),
-    maps:remove(OldName, NewData).
+-export([test/0]).
 
 runNewAction("remove", Key, Data) ->
     proplists:delete(Key, Data);
@@ -49,69 +21,114 @@ runNewAction("rename", Elements, Data) ->
     NewData = maps:put(NewName, maps:get(OldName, Data), Data),
     maps:remove(OldName, NewData).
 
-filter(Action, PathElements, Data) ->
+filter(Action, PathElements, FullData) ->
+    {Data} = FullData,
+    io:format("Data: ~p~n", [Data]),
     if
         length(PathElements) > 0 ->
             Element = lists:nth(1, PathElements),
-            SearchResult = findKey(Element, Data),
+            TKeys = proplists:get_keys(Data),
+            SearchResult = lists:member(Element, TKeys),
             SubPathElements = lists:delete(Element, PathElements),
             if
                 SearchResult /= false ->
-                    NewData = maps:get(Element, Data),
+                    { NewData } = proplists:get_value(Element, Data),
                     if
-                        length(SubPathElements) == 1 ->
-                            if
-                                is_list(NewData) ->
-                                    UpdateData = [  checkArray(Action, lists:nth(1, SubPathElements), X) || X <- NewData ],
-                                    maps:update(Element, UpdateData, Data);
-                                true ->
-                                    UpdateData = runAction(Action, lists:nth(1, SubPathElements), NewData),
-                                    maps:update(Element, filter(Action, SubPathElements, UpdateData), Data)
-                            end;
+                        length(PathElements) == 1 ->
+                            io:format("ELEMENT: ~n~p~n", [SubPathElements]),
+                            FinalElement = lists:nth(1, SubPathElements),
+                            NewValue = runNewAction(binary:bin_to_list(Action), FinalElement, NewData),
+                            NewResult = proplists:delete(FinalElement, NewData),
+                            %io:format("Data: ~n~p~n FinalElement: ~n~p~n NewValue: ~n~p~n NewResult: ~n~p~n", [NewData, FinalElement, NewValue, NewResult]),
+                            { lists:merge(Data, NewValue) };
                         true ->
-                            if
-                                is_list(NewData) ->
-                                    maps:update(Element, [ filter(Action, SubPathElements, X) || X <- NewData ], Data);
-                                true ->
-                                    maps:update(Element, filter(Action, SubPathElements, NewData), Data)
-                            end
+                            LoopData = proplists:delete(Element, Data),
+                            io:format("--- ~n~p~n", [Element]),
+                            { lists:merge(LoopData, filter(Action, SubPathElements, {NewData}) ) }
                     end;
                 true ->
-                    Data
+                    {Data}
             end;
         true ->
-            Data
+            {Data}
     end.
 
-checkArray(Action, Element, Data) ->
-    ListSearchResult = findKey(Element, Data),
-    Result = if
-        ListSearchResult /= false ->
-            runAction(Action, Element, Data);
-        true ->
-            Data
-    end,
-    Result.
 
-convertFilter({Filter}, Data) ->
-    {SubData} = Data,
+%processDataType(Data, Filter, Elements) ->
+%    if
+%      is_tuple(Data) ->
+%        { SubData } = Data,
+%        TKeys = proplists:get_keys(SubData),
+%        [ convertFilter({Filter}, proplists:get_value(Key, SubData)) || Key <- TKeys ];
+% %       {Data, Filter};
+%      is_list(Data) ->
+%        [ processDataType(X, Filter, []) || X <- Data];
+%        {Data, Filter};
+%      true ->
+%        Elements
+%    end.
+
+findPath(Data, Key, Path) ->
+  if
+    is_list(Data) ->
+	  	KeyList = proplists:get_keys(Data),
+		  KeyFound = lists:member(Key, KeyList),
+		  if
+			  KeyFound ->
+		  		 lists:merge(Path, [Key]);
+			  length(KeyList) > 0 ->
+		  		 lists:map(fun(X) ->
+             SubListing = proplists:get_value(X, Data),
+             if
+               is_tuple(SubListing) ->
+                 {NewSub}  = SubListing,
+                 findPath(NewSub, Key, lists:merge(Path, [X]));
+               true ->
+                 []
+             end
+             end, KeyList );
+			  true ->
+				   lists:flatten(Path)
+      end;
+    true ->
+      lists:flatten(Path)
+  end.
+
+test() ->
+  Data = {[{<<"checked">>,false},
+  {<<"dimensions">>,{[{<<"width">>,5},{<<"height">>,10}]}},
+  {<<"id">>,1},
+  {<<"name">>,<<"A green door">>},
+  {<<"price">>,12.5},
+  {<<"tags">>,[<<"home">>,<<"green">>]}]},
+  Key = <<"width">>,
+  {SubData} = Data,
+  Action = <<"masking">>,
+  Path = lists:flatten(findPath(SubData, Key, [])),
+  io:format("Testing!!!!~n Data: ~p~n key: ~p~n Path: ~p~n", [Data, Key, lists:flatten(Path)]),
+  Result = filter(Action, Path, Data),
+  io:format("Result: ~n~p~n", [Result]).
+
+convertFilter({Filter}, {SubData}) ->
     Type = proplists:get_value(<<"type">>, Filter), 
     Value = proplists:get_value(<<"value">>, Filter), 
     %Result = findKey(binary:bin_to_list(Value), SubData),
     Key_list = proplists:get_keys(SubData),
     KeyFound = lists:member(Value, Key_list),
-    io:format("Filter: ~n~p~n", [Filter]),
     ActionResult = if
       KeyFound ->
         runNewAction(binary:bin_to_list(Type), Value, SubData);
       true ->
         % TODO ADD LOOP IF VALUE IS MAP OR LIST Searching!!!
+        %[ processDataType(proplists:get_value(X, SubData), Filter, []) || X <- Key_list ],
         io:format("Was Not found~n", []),
         SubData
     end,
-    io:format("Orignal: ~n~p~n", [Data]),
-    io:format("Result: ~n~p~n", [{ActionResult}]),
-    {ActionResult}.
+    %io:format("Orignal: ~n~p~n", [Data]),
+    %io:format("Result: ~n~p~n", [{ActionResult}]),
+    {ActionResult};
+convertFilter(_, Data) ->
+    Data.
 
 msgMapper(Filter, Data) ->
     if
@@ -123,56 +140,3 @@ msgMapper(Filter, Data) ->
          true ->
             Data
     end.
-    %if
-    %    length(Filter) > 0 ->
-    %        F = lists:nth(1, Filter),
-    %        Elements = string:tokens(F, "^"),
-    %        Action = lists:nth(1, Elements),
-    %        Path = lists:nth(2, Elements),
-    %        PathElements = string:tokens(Path, "/"),
-    %        if
-    %            length(PathElements) > 1 ->
-    %                NewData = filter(Action, PathElements, Data);
-    %            true ->
-    %                NewData = runAction(Action, Path, Data)
-    %        end,
-    %        msgMapper(
-    %            lists:reverse(lists:droplast(lists:reverse(Filter))),
-    %            NewData
-    %        );
-    %    true ->
-    %        Data
-    %end.
-
-init() ->
-    M_EX = #{
-        "name" => "Ben",
-        "age" => 41,
-        "addr" => #{
-            "st" => "Some Street",
-            "town" => #{
-                "name" => "Henrietta",
-                "zip" => 14586
-            }
-        },
-        "classes" => [
-            #{
-                "name" => "class1",
-                "Moving" => [
-                    #{"maskMe" => "Masking"}
-                ]
-            },
-            #{
-                "name" => "class2"
-            }
-        ]
-    },
-    Filter = [
-        "rename^name=>NewName",
-        "masking^age",
-        "remove^addr/st",
-        "remove^addr/town/zip",
-        "masking^classes/Moving/maskMe"
-    ],
-    NewMap = msgMapper(Filter, M_EX),
-    io:format("-----------------~nNew:~n~p~n", [NewMap]).

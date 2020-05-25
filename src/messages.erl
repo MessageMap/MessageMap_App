@@ -149,8 +149,6 @@ processMessageMap(TopicId, Filter, Payload) ->
     LTid = binary:bin_to_list(Tid),
     if
       TopicId =:= LTid ->
-        io:format("--~n~p~n", [Values]),
-        io:format("End", []),
         mapping:msgMapper(Values, Payload);
       true ->
         Payload
@@ -160,7 +158,6 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
   Apps = database:getAllAppDB(),
   lists:foreach(fun(App) ->
     %TODO: Add Push functions here (metrics, Notification, Websockets
-    io:format("Start----------------------~n", []),
     {_,FoundAppId,_,_,_,_,SubscribedTopics,_,FilterSettings, EncryptValue} = App,
     case string:str(SubscribedTopics, TopicId) of
       0 ->
@@ -172,11 +169,9 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
              MapPayload;
            _ ->
              JsonFilter = [ processMessageMap(TopicId, X, MapPayload) || X <- jiffy:decode(FilterSettings) ],
-             io:format("MapPayload: ~n Original: ~n~p~n ~n~p~n ", [MapPayload, JsonFilter]),
+             %io:format("MapPayload: ~n Original: ~n~p~n ~n~p~n ", [MapPayload, JsonFilter]),
              lists:nth(1, JsonFilter)
         end,
-        % TODO: Match below with TopicId Loop all Filters
-        % [{ [ _, { _, SubFilter } ] }] = jiffy:decode(Filter)
         % Start Encryption Values
         SavedPayload = case EncryptValue of
            [] ->
