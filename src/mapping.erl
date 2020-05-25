@@ -41,8 +41,8 @@ runAction("rename", Key, Data)->
 runNewAction("remove", Key, Data) ->
     proplists:delete(Key, Data);
 runNewAction("masking", Key, Data) ->
-    proplists:delete(Key, Data),
-    lists:merge(Data, [{Key, <<"************">>}]);
+    NewData = proplists:delete(Key, Data),
+    lists:merge(NewData, [{Key, <<"************">>}]);
 runNewAction("rename", Elements, Data) ->
     OldName = lists:nth(1, Elements),
     NewName = lists:nth(2, Elements),
@@ -105,6 +105,7 @@ convertFilter({Filter}, Data) ->
       KeyFound ->
         runNewAction(binary:bin_to_list(Type), Value, SubData);
       true ->
+        % TODO ADD LOOP IF VALUE IS MAP OR LIST Searching!!!
         io:format("Was Not found~n", []),
         SubData
     end,
