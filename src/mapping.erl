@@ -8,26 +8,24 @@
 %%%-------------------------------------------------------------------
 -module(mapping).
 -export([msgMapper/2]).
--export([test/0]).
 
-runNewAction("remove", Key, Data) ->
+runNewAction("remove", Key, Data, _) ->
     proplists:delete(Key, Data);
-runNewAction("masking", Key, Data) ->
+runNewAction("masking", Key, Data, _) ->
     NewData = proplists:delete(Key, Data),
     lists:merge(NewData, [{Key, <<"************">>}]);
-runNewAction("rename", Elements, Data) ->
-    OldName = lists:nth(1, Elements),
-    NewName = lists:nth(2, Elements),
-    NewData = maps:put(NewName, maps:get(OldName, Data), Data),
-    maps:remove(OldName, NewData).
+runNewAction("rename", Key, Data, NewName) ->
+    Value = proplists:get_value(Key, Data),
+    NewData = proplists:delete(Key, Data),
+    lists:merge(NewData, [{NewName, Value}]).
 
-filter(Action, PathElements, FullData) ->
+filter(Action, PathElements, FullData, OldName) ->
     { Data } = FullData,
     if
         is_list(Data) =:= false ->
             [ FinalElement ] = PathElements,
             { SubData } = Data,
-            runNewAction(binary:bin_to_list(Action), FinalElement, SubData);
+            runNewAction(binary:bin_to_list(Action), FinalElement, SubData, OldName);
         length(PathElements) > 0 ->
             Element = lists:nth(1, PathElements),
             TKeys = proplists:get_keys(Data),
@@ -37,7 +35,7 @@ filter(Action, PathElements, FullData) ->
                 SearchResult /= false ->
                     NewData = proplists:get_value(Element, Data),
                     LoopData = proplists:delete(Element, Data),
-                    SubResult = [ { Element, { filter(Action, SubPathElements, {NewData}) } } ],
+                    SubResult = [ { Element, { filter(Action, SubPathElements, {NewData}, OldName) } } ],
                     { lists:merge(LoopData, SubResult) };
                 true ->
                     {Data}
@@ -74,37 +72,37 @@ findPath(Data, Key, Path) ->
       lists:flatten(Path)
   end.
 
-test() ->
-  Data = {[{<<"checked">>,false},
-  {<<"dimensions">>,{[{<<"width">>,5},{<<"height">>,10}]}},
-  {<<"id">>,1},
-  {<<"name">>,<<"A green door">>},
-  {<<"price">>,12.5},
-  {<<"tags">>,[<<"home">>,<<"green">>]}]},
-  Key = <<"width">>,
-  {SubData} = Data,
-  Action = <<"masking">>,
-  Path = lists:flatten(findPath(SubData, Key, [])),
-  io:format("Testing!!!!~n Data: ~p~n key: ~p~n Path: ~p~n", [Data, Key, lists:flatten(Path)]),
-  Result = filter(Action, Path, Data),
-  io:format("Result: ~n~p~n", [Result]).
 
 convertFilter({Filter}, {SubData}) ->
-    Type = proplists:get_value(<<"type">>, Filter), 
-    Value = proplists:get_value(<<"value">>, Filter), 
-    %Result = findKey(binary:bin_to_list(Value), SubData),
+    Type = proplists:get_value(<<"type">>, Filter),
+    Value = proplists:get_value(<<"value">>, Filter),
+    CurrentName = proplists:get_value(<<"key">>, Filter, false),
     Key_list = proplists:get_keys(SubData),
-    KeyFound = lists:member(Value, Key_list),
+    KeyFound = if
+      CurrentName =:= false ->
+        lists:member(Value, Key_list);
+      true ->
+        lists:member(CurrentName, Key_list)
+    end,
     ActionResult = if
       KeyFound ->
-        runNewAction(binary:bin_to_list(Type), Value, SubData);
+        if 
+          CurrentName =:= false ->
+            runNewAction(binary:bin_to_list(Type), Value, SubData, false);
+          true ->
+            runNewAction(binary:bin_to_list(Type), CurrentName, SubData, Value)
+        end;
       true ->
-        io:format("__________~n~p~n~p~n", [SubData, Value]),
-        Path = lists:flatten(findPath(SubData, Value, [])),
-        { Result } = filter(Type, Path, { SubData }),
+        { Result } = if 
+           CurrentName =:= false ->
+             Path = lists:flatten(findPath(SubData, Value, [])),
+             filter(Type, Path, { SubData }, false);
+           true ->
+             Path = lists:flatten(findPath(SubData, CurrentName, [])),
+             filter(Type, Path, { SubData}, Value)
+        end,
         Result
     end,
-    io:format("Result: ~n~p~n", [{ActionResult}]),
     {ActionResult};
 convertFilter(_, Data) ->
     Data.

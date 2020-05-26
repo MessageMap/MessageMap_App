@@ -144,7 +144,6 @@ check_topicId_in_App(TopicId, App, Method) ->
   end.
 
 processMessageMap(TopicId, Filter, Payload) ->
-    io:format("Starting ~n~p~n~p~n~p~n", [TopicId, Filter, Payload]),
     {[ {_, Tid}, {_,Values} ]}  = Filter,
     LTid = binary:bin_to_list(Tid),
     if
@@ -169,7 +168,6 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
              MapPayload;
            _ ->
              JsonFilter = [ processMessageMap(TopicId, X, MapPayload) || X <- jiffy:decode(FilterSettings) ],
-             %io:format("MapPayload: ~n Original: ~n~p~n ~n~p~n ", [MapPayload, JsonFilter]),
              lists:nth(1, JsonFilter)
         end,
         % Start Encryption Values
@@ -184,7 +182,6 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
         % TODO: Check Table row count limit 20,000
         Waiting = mnesia:table_info(Tbl, size),
         % RM for less logs
-        %tools:log("info", io_lib:format("Current (~p) Messages: ~p", [Tbl, Waiting])),
         if
           Waiting < ?MAX_WAITING andalso SavedPayload =/= "Payload Is To Long" ->
             database:insert_dyn_table(Tbl, AppId, TopicId, SchemaId, SavedPayload);
