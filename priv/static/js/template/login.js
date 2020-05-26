@@ -17,7 +17,7 @@ var controller = {
 			<div class="form-group"> \
 				<button id="btn-login" class="btn btn-primary btn-block">Login</button> \
 			</div> \
-			<p class="text-center">Feedback to: <a href="mailto:admin@MessageMap.io">Admin@Messagemap.io</a></p> \
+			<p class="text-center">Feedback/Questions to: <a href="mailto:support@MessageMap.io">Support@Messagemap.io</a></p> \
 		</form> \
 	</div>',
     'script': function(){
