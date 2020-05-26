@@ -22,9 +22,12 @@ runNewAction("rename", Elements, Data) ->
     maps:remove(OldName, NewData).
 
 filter(Action, PathElements, FullData) ->
-    {Data} = FullData,
-    io:format("Data: ~p~n", [Data]),
+    { Data } = FullData,
     if
+        is_list(Data) =:= false ->
+            [ FinalElement ] = PathElements,
+            { SubData } = Data,
+            runNewAction(binary:bin_to_list(Action), FinalElement, SubData);
         length(PathElements) > 0 ->
             Element = lists:nth(1, PathElements),
             TKeys = proplists:get_keys(Data),
@@ -32,20 +35,10 @@ filter(Action, PathElements, FullData) ->
             SubPathElements = lists:delete(Element, PathElements),
             if
                 SearchResult /= false ->
-                    { NewData } = proplists:get_value(Element, Data),
-                    if
-                        length(PathElements) == 1 ->
-                            io:format("ELEMENT: ~n~p~n", [SubPathElements]),
-                            FinalElement = lists:nth(1, SubPathElements),
-                            NewValue = runNewAction(binary:bin_to_list(Action), FinalElement, NewData),
-                            NewResult = proplists:delete(FinalElement, NewData),
-                            %io:format("Data: ~n~p~n FinalElement: ~n~p~n NewValue: ~n~p~n NewResult: ~n~p~n", [NewData, FinalElement, NewValue, NewResult]),
-                            { lists:merge(Data, NewValue) };
-                        true ->
-                            LoopData = proplists:delete(Element, Data),
-                            io:format("--- ~n~p~n", [Element]),
-                            { lists:merge(LoopData, filter(Action, SubPathElements, {NewData}) ) }
-                    end;
+                    NewData = proplists:get_value(Element, Data),
+                    LoopData = proplists:delete(Element, Data),
+                    SubResult = [ { Element, { filter(Action, SubPathElements, {NewData}) } } ],
+                    { lists:merge(LoopData, SubResult) };
                 true ->
                     {Data}
             end;
@@ -54,19 +47,6 @@ filter(Action, PathElements, FullData) ->
     end.
 
 
-%processDataType(Data, Filter, Elements) ->
-%    if
-%      is_tuple(Data) ->
-%        { SubData } = Data,
-%        TKeys = proplists:get_keys(SubData),
-%        [ convertFilter({Filter}, proplists:get_value(Key, SubData)) || Key <- TKeys ];
-% %       {Data, Filter};
-%      is_list(Data) ->
-%        [ processDataType(X, Filter, []) || X <- Data];
-%        {Data, Filter};
-%      true ->
-%        Elements
-%    end.
 
 findPath(Data, Key, Path) ->
   if
@@ -119,13 +99,12 @@ convertFilter({Filter}, {SubData}) ->
       KeyFound ->
         runNewAction(binary:bin_to_list(Type), Value, SubData);
       true ->
-        % TODO ADD LOOP IF VALUE IS MAP OR LIST Searching!!!
-        %[ processDataType(proplists:get_value(X, SubData), Filter, []) || X <- Key_list ],
-        io:format("Was Not found~n", []),
-        SubData
+        io:format("__________~n~p~n~p~n", [SubData, Value]),
+        Path = lists:flatten(findPath(SubData, Value, [])),
+        { Result } = filter(Type, Path, { SubData }),
+        Result
     end,
-    %io:format("Orignal: ~n~p~n", [Data]),
-    %io:format("Result: ~n~p~n", [{ActionResult}]),
+    io:format("Result: ~n~p~n", [{ActionResult}]),
     {ActionResult};
 convertFilter(_, Data) ->
     Data.
