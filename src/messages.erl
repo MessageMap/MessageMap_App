@@ -182,6 +182,7 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
         % TODO: Check Table row count limit 20,000
         Waiting = mnesia:table_info(Tbl, size),
         % RM for less logs
+        tools:log("info", io_lib:format("Current (~p) Messages: ~p", [Tbl, Waiting])),
         if
           Waiting < ?MAX_WAITING andalso SavedPayload =/= "Payload Is To Long" ->
             database:insert_dyn_table(Tbl, AppId, TopicId, SchemaId, SavedPayload);
