@@ -71,3 +71,12 @@
     border:1px solid #94a0b4;
     color:#000
 }
+
+.header-icons {
+    height: 42px;
+    width: 48px;
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    color: #2b7da0;
+}

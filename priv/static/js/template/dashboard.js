@@ -11,7 +11,7 @@ var controller = {
 						<div class="stack-order">  \
 							<h1 class="no-margins" id="app_counts">0</h1> \
 						</div> \
-						<div class="bar-chart-icon"></div> \
+						<div class="header-icons fa fa-3x fa-server"></div> \
 					</div>  \
 				</div> \
 			</div> \
@@ -25,7 +25,7 @@ var controller = {
 						<div class="stack-order"> \
 							<h1 class="no-margins" id="topic_counts">0</h1> \
 						</div> \
-						<div class="bar-chart-icon"></div> \
+						<div class="header-icons fa fa-3x fa-tags"></div> \
 					</div>  \
 				</div> \
 			</div> \
@@ -39,7 +39,7 @@ var controller = {
 						<div class="stack-order"> \
 							<h1 class="no-margins" id="schema_counts">0</h1> \
 						</div> \
-						<div class="bar-chart-icon"></div> \
+						<div class="header-icons fa fa-3x fa-check-square"></div> \
 					</div>  \
 				</div> \
 			</div> \
