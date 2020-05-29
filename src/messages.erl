@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
 %%% @author Benjamin Adams
-%%% @copyright (C) 2017, MessageMap.io
+%%% @copyright (C) 2020, MessageMap.io
 %%% @doc
 %%%  This Intercepts Requests for Messages to DB Interaction
 %%% @end
-%%% Created : 16. Aug 2017
+%%% Created : 29. May 2020
 %%%-------------------------------------------------------------------
 -module(messages).
 
@@ -34,24 +34,16 @@ push(Version, TopicName, Auth, Payload) ->
           if
             Schema == false ->
               % Update to Say Queue status Max waiting or message size if Encryption enabled
-              process_Messages(TopicId, MapPayload, AppId, SchemaId),
-              { 200, #{
-                status => 'good'
-              } };
+              process_Messages(TopicId, MapPayload, AppId, SchemaId);
             Schema == "Schema Version Not Found" ->
               { 422, #{
                 status => 'Invalid Schema Name'
               } };
             true ->
-              %%%%%%%%%%%%%% CONTINUE HERE
               SchemaIsValid = validate:schema(Schema, MapPayload),
-              io:format("Validate: ~p~n", [SchemaIsValid]),
               if
                 SchemaIsValid /= error ->
-                  process_Messages(TopicId, MapPayload, AppId, SchemaId),
-                  { 200, #{
-                    status => 'good'
-                  } };
+                  process_Messages(TopicId, MapPayload, AppId, SchemaId);
                 true ->
                   { 422, #{
                     status => 'JSON Schema Validation'
@@ -155,12 +147,12 @@ processMessageMap(TopicId, Filter, Payload) ->
 
 process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
   Apps = database:getAllAppDB(),
-  lists:foreach(fun(App) ->
+  R = lists:map(fun(App) ->
     %TODO: Add Push functions here (metrics, Notification, Websockets
     {_,FoundAppId,_,_,_,_,SubscribedTopics,_,FilterSettings, EncryptValue} = App,
-    case string:str(SubscribedTopics, TopicId) of
+    CaseResult = case string:str(SubscribedTopics, TopicId) of
       0 ->
-        true;
+        "bad";
       _ ->
         % Start MessageMapping
         MapMessageResult = case FilterSettings of
@@ -176,20 +168,43 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
              MapMessageResult;
            _ ->
              binary:list_to_bin(encryption:msgEncryption(jiffy:encode(MapMessageResult), binary:list_to_bin(EncryptValue)))
-         end,
-        %Insert data by App For Pulling
+        end,
         Tbl = database:check_dyn_table(FoundAppId),
         % TODO: Check Table row count limit 20,000
         Waiting = mnesia:table_info(Tbl, size),
-        % RM for less logs
         tools:log("info", io_lib:format("Current (~p) Messages: ~p", [Tbl, Waiting])),
-        if
+        Result = if
           Waiting < ?MAX_WAITING andalso SavedPayload =/= "Payload Is To Long" ->
-            database:insert_dyn_table(Tbl, AppId, TopicId, SchemaId, SavedPayload);
+            database:insert_dyn_table(Tbl, AppId, TopicId, SchemaId, SavedPayload),
+            true;
           true ->
             tools:log("info", io_lib:format("Table: ~p Queue has payload to long or Queue is Maxed: ~p", [Tbl, Waiting])),
-            true
-        end
-    end
+            false
+        end,
+        Result
+    end,
+    CaseResult
   end, Apps),
-  database:add_published_counter(AppId).
+  database:add_published_counter(AppId),
+  Success = length(lists:filter(fun(X) -> X =:= true end, R)),
+  Failed = length(lists:filter(fun(X) -> X =:= false end, R)),
+  if
+    0 =:= Failed ->
+      { 200, #{
+          status => 'mix',
+          subscrier_Result => #{
+               success => Success,
+               failed => Failed
+          }
+        }
+      };
+    true ->
+      { 207, #{
+          status => 'good',
+          subscriber_Results => #{
+               success => Success,
+               failed => Failed
+          }
+        }
+      }
+  end.
