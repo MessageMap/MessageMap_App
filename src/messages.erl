@@ -192,7 +192,7 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
   if
     0 =:= Failed ->
       { 200, #{
-          status => 'mix',
+          status => 'good',
           subscrier_Result => #{
                success => Success,
                failed => Failed
@@ -201,7 +201,7 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
       };
     true ->
       { 207, #{
-          status => 'good',
+          status => 'mix',
           subscriber_Results => #{
                success => Success,
                failed => Failed
