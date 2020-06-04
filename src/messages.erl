@@ -176,6 +176,7 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
         Result = if
           Waiting < ?MAX_WAITING andalso SavedPayload =/= "Payload Is To Long" ->
             database:insert_dyn_table(Tbl, AppId, TopicId, SchemaId, SavedPayload),
+            tools:log("info", io_lib:format("Message Published", [])),
             true;
           true ->
             tools:log("info", io_lib:format("Table: ~p Queue has payload to long or Queue is Maxed: ~p", [Tbl, Waiting])),

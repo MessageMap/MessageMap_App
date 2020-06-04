@@ -16,6 +16,9 @@ init(Req, Opts) ->
   FullAuthToken = cowboy_req:header(<<"authorization">>, Req, []),
   AuthToken = lists:last(string:tokens(binary:bin_to_list(FullAuthToken), " ")),
   Auth = encryption:ewtDecode(binary:list_to_bin(AuthToken)),
+  %RequestTime = cowboy_req:header(<<"x-request-time">>, Req, []),
+  %io:format("Request Header: ~p~n", [RequestTime]),
+  % TODO: Remove . from timestamp, use timestamp as key in database for FIFO
   if
     AuthToken == [] ->
        Req2 = cowboy_req:reply(401, tools:resp_headers(),
