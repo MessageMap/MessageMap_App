@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
 %%% @author Benjamin Adams
-%%% @copyright (C) 2017, Message.io
+%%% @copyright (C) 2020, MessageMap LLC
 %%% @doc
 %%%  Return One topic for listing
 %%% @end
-%%% Created : 8. Sept 2017
+%%% Created : 04. Jun 2020
 %%%-------------------------------------------------------------------
 -module(topic_one_handler).
 

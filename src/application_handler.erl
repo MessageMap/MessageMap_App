@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
 %%% @author Benjamin Adams
-%%% @copyright (C) 2017, Ethan Solutions
+%%% @copyright (C) 2020, MessageMap LLC
 %%% @doc
 %%%  Return to the user contents of their token
 %%% @end
-%%% Created : 8. Sept 2017
+%%% Created : 4. Jun 2020
 %%%-------------------------------------------------------------------
 -module(application_handler).
 
@@ -45,7 +45,6 @@ buildResponses(Data) ->
 
 buildResponse(Data) ->
   {_, Id, Name, Description, ApiKeys, Ownedtopics, SubscribedTopics, CreatedOn, Filter, Encrypt} = element(1, list_to_tuple([Data])),
-  io:format("Return TODO FIX ON SAVE Filter: ~p~n", [Filter]),
   #{
     id => binary:list_to_bin(Id),
     name => binary:list_to_bin(Name),

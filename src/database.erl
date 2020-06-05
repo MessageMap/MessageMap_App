@@ -24,7 +24,7 @@
 -export([getAppDBAppId/1]).
 -export([getAllUsers/0]).
 -export([get_dyn_table/2]).
--export([insert_dyn_table/5]).
+-export([insert_dyn_table/6]).
 -export([getAllAppDB/0]).
 -export([deleteAppDBAppId/1]).
 -export([updateAppDBAppId/7]).
@@ -442,10 +442,10 @@ getResult(Tbl, UnFilteredResults) ->
   spawn(database, async_dyn_delete, [Tbl, Results]),
   Payloads.
 
-insert_dyn_table(Tbl, AppId, TopicId, SchemaId, Payload) ->
-  RowId = uuid:to_string(uuid:uuid4()),
+insert_dyn_table(Tbl, AppId, TopicId, SchemaId, Payload, RequestTime) ->
+  RowId = binary:bin_to_list(RequestTime), %uuid:to_string(uuid:uuid4()),
   CreatedOn = calendar:universal_time(),
-  InsertData = {Tbl, RowId, AppId, TopicId, SchemaId, Payload,  CreatedOn},
+  InsertData = {Tbl, RowId, AppId, TopicId, SchemaId, Payload, CreatedOn},
   INS = fun() -> mnesia:write(InsertData) end,
   mnesia:sync_transaction(INS),
   %Update counters

@@ -8,18 +8,18 @@
 %%%-------------------------------------------------------------------
 -module(messages).
 
--export([push/4]).
+-export([push/5]).
 -export([pull/2]).
 -export([stats/2]).
 
 -define(MAX_WAITING, 20000).
 
 % Don't allow latest yet
-push("latest", _, _ , _) ->
+push("latest", _, _ , _, _) ->
   { 422, #{
     status => 'Topic Is attached to Schemas Send message with schema: /messages/{SchemaVersion}/{topicName}'
   } };
-push(Version, TopicName, Auth, Payload) ->
+push(Version, TopicName, Auth, Payload, RequestTime) ->
   { _, Scope } = maps:find(scope, Auth),
   Check = check_scope("PUSH", Scope),
   if
@@ -34,7 +34,7 @@ push(Version, TopicName, Auth, Payload) ->
           if
             Schema == false ->
               % Update to Say Queue status Max waiting or message size if Encryption enabled
-              process_Messages(TopicId, MapPayload, AppId, SchemaId);
+              process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime);
             Schema == "Schema Version Not Found" ->
               { 422, #{
                 status => 'Invalid Schema Name'
@@ -43,7 +43,7 @@ push(Version, TopicName, Auth, Payload) ->
               SchemaIsValid = validate:schema(Schema, MapPayload),
               if
                 SchemaIsValid /= error ->
-                  process_Messages(TopicId, MapPayload, AppId, SchemaId);
+                  process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime);
                 true ->
                   { 422, #{
                     status => 'JSON Schema Validation'
@@ -145,7 +145,7 @@ processMessageMap(TopicId, Filter, Payload) ->
         Payload
     end.
 
-process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
+process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
   Apps = database:getAllAppDB(),
   R = lists:map(fun(App) ->
     %TODO: Add Push functions here (metrics, Notification, Websockets
@@ -175,7 +175,7 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId) ->
         tools:log("info", io_lib:format("Current (~p) Messages: ~p", [Tbl, Waiting])),
         Result = if
           Waiting < ?MAX_WAITING andalso SavedPayload =/= "Payload Is To Long" ->
-            database:insert_dyn_table(Tbl, AppId, TopicId, SchemaId, SavedPayload),
+            database:insert_dyn_table(Tbl, AppId, TopicId, SchemaId, SavedPayload, RequestTime),
             tools:log("info", io_lib:format("Message Published", [])),
             true;
           true ->

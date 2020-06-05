@@ -17,7 +17,7 @@ init(Req, Opts) ->
   FullAuthToken = cowboy_req:header(<<"authorization">>, Req, <<"Bad">>),
   AuthToken = lists:last(string:tokens(binary:bin_to_list(FullAuthToken), " ")),
   Auth = encryption:ewtDecode(binary:list_to_bin(AuthToken)),
-  % TODO: Add Pull Header For timestamp for in database
+  RequestTime = cowboy_req:header(<<"x-request-time">>, Req, binary:list_to_bin(uuid:to_string(uuid:uuid4()))),
   if
     AuthToken == [] ->
        Req2 = cowboy_req:reply(401, tools:resp_headers(),
@@ -33,7 +33,7 @@ init(Req, Opts) ->
       if
         Method == <<"POST">> ->
           {ok,  [{ Payload, _}] , _} = cowboy_req:read_urlencoded_body(Req),
-          { Status, Result } = messages:push(Version, Topic, Auth, Payload),
+          { Status, Result } = messages:push(Version, Topic, Auth, Payload, RequestTime),
           Req2 = cowboy_req:reply(Status, tools:resp_headers(),
             jiffy:encode(Result),
             Req),
