@@ -1,16 +1,16 @@
 %%%-------------------------------------------------------------------
 %%% @author Benjamin Adams
-%%% @copyright (C) 2017, MessageMap.io
+%%% @copyright (C) 2020, MessageMap.io
 %%% @doc
 %%%  This file is for oauth
 %%% @end
-%%% Created : 16. Aug 2017
+%%% Created : 04. Jun 2020
 %%%-------------------------------------------------------------------
 -module(token_handler).
 
 -export([init/2]).
 
--define(access_exp, 5*60). % set to 5 mins
+-define(access_exp, 60*60). % set to 1 hour
 -define(refresh_exp, 14*24*60*60). % set to 14 Days
 
 init(Req, Opts) ->
@@ -43,8 +43,6 @@ init(Req, Opts) ->
 %%%%%%%%%%%%%%%%%%% Internal Functions
 %% Build Response
 getResponse(Client_id, <<"refresh_token">>, Code, Refresh_token) ->
-  io:format("ClientID is not used: ~p~n", [Client_id]),
-  io:format("Code is not used: ~p~n", [Code]),
   Claims = encryption:ewtDecode(Refresh_token),
   { _, App } = maps:find(app, Claims),
   returnApp(App);

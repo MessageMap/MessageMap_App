@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
 %%% @author Benjamin Adams
-%%% @copyright (C) 2017, MessageMap.io
+%%% @copyright (C) 2020, MessageMap.io
 %%% @doc
 %%%  This Intercepts Requests for Handeling messages
 %%% @end
-%%% Created : 16. Aug 2017
+%%% Created : 04. Jun 2020
 %%%-------------------------------------------------------------------
 -module(messages_noversion_handler).
 
@@ -13,7 +13,7 @@
 init(Req, Opts) ->
   Method = cowboy_req:method(Req),
   Topic = cowboy_req:binding(topic, Req),
-  FullAuthToken = cowboy_req:header(<<"authorization">>, Req, []),
+  FullAuthToken = cowboy_req:header(<<"authorization">>, Req, <<"Bad">>),
   AuthToken = lists:last(string:tokens(binary:bin_to_list(FullAuthToken), " ")),
   Auth = encryption:ewtDecode(binary:list_to_bin(AuthToken)),
   %RequestTime = cowboy_req:header(<<"x-request-time">>, Req, []),

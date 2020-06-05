@@ -41,7 +41,7 @@ var controller = {
                                            <strong>Push Message to Topic</strong></h2> \
                                            <p>Sending a message to a Topic</p> <ul> <li><strong>URL</strong><br> /messages/<code>TOPIC</code></li> \
                                            <li><strong>Method:</strong><br> <code>POST</code></li> <li><strong>Headers:</strong><br> \
-                                           <code>{ "content-type": "application/json", "authentication": "Bearer ACCESS_TOKEN" }</code></li> \
+                                           <code>{ "content-type": "application/json", "authorization": "Bearer ACCESS_TOKEN" }</code></li> \
                                            <li><strong>Body:</strong><br> <code>{ "json_object":"any object you need to pass to a topic" }</code></li> \
                                            <li><strong>Success Response:</strong> \
                                           <ul> <li><strong>Code:</strong> 200<br> \
@@ -50,7 +50,7 @@ var controller = {
                                           <h2><a id="Pull_Message_from_Topic_28"></a><strong>Pull Message from Topic</strong></h2> \
                                           <p>Retreive a messages from a Topic</p> <ul> <li><strong>URL</strong><br> /messages</li> \
                                           <li><strong>Method:</strong><br> <code>GET</code></li> <li><strong>Headers:</strong><br> \
-                                          <code>{ "content-type": "application/json", "authentication": "Bearer ACCESS_TOKEN" }</code></li> \
+                                          <code>{ "content-type": "application/json", "authorization": "Bearer ACCESS_TOKEN" }</code></li> \
                                           <li><strong>Success Response:</strong> <ul> <li><strong>Code:</strong> 200<br> \
                                           <strong>Content:</strong> <code>[{ "array_of_jsons":"any object that is current on the topic" }]</code></li> </ul> \
                                           </li> </ul> \
