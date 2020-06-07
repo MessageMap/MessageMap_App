@@ -12,7 +12,8 @@
 -export([pull/2]).
 -export([stats/2]).
 
--define(MAX_WAITING, 20000).
+%-define(MAX_WAITING, 20000).
+-define(MAX_WAITING, 1000000). % Testing 1,000,000
 
 % Don't allow latest yet
 push("latest", _, _ , _, _) ->

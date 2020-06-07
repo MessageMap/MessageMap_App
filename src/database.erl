@@ -309,7 +309,6 @@ validateAppDBAppIdApiKey(AppId, Apikey) ->
         encrypt => OneResult#applications.encrypt
       }
   end,
-  io:format("~p~n", [R]),
   R.
 
 getAllAppDB() ->

@@ -15,7 +15,6 @@ lookup(_, _, "None") ->
 lookup(Auth, TopicId, Version) ->
   { ok , Info } = maps:find(info, Auth),
   { ok, AuthSchemas } = maps:find(schemas, Info),
-  io:format("~p~n", [AuthSchemas]),
   filteredSchemas(AuthSchemas, Auth, TopicId, Version).
 
 filteredSchemas([], _, _, _) ->
