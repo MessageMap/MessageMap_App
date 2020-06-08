@@ -14,6 +14,7 @@ start() ->
   tools:log("info", io_lib:format("Startup Script Has begun", [])),
   database:init(),
   bootup(),
+  application:start(os_mon),
   timer:sleep(1000),
   % Start Backup of apps every minute
   timer:apply_interval(60000, database, backupDB, ["/tmp/db_app_backup.db"]),
@@ -26,7 +27,8 @@ start() ->
 stop() ->
   tools:log("info", io_lib:format("Shutdown Script Has begun~n", [])),
   % TODO: Find why this halts shutdown
-%  mnesia:stop(), % Stopping Database
+  mnesia:stop(), % Stopping Database
+  application:stop(os_mon),
   tools:log("info", io_lib:format("Shutdown Script Has Finished~n", [])).
 
 %% Internal Functions

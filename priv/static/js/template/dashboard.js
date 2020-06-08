@@ -133,6 +133,7 @@ var controller = {
           $('.data-point-label').remove();
           $('#consume_msgs').html('<h1>' + message.totalMessagesConsumed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</h1>');
           $('#publishes_msgs').html('<h1>' + message.totalMessagesPublished.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</h1>');
+					$('#storage_msgs').html('<h1>'+ message.storage.toString() + ' % (Update 13% OS buffer)</h1>');
           message.appstats.forEach(function(app){
             //var percentFull = parseFloat((app.messages_waiting/20000)*100).toFixed(2);
             $('#pub_stat_'+app.id).html(app.published_messages.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));

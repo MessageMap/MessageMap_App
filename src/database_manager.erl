@@ -60,7 +60,7 @@
 %  - Get Largest counter in array from: tblManager { appid, [counter] }
 %  - Write to Table
 %  - Async: Check Table size Write If >= Max Function CreateNextTbl
-%  --       Call: createMsgTable(appid, counter+0)
+%  --       Call: createMsgTable(appid, counter+1)
 % On Read Messages
 %  - One Pull current Counter (min counter for app)
 %  -

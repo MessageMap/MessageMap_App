@@ -42,21 +42,23 @@ pullData() ->
     SubPull = mnesia:dirty_read({counter_consumed, Tbl}),
     Sub = resultConversion(SubPull),
     Size = mnesia:table_info(Tbl, size),% * erlang:system_info(wordsize)), % / (1024*1024),
-    Storage = database:table_storage_size(Tbl),
+    %Storage = database:table_storage_size(Tbl),
     #{
       id => binary:list_to_bin(App),
       name => binary:list_to_bin(AppName),
       messages_waiting => Size,
       published_messages => binary:list_to_bin([Pub]),
-      consumed_messages => binary:list_to_bin([Sub]),
-      storage => Storage
+      consumed_messages => binary:list_to_bin([Sub])
+    %  storage => Storage
     }
   end, AllApps),
   [{_,_,Published}] = mnesia:dirty_read({counter_published, all}),
   [{_,_,Consumed}] = mnesia:dirty_read({counter_consumed, all}),
+  [{_,_,PercentFull}, _] = disksup:get_disk_data(),
   {[{<<"applications">>,mnesia:table_info(applications, size)},
     {<<"topics">>,mnesia:table_info(topics, size)},
     {<<"schemas">>,mnesia:table_info(tblschemas, size)},
+    {<<"storage">>,PercentFull},
     {<<"totalMessagesPublished">>,Published},
     {<<"totalMessagesConsumed">>,Consumed},
     {<<"appstats">>,AppStats}]}.
@@ -65,5 +67,4 @@ pullData() ->
 resultConversion([]) ->
   ["0"];
 resultConversion([{_,_,Result}]) ->
-  R = lists:flatten(io_lib:format("~p", [Result])),
-  R.
+  lists:flatten(io_lib:format("~p", [Result])).
