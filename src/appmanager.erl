@@ -16,8 +16,9 @@ start() ->
   bootup(),
   application:start(os_mon),
   timer:sleep(1000),
-  % Start Backup of apps every minute
-  timer:apply_interval(60000, database, backupDB, ["/tmp/db_app_backup.db"]),
+  database_manager:init(),
+  % Start Backup of apps every 10 minutes
+  timer:apply_interval(600000, database, backupDB, ["/tmp/db_app_backup.db"]),
   % Run Renew Cert Every 24hrs
   timer:apply_interval(86400, encryption, certRenew, []),
   tools:log("info", io_lib:format("Startup Script Has Finished", [])),
@@ -27,8 +28,11 @@ start() ->
 stop() ->
   tools:log("info", io_lib:format("Shutdown Script Has begun~n", [])),
   % TODO: Find why this halts shutdown
+  io:format("Start DB~n", []),
   mnesia:stop(), % Stopping Database
+  io:format("2222~n", []),
   application:stop(os_mon),
+  io:format("44444~n", []),
   tools:log("info", io_lib:format("Shutdown Script Has Finished~n", [])).
 
 %% Internal Functions

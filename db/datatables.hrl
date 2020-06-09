@@ -34,3 +34,6 @@
                   createdOn}).
 -record(counter_published, {name, value=0}).
 -record(counter_consumed, {name, value=0}).
+-record(tblManager, {appid,
+                  counter=[],
+                  nodes=[]}).

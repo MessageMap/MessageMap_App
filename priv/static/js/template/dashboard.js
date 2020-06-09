@@ -122,6 +122,7 @@ var controller = {
           var message = JSON.parse(event.data);
           var pub_mps = 0;
           var con_mps = 0;
+					var storage = 0;
           if(datapull.published > 0){
             pub_mps = message.totalMessagesPublished - datapull.published  + 6;
           }
@@ -130,21 +131,25 @@ var controller = {
           }
           datapull.published = message.totalMessagesPublished;
           datapull.consumed = message.totalMessagesConsumed;
+					if (parseInt(message.storage) > 13) {
+					  storage = ((parseInt(message.storage)/(100-13))*100);
+					}
+					if (storage > 100){
+					  storage = 100;
+					}
           $('.data-point-label').remove();
           $('#consume_msgs').html('<h1>' + message.totalMessagesConsumed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</h1>');
           $('#publishes_msgs').html('<h1>' + message.totalMessagesPublished.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + '</h1>');
-					$('#storage_msgs').html('<h1>'+ message.storage.toString() + ' % (Update 13% OS buffer)</h1>');
+					if (storage > 90) {
+					  $('#storage_msgs').parent().parent().addClass('alert-danger').removeClass('alert-success');
+					} else {
+					  $('#storage_msgs').parent().parent().addClass('alert-success').removeClass('alert-danger');
+					}
+					$('#storage_msgs').html('<h1>'+ storage.toFixed(2) + ' %</h1>');
           message.appstats.forEach(function(app){
-            //var percentFull = parseFloat((app.messages_waiting/20000)*100).toFixed(2);
             $('#pub_stat_'+app.id).html(app.published_messages.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
             $('#con_stat_'+app.id).html(app.consumed_messages.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
             $('#wait_stat_'+app.id).html(app.messages_waiting.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-            //$('#storage_stat_'+app.id).html(percentFull.toString()+' %');
-            //if(parseInt(percentFull) > 90){
-            //  $('#storage_stat_'+app.id).parent().parent().addClass('alert-danger').removeClass('alert-success');
-            //} else {
-            //  $('#storage_stat_'+app.id).parent().parent().addClass('alert-success').removeClass('alert-danger');
-            //}
           });
           $('#app_counts').html(message.applications)
           $('#topic_counts').html(message.topics)

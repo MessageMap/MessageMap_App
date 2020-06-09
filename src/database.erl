@@ -414,6 +414,9 @@ login(Email, Password) ->
 %% Dynamic tables
 check_dyn_table(Name) ->
   Tbl = list_to_atom("msgs"++string:join(string:tokens(Name, "-"),"")),
+% Change Above to go to database_manager Two Functions:
+%  appID, [select, insert]
+% Result will be for which table to interact with
   try
     mnesia:table_info(Tbl, type)
   catch
@@ -473,7 +476,10 @@ table_storage_size(Tbl) ->
   DCLSize = filelib:file_size(io_lib:format('~s/~s.DCL', [?MNESIA_DIR, Tbl])),
   DCDSize+DCLSize.
 
+
+% DON'T THINK THIS SHOULD BE USED ANYMORE
 status(Name) ->
+  io:format("Remove This From code~n----------------------------------REMOVE------------~n", []),
   Tbl = list_to_atom("msgs"++string:join(string:tokens(Name, "-"),"")),
   Size = table_storage_size(Tbl),
   #{

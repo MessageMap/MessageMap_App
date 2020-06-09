@@ -10,12 +10,37 @@
 -module(database_manager).
 
 %% API
--export([]).
+-export([init/0]).
+-export([getNewTblName/1]).
 
 % List of Functions to Export
+-include_lib("stdlib/include/qlc.hrl").
+-include("db/datatables.hrl").
 
 % On boot Setup
-%
+init() ->
+  io:format("Loading INIT for DB Manager", []),
+  mnesia:load_textfile("db/messagetables.hrl"),
+  AllApps = database:getAllAppDB(),
+  io:format(" TODO: Load current apps and table structure into tbl ~nAllApps: ~p~n", [AllApps]),
+  true.
+
+getNewTblName(AppId) ->
+  io:format("Loaded AppID: ~p~n", [AppId]),
+  PULL = fun() ->
+    Query = qlc:q([X || X <- mnesia:table(tblManager),
+      X#tblManager.appid =:= AppId]),
+    qlc:e(Query)
+  end,
+  {atomic, Results} = mnesia:sync_transaction(PULL), 
+  if
+    Results =:= [] ->
+      list_to_atom("msgs"++string:join(string:tokens(AppId, "-"),"")++"_0");
+    true ->
+      io:format("Table Found.., Add Logic for finding Next ID"),
+      839489348
+  end.
+
 % Create file db/messagetables.hrl
 % Content
 % {tables,
