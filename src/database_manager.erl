@@ -11,8 +11,14 @@
 
 %% API
 -export([init/0]).
--export([getNewTblName/1]).
+-export([createMsgsTbl/1]).
+%-export([selectTblName/1]).
+%-export([deleteTblName/1]).
+%-export([allTblNames/1]).
+-export([allTblNames/1]).
 
+%debug
+-export([addCreateTblMemory/3]).
 % List of Functions to Export
 -include_lib("stdlib/include/qlc.hrl").
 -include("db/datatables.hrl").
@@ -23,23 +29,57 @@ init() ->
   mnesia:load_textfile("db/messagetables.hrl"),
   AllApps = database:getAllAppDB(),
   io:format(" TODO: Load current apps and table structure into tbl ~nAllApps: ~p~n", [AllApps]),
+  AppId = "a6cc9f6b-a146-44a4-b981-4ca0dc33953b", %uuid:to_string(uuid:uuid4()),
+  io:format("result: ~p~n", [createMsgsTbl(AppId)]),
   true.
 
-getNewTblName(AppId) ->
+createMsgsTbl(AppId) ->
   io:format("Loaded AppID: ~p~n", [AppId]),
+  Results = pullTblMemory(AppId),
+  io:format("results~p~n", [Results]),
+  Nodes = [node()],
+  {TblName, CountResult} = if
+    Results =:= [] ->
+      Tbl = list_to_atom("msgs"++string:join(string:tokens(AppId, "-"),"")++"_0"),
+      {Tbl, [0]};
+    true ->
+      [{_,AppId,Counters,_}] = Results,
+      [Current|_] = lists:reverse(lists:sort(Counters)),
+      Tbl = list_to_atom("msgs"++string:join(string:tokens(AppId, "-"), "")++"_"++erlang:integer_to_list(Current+1)),
+      { Tbl, lists:merge(lists:sort(Counters), [Current+1]) }
+  end,
+  createTbl(TblName),
+  addCreateTblMemory(AppId, CountResult, Nodes).
+
+allTblNames(AppId) ->
+  [{tblManager,AppId,Counters,_}] = pullTblMemory(AppId),
+  [ list_to_atom("msgs"++string:join(string:tokens(AppId, "-"),"")++"_"++erlang:integer_to_list(C)) || C <- Counters].
+
+% Internal Functions
+addCreateTblMemory(AppId, Counter, Nodes) ->
+  InternalResult = pullTblMemory(AppId),
+  io:format("Internal Result: ~p~n", [InternalResult]),
+  INS = fun() ->
+      mnesia:write(#tblManager{appid=AppId, counter=Counter,nodes=Nodes})
+      end,
+  mnesia:sync_transaction(INS).
+
+pullTblMemory(AppId) ->
   PULL = fun() ->
     Query = qlc:q([X || X <- mnesia:table(tblManager),
       X#tblManager.appid =:= AppId]),
     qlc:e(Query)
   end,
-  {atomic, Results} = mnesia:sync_transaction(PULL), 
-  if
-    Results =:= [] ->
-      list_to_atom("msgs"++string:join(string:tokens(AppId, "-"),"")++"_0");
-    true ->
-      io:format("Table Found.., Add Logic for finding Next ID"),
-      839489348
-  end.
+  {atomic, Results} = mnesia:sync_transaction(PULL),
+  Results. 
+
+createTbl(Tbl) ->
+  mnesia:create_table(Tbl,
+          [
+            {type, ordered_set},
+            {attributes, [rowId, pubId, topicId, schemaId, payload, createdOn]},
+            {disc_copies, [node()]}
+          ]).
 
 % Create file db/messagetables.hrl
 % Content
