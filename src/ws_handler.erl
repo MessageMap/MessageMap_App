@@ -36,20 +36,18 @@ pullData() ->
   AllApps = database:getAllAppDB(),
   AppStats = lists:map(fun(A) ->
     {_,App,AppName,_,_,_,_,_,_,_} = A,
-    Tbl = database:check_dyn_table(App),
-    PubPull = mnesia:dirty_read({counter_published, Tbl}),
+    %Tbl = database:check_dyn_table(App),
+    PubPull = mnesia:dirty_read({counter_published, App}),
     Pub = resultConversion(PubPull),
-    SubPull = mnesia:dirty_read({counter_consumed, Tbl}),
+    SubPull = mnesia:dirty_read({counter_consumed, App}),
     Sub = resultConversion(SubPull),
-    Size = mnesia:table_info(Tbl, size),% * erlang:system_info(wordsize)), % / (1024*1024),
-    %Storage = database:table_storage_size(Tbl),
+    Size = database_manager:recordCount(App),
     #{
       id => binary:list_to_bin(App),
       name => binary:list_to_bin(AppName),
       messages_waiting => Size,
       published_messages => binary:list_to_bin([Pub]),
       consumed_messages => binary:list_to_bin([Sub])
-    %  storage => Storage
     }
   end, AllApps),
   [{_,_,Published}] = mnesia:dirty_read({counter_published, all}),

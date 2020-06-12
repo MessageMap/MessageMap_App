@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
 %%% @author Benjamin Adams
-%%% @copyright (C) 2017, Message.io
+%%% @copyright (C) 2020, MessageMap.IO LLC
 %%% @doc
 %%%  Return One application for listing
 %%% @end
-%%% Created : 8. Sept 2017
+%%% Created : 11. Jun 2020
 %%%-------------------------------------------------------------------
 -module(application_one_handler).
 
@@ -61,7 +61,6 @@ processRequest(<<"DELETE">>, _, AppId, _) ->
 % %% Internal functions
 buildResponse(Data) ->
   {_,Id,Name,Description,ApiKeys,Ownedtopics,SubscribedTopics,CreatedOn,Filters,Encrypt} = element(1, list_to_tuple([Data])),
-  io:format("Filters: ~p~n", [Filters]),
   #{
     id => binary:list_to_bin(Id),
     name => binary:list_to_bin(Name),

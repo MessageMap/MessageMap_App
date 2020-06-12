@@ -12,13 +12,17 @@
 %% API
 -export([init/0]).
 -export([createMsgsTbl/1]).
-%-export([selectTblName/1]).
+-export([recordCount/1]).
 %-export([deleteTblName/1]).
 %-export([allTblNames/1]).
 -export([allTblNames/1]).
+-export([insertTblName/1]).
 
 %debug
 -export([addCreateTblMemory/3]).
+
+-define(Max_Table_Size, 2147483648).
+
 % List of Functions to Export
 -include_lib("stdlib/include/qlc.hrl").
 -include("db/datatables.hrl").
@@ -28,9 +32,9 @@ init() ->
   io:format("Loading INIT for DB Manager", []),
   mnesia:load_textfile("db/messagetables.hrl"),
   AllApps = database:getAllAppDB(),
-  io:format(" TODO: Load current apps and table structure into tbl ~nAllApps: ~p~n", [AllApps]),
-  AppId = "a6cc9f6b-a146-44a4-b981-4ca0dc33953b", %uuid:to_string(uuid:uuid4()),
-  io:format("result: ~p~n", [createMsgsTbl(AppId)]),
+  io:format(" TODO: Load current apps and table structure into tbl ~n AllApps: ~p ~n TODO: Load Structure into memory table~n", [AllApps]),
+  %AppId = "a6cc9f6b-a146-44a4-b981-4ca0dc33953b", %uuid:to_string(uuid:uuid4()),
+  %io:format("result: ~p~n", [createMsgsTbl(AppId)]),
   true.
 
 createMsgsTbl(AppId) ->
@@ -49,11 +53,44 @@ createMsgsTbl(AppId) ->
       { Tbl, lists:merge(lists:sort(Counters), [Current+1]) }
   end,
   createTbl(TblName),
-  addCreateTblMemory(AppId, CountResult, Nodes).
+  addCreateTblMemory(AppId, CountResult, Nodes),
+  TblName.
+
+insertTblName(AppId) ->
+  Tbl_list = allTblNames(AppId),
+  if
+    Tbl_list =:= [] ->
+      createMsgsTbl(AppId);
+    true ->
+      TblName = lists:nth(1, lists:reverse(lists:sort(Tbl_list))),
+      {_,{_,SizeBytes,_,_,_,_,_,_,_,_,_,_,_,_}} = file:read_file_info("/var/messageMap/"++erlang:atom_to_list(TblName)++".DCD"),
+      io:format("Table: ~p Size: ~p Max: ~p~n", [TblName, SizeBytes, ?Max_Table_Size]),
+      if
+        SizeBytes > ?Max_Table_Size ->
+          createMsgsTbl(AppId);
+        true ->
+          TblName
+      end
+  end.
+
+recordCount(AppId) ->
+  Tbl_list = allTblNames(AppId),
+  if
+    Tbl_list =:= [] ->
+      0;
+    true ->
+      lists:foldl(fun(X, Sum) -> mnesia:table_info(X, size) + Sum end, 0, Tbl_list)
+  end.
 
 allTblNames(AppId) ->
-  [{tblManager,AppId,Counters,_}] = pullTblMemory(AppId),
-  [ list_to_atom("msgs"++string:join(string:tokens(AppId, "-"),"")++"_"++erlang:integer_to_list(C)) || C <- Counters].
+  Tbl_check = pullTblMemory(AppId),
+  if
+    Tbl_check =:= [] ->
+      [];
+    true ->
+      [{tblManager,AppId,Counters,_}] = Tbl_check,
+      [ list_to_atom("msgs"++string:join(string:tokens(AppId, "-"),"")++"_"++erlang:integer_to_list(C)) || C <- Counters]
+  end.
 
 % Internal Functions
 addCreateTblMemory(AppId, Counter, Nodes) ->
@@ -71,7 +108,7 @@ pullTblMemory(AppId) ->
     qlc:e(Query)
   end,
   {atomic, Results} = mnesia:sync_transaction(PULL),
-  Results. 
+  Results.
 
 createTbl(Tbl) ->
   mnesia:create_table(Tbl,

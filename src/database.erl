@@ -24,7 +24,7 @@
 -export([getAppDBAppId/1]).
 -export([getAllUsers/0]).
 -export([get_dyn_table/2]).
--export([insert_dyn_table/6]).
+-export([insert_dyn_table/5]).
 -export([getAllAppDB/0]).
 -export([deleteAppDBAppId/1]).
 -export([updateAppDBAppId/7]).
@@ -321,12 +321,13 @@ deleteAppDBAppId(AppId) ->
     [Obj_to_del] = getAppDBAppId(AppId),
     mnesia:delete_object(applications, Obj_to_del, write)
   end,
-  AppTbl = check_dyn_table(AppId),
-  DelTable = lists:nth(1, [ X || X <- mnesia:system_info(tables), X == AppTbl]),
-  if
-    DelTable =:= AppTbl ->
-      mnesia:delete_table(DelTable)
-  end,
+  % TODO: change to delete all tables with appID
+  %AppTbl = check_dyn_table(AppId),
+  %DelTable = lists:nth(1, [ X || X <- mnesia:system_info(tables), X == AppTbl]),
+  %if
+  %  DelTable =:= AppTbl ->
+  %    mnesia:delete_table(DelTable)
+  %end,
   mnesia:sync_transaction(DELETE).
 
 updateAppDBAppId(AppId, Name, Description, OwnedTopics, SubscribedTopics, Filter, Encrypt) ->
@@ -417,6 +418,7 @@ check_dyn_table(Name) ->
 % Change Above to go to database_manager Two Functions:
 %  appID, [select, insert]
 % Result will be for which table to interact with
+  io:format("~n******************* CREATING A TABLE ***********************~n"),
   try
     mnesia:table_info(Tbl, type)
   catch
@@ -444,9 +446,11 @@ getResult(Tbl, UnFilteredResults) ->
   spawn(database, async_dyn_delete, [Tbl, Results]),
   Payloads.
 
-insert_dyn_table(Tbl, AppId, TopicId, SchemaId, Payload, RequestTime) ->
-  RowId = binary:bin_to_list(RequestTime), %uuid:to_string(uuid:uuid4()),
+insert_dyn_table(AppId, TopicId, SchemaId, Payload, RequestTime) ->
+  RowId = binary:bin_to_list(RequestTime),
+  Tbl = database_manager:insertTblName(AppId),
   CreatedOn = calendar:universal_time(),
+  io:format("Writing to Table: ~p~n", [Tbl]),
   InsertData = {Tbl, RowId, AppId, TopicId, SchemaId, Payload, CreatedOn},
   INS = fun() -> mnesia:write(InsertData) end,
   mnesia:sync_transaction(INS),
@@ -457,14 +461,14 @@ insert_dyn_table(Tbl, AppId, TopicId, SchemaId, Payload, RequestTime) ->
   }.
 
 add_published_counter(AppId) ->
-  PubTbl = check_dyn_table(AppId),
-  mnesia:dirty_update_counter({counter_published, PubTbl}, 1).
+  mnesia:dirty_update_counter({counter_published, AppId}, 1).
 
 async_dyn_delete(Tbl, Results) ->
+    io:format("Note Need to Use counter for AppID Not TBL~n database:async_dyn_delete:~n~p~n", [Results]),
     DELETE = fun() ->
       lists:foreach(fun(Object) ->
         mnesia:dirty_update_counter({counter_consumed, all}, 1),
-        mnesia:dirty_update_counter({counter_consumed, Tbl}, 1),
+        mnesia:dirty_update_counter({counter_consumed, Tbl}, 1), % TODO Change from Tbl to AppId
         {_, Key,_,_,_,_,_} = Object,
         mnesia:delete(Tbl, Key, write)
       end, Results)

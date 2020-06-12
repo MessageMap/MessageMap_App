@@ -13,7 +13,7 @@
 -export([stats/2]).
 
 %-define(MAX_WAITING, 20000).
--define(MAX_WAITING, 1000000). % Testing 1,000,000
+%-define(MAX_WAITING, 1000000). % Testing 1,000,000
 
 % Don't allow latest yet
 push("latest", _, _ , _, _) ->
@@ -170,17 +170,15 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
            _ ->
              binary:list_to_bin(encryption:msgEncryption(jiffy:encode(MapMessageResult), binary:list_to_bin(EncryptValue)))
         end,
-        Tbl = database:check_dyn_table(FoundAppId),
-        % TODO: Check Table row count limit 20,000
-        Waiting = mnesia:table_info(Tbl, size),
-        tools:log("info", io_lib:format("Current (~p) Messages: ~p", [Tbl, Waiting])),
+        % TODO: this is where Push and not Save Action will happen
+        HardDriveNotFull = true, % Change This to if HD is Full
         Result = if
-          Waiting < ?MAX_WAITING andalso SavedPayload =/= "Payload Is To Long" ->
-            database:insert_dyn_table(Tbl, AppId, TopicId, SchemaId, SavedPayload, RequestTime),
+          HardDriveNotFull andalso SavedPayload =/= "Payload Is To Long" ->
+            database:insert_dyn_table(FoundAppId, TopicId, SchemaId, SavedPayload, RequestTime),
             tools:log("info", io_lib:format("Message Published", [])),
             true;
           true ->
-            tools:log("info", io_lib:format("Table: ~p Queue has payload to long or Queue is Maxed: ~p", [Tbl, Waiting])),
+            tools:log("info", io_lib:format("Tried to Push Messages to App: ~p Hard Drive is Full", [AppId])),
             false
         end,
         Result
