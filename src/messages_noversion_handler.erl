@@ -17,6 +17,7 @@ init(Req, Opts) ->
   AuthToken = lists:last(string:tokens(binary:bin_to_list(FullAuthToken), " ")),
   Auth = encryption:ewtDecode(binary:list_to_bin(AuthToken)),
   RequestTime = cowboy_req:header(<<"x-request-time">>, Req, binary:list_to_bin(uuid:to_string(uuid:uuid4()))),
+  tools:osStats(),
   if
     AuthToken == [] ->
        Req2 = cowboy_req:reply(401, tools:resp_headers(),

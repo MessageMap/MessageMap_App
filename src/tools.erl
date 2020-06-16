@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(tools).
 
--export([log/2, pull_global_stats/0, resp_headers/0, integer_check/1, verifyAuthAdmin/1, verifyAuth/1, version/0, convertDateTime/1]).
+-export([log/2, osStats/0, pull_global_stats/0, resp_headers/0, integer_check/1, verifyAuthAdmin/1, verifyAuth/1, version/0, convertDateTime/1]).
 
 -define(server, "MessageMap.io").
 -define(version, "0.0.1 Beta").
@@ -21,6 +21,19 @@ resp_headers()->
     <<"server">> => <<?server>>,
     <<"version">> => <<?version>>
   }.
+
+osStats() ->
+  [{_,_,Disk},_] = disksup:get_disk_data(),
+  Cpu = cpu_sup:avg1(),
+  Mem = memsup:get_sysmem_high_watermark(),
+  Usage = #{
+    "cpu" => Cpu,
+    "disk" => Disk,
+    "mem" => Mem
+  },
+  Limit = ((Cpu < 350) and (Disk < 90) and (Mem < 90)),
+  tools:log("info", io_lib:format("CPU LOAD: ~p~n", [{Limit, Usage}])),
+  { Limit, Usage }.
 
 log(Level="info", MsgRaw)->
   Msg = erlang:binary_to_list(erlang:iolist_to_binary(MsgRaw)),
