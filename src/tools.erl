@@ -31,7 +31,7 @@ osStats() ->
     "disk" => Disk,
     "mem" => Mem
   },
-  Limit = ((Cpu < 350) and (Disk < 90) and (Mem < 90)),
+  Limit = ((Cpu < 400) and (Disk < 90) and (Mem < 90)),
   tools:log("info", io_lib:format("CPU LOAD: ~p~n", [{Limit, Usage}])),
   { Limit, Usage }.
 
