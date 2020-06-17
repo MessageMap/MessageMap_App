@@ -20,8 +20,10 @@
 
 %debug
 -export([addCreateTblMemory/3]).
+-export([createTbl/1]).
 
--define(Max_Table_Size, 2147483648).
+%-define(Max_Table_Size, 2147483648).
+-define(Max_Table_Size, 1077483648).
 
 % List of Functions to Export
 -include_lib("stdlib/include/qlc.hrl").
@@ -58,12 +60,14 @@ createMsgsTbl(AppId) ->
 
 insertTblName(AppId) ->
   Tbl_list = allTblNames(AppId),
+  io:format("Table Listing: ~p~n", [Tbl_list]),
   if
     Tbl_list =:= [] ->
       createMsgsTbl(AppId);
     true ->
       TblName = lists:nth(1, lists:reverse(lists:sort(Tbl_list))),
-      {_,{_,SizeBytes,_,_,_,_,_,_,_,_,_,_,_,_}} = file:read_file_info("/var/messageMap/"++erlang:atom_to_list(TblName)++".DCD"),
+      % DCD file Ext for ordered_set
+      {_,{_,SizeBytes,_,_,_,_,_,_,_,_,_,_,_,_}} = file:read_file_info("/var/messageMap/"++erlang:atom_to_list(TblName)++".DAT"),
       io:format("Table: ~p Size: ~p Max: ~p~n", [TblName, SizeBytes, ?Max_Table_Size]),
       if
         SizeBytes > ?Max_Table_Size ->
@@ -111,11 +115,13 @@ pullTblMemory(AppId) ->
   Results.
 
 createTbl(Tbl) ->
+  io:format("Creating Table: ~p~n", [Tbl]),
   mnesia:create_table(Tbl,
           [
-            {type, ordered_set},
+            %{type, ordered_set}, -- Not for disc_only_copies
+            {type, set},
             {attributes, [rowId, pubId, topicId, schemaId, payload, createdOn]},
-            {disc_copies, [node()]}
+            {disc_only_copies, [node()]}
           ]).
 
 % Create file db/messagetables.hrl
