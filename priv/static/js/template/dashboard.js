@@ -131,8 +131,8 @@ var controller = {
           }
           datapull.published = message.totalMessagesPublished;
           datapull.consumed = message.totalMessagesConsumed;
-					if (parseInt(message.storage) > 13) {
-					  storage = ((parseInt(message.storage)/(100-13))*100);
+					if (parseInt(message.storage) > 9) {
+					  storage = ((parseInt(message.storage)/(100-9))*100);
 					}
 					if (storage > 100){
 					  storage = 100;
