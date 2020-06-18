@@ -23,7 +23,7 @@
 -export([getAppDB/1]).
 -export([getAppDBAppId/1]).
 -export([getAllUsers/0]).
--export([get_dyn_table/2]).
+-export([get_dyn_table/3]).
 -export([insert_dyn_table/5]).
 -export([getAllAppDB/0]).
 -export([deleteAppDBAppId/1]).
@@ -36,7 +36,7 @@
 -export([deleteSchemaDBSchemaId/1]).
 -export([deleteTopicDBTopicId/1]).
 -export([deleteDBUser/1]).
--export([async_dyn_delete/2]).
+-export([async_dyn_delete/3]).
 -export([saveTopic/3]).
 -export([table_storage_size/1]).
 -export([getTopicDB/1]).
@@ -432,25 +432,23 @@ check_dyn_table(Name) ->
   end,
   Tbl.
 
-get_dyn_table(Tbl, Limit) ->
-  % change to First Select Here
+get_dyn_table(AppId, Tbl, Limit) ->
   PULL = fun() -> mnesia:select(Tbl,[{'_',[],['$_']}], Limit, read) end,
   {atomic, Results} = mnesia:sync_transaction(PULL),
-  getResult(Tbl, Results).
+  getResult(AppId, Tbl, Results).
 
-getResult(_, '$end_of_table') ->
+getResult(_, _, '$end_of_table') ->
   [];
-getResult(Tbl, UnFilteredResults) ->
+getResult(AppId, Tbl, UnFilteredResults) ->
   {Results, _ }  = UnFilteredResults,
   Payloads = [element(6,T) || T <- Results],
-  spawn(database, async_dyn_delete, [Tbl, Results]),
+  spawn(database, async_dyn_delete, [AppId, Tbl, Results]),
   Payloads.
 
 insert_dyn_table(AppId, TopicId, SchemaId, Payload, RequestTime) ->
   RowId = binary:bin_to_list(RequestTime),
   Tbl = database_manager:insertTblName(AppId),
   CreatedOn = calendar:universal_time(),
-  io:format("Writing to Table: ~p~n", [Tbl]),
   InsertData = {Tbl, RowId, AppId, TopicId, SchemaId, Payload, CreatedOn},
   INS = fun() -> mnesia:write(InsertData) end,
   mnesia:sync_transaction(INS),
@@ -463,12 +461,11 @@ insert_dyn_table(AppId, TopicId, SchemaId, Payload, RequestTime) ->
 add_published_counter(AppId) ->
   mnesia:dirty_update_counter({counter_published, AppId}, 1).
 
-async_dyn_delete(Tbl, Results) ->
-    io:format("Note Need to Use counter for AppID Not TBL~n database:async_dyn_delete:~n~p~n", [Results]),
+async_dyn_delete(AppId, Tbl, Results) ->
     DELETE = fun() ->
       lists:foreach(fun(Object) ->
         mnesia:dirty_update_counter({counter_consumed, all}, 1),
-        mnesia:dirty_update_counter({counter_consumed, Tbl}, 1), % TODO Change from Tbl to AppId
+        mnesia:dirty_update_counter({counter_consumed, AppId}, 1),
         {_, Key,_,_,_,_,_} = Object,
         mnesia:delete(Tbl, Key, write)
       end, Results)

@@ -17,6 +17,7 @@
 %-export([allTblNames/1]).
 -export([allTblNames/1]).
 -export([insertTblName/1]).
+-export([selectTblName/1]).
 
 %debug
 -export([addCreateTblMemory/3]).
@@ -60,7 +61,6 @@ createMsgsTbl(AppId) ->
 
 insertTblName(AppId) ->
   Tbl_list = allTblNames(AppId),
-  io:format("Table Listing: ~p~n", [Tbl_list]),
   if
     Tbl_list =:= [] ->
       createMsgsTbl(AppId);
@@ -68,7 +68,6 @@ insertTblName(AppId) ->
       TblName = lists:nth(1, lists:reverse(lists:sort(Tbl_list))),
       % DCD file Ext for ordered_set
       {_,{_,SizeBytes,_,_,_,_,_,_,_,_,_,_,_,_}} = file:read_file_info("/var/messageMap/"++erlang:atom_to_list(TblName)++".DAT"),
-      io:format("Table: ~p Size: ~p Max: ~p~n", [TblName, SizeBytes, ?Max_Table_Size]),
       if
         SizeBytes > ?Max_Table_Size ->
           createMsgsTbl(AppId);
@@ -77,6 +76,16 @@ insertTblName(AppId) ->
       end
   end.
 
+selectTblName(AppId) ->
+  Tbl_list = allTblNames(AppId),
+  if
+    Tbl_list =:= [] ->
+      { false, 0 };
+    true ->
+      TblName = lists:nth(1, lists:sort(Tbl_list)),
+      { TblName,  mnesia:table_info(TblName, size) }
+  end.
+      
 recordCount(AppId) ->
   Tbl_list = allTblNames(AppId),
   if

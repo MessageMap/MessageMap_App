@@ -12,9 +12,6 @@
 -export([pull/2]).
 -export([stats/2]).
 
-%-define(MAX_WAITING, 20000).
-%-define(MAX_WAITING, 1000000). % Testing 1,000,000
-
 % Don't allow latest yet
 push("latest", _, _ , _, _) ->
   { 422, #{
@@ -64,12 +61,15 @@ push(Version, TopicName, Auth, Payload, RequestTime) ->
 
 pull(Auth, Limit) ->
   AppId = pullAppId(Auth),
-  Tbl = database:check_dyn_table(AppId),
+  { Tbl, RowCount } = database_manager:selectTblName(AppId),
+  io:format("TODO CHANGE TO CHECK Rows If Count Less then Limit, Delete Table and Loop Again to this Function Append Results: Count: ~p Limit: ~p~n", [RowCount, Limit]),
   if
+    Tbl =:= false ->
+      [];
     Limit < 100 ->
-      database:get_dyn_table(Tbl, Limit);
+      database:get_dyn_table(AppId, Tbl, Limit);
     true ->
-      database:get_dyn_table(Tbl, 100)
+      database:get_dyn_table(AppId, Tbl, 100)
   end.
 
 stats(TopicName, Auth) ->
