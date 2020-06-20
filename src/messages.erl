@@ -28,8 +28,17 @@ push(Version, TopicName, Auth, Payload, RequestTime) ->
       if
         TopicId /= fail ->
           { SchemaId, Schema } = validate:lookup(Auth, TopicId, Version),
-          MapPayload = jiffy:decode(Payload),
+          MapPayload = try 
+               jiffy:decode(Payload)
+          catch
+               _Type:_Error ->
+                   "Invalid"
+          end,
           if
+            MapPayload =:= "Invalid" ->
+              { 422, #{
+                 status => 'Invalid JSON Schema'
+              } };
             Schema == false ->
               % Update to Say Queue status Max waiting or message size if Encryption enabled
               process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime);

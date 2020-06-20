@@ -61,6 +61,7 @@ createMsgsTbl(AppId) ->
 
 insertTblName(AppId) ->
   Tbl_list = allTblNames(AppId),
+  io:format("TBL LIST: ~p~n", [Tbl_list]),
   if
     Tbl_list =:= [] ->
       createMsgsTbl(AppId);
@@ -129,7 +130,9 @@ createTbl(Tbl) ->
           [
             %{type, ordered_set}, -- Not for disc_only_copies
             {type, set},
-            {attributes, [rowId, pubId, topicId, schemaId, payload, createdOn]},
+            {attributes, record_info(fields, message)},
+            %{index, [#message.rowId]},
+            {record_name, message},
             {disc_only_copies, [node()]}
           ]).
 

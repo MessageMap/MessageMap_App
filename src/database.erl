@@ -446,12 +446,20 @@ getResult(AppId, Tbl, UnFilteredResults) ->
   Payloads.
 
 insert_dyn_table(AppId, TopicId, SchemaId, Payload, RequestTime) ->
-  RowId = binary:bin_to_list(RequestTime),
   Tbl = database_manager:insertTblName(AppId),
-  CreatedOn = calendar:universal_time(),
-  InsertData = {Tbl, RowId, AppId, TopicId, SchemaId, Payload, CreatedOn},
-  INS = fun() -> mnesia:write(InsertData) end,
-  mnesia:sync_transaction(INS),
+  io:format("Write Table: ~p~n", [Tbl]),
+  INS = fun() ->
+       Data = #message{rowId=binary:bin_to_list(RequestTime),
+                             appId=AppId,
+                             topicId=TopicId,
+                             schemaId=SchemaId,
+                             payload=Payload,  % TODO: Add compression
+                             createdOn=calendar:universal_time()},
+       io:format("Data: ~p~n", [Data]),
+       mnesia:write(Tbl, Data, write)
+  end,
+  Result = mnesia:sync_transaction(INS),
+  io:format("Insert Result: ~p~n", [Result]),
   %Update counters
   mnesia:dirty_update_counter({counter_published, all}, 1),
   #{
@@ -462,12 +470,13 @@ add_published_counter(AppId) ->
   mnesia:dirty_update_counter({counter_published, AppId}, 1).
 
 async_dyn_delete(AppId, Tbl, Results) ->
+    io:format("Running Delete on: ~p~n", [Tbl]),
     DELETE = fun() ->
       lists:foreach(fun(Object) ->
         mnesia:dirty_update_counter({counter_consumed, all}, 1),
         mnesia:dirty_update_counter({counter_consumed, AppId}, 1),
-        {_, Key,_,_,_,_,_} = Object,
-        mnesia:delete(Tbl, Key, write)
+        %{Key, _,_,_,_,_,_} = Object,
+        mnesia:delete_object(Tbl, Object, write)
       end, Results)
     end,
     mnesia:sync_transaction(DELETE).
