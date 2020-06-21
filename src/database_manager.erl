@@ -108,6 +108,13 @@ allTblNames(AppId) ->
   end.
 
 % Internal Functions
+% TODO: Calculate Stroage in DB
+% 4> K = #{ 1=>435, 2=>354, 34=>345346 }.
+%#{1 => 435,2 => 354,34 => 345346}
+%5> K.
+%#{1 => 435,2 => 354,34 => 345346}
+%6> maps:find(2, K).
+%{ok,354}
 addCreateTblMemory(AppId, Counter, Nodes) ->
   InternalResult = pullTblMemory(AppId),
   io:format("Internal Result: ~p~n", [InternalResult]),

@@ -159,7 +159,8 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
   Apps = database:getAllAppDB(),
   R = lists:map(fun(App) ->
     %TODO: Add Push functions here (metrics, Notification, Websockets
-    {_,FoundAppId,_,_,_,_,SubscribedTopics,_,FilterSettings, EncryptValue} = App,
+    {_,FoundAppId,_,_,_,_,SubscribedTopics,_,FilterSettings, EncryptValue, PushConfig} = App,
+    io:format("Message Push Configuration: ~p~n", [PushConfig]),
     CaseResult = case string:str(SubscribedTopics, TopicId) of
       0 ->
         "bad";
@@ -180,6 +181,8 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
              binary:list_to_bin(encryption:msgEncryption(jiffy:encode(MapMessageResult), binary:list_to_bin(EncryptValue)))
         end,
         % TODO: this is where Push and not Save Action will happen
+        % This is where Push will happen and return Fail Max for save in next section
+
         HardDriveNotFull = true, % Change This to if HD is Full
         Result = if
           HardDriveNotFull andalso SavedPayload =/= "Payload Is To Long" ->

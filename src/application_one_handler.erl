@@ -38,27 +38,19 @@ processRequest(<<"PUT">>, _, AppId, Req) ->
   { _, PushRetries } = lists:keyfind(<<"pushRetries">>, 1, Body),
   { _, PushStatusCode } = lists:keyfind(<<"pushStatusCode">>, 1, Body),
   { _, PushHeaders } = lists:keyfind(<<"pushHeaders">>, 1, Body),
-  PushConfig = #{
-     messages => PushMessages,
-     url => PushUrl,
-     retries => PushRetries,
-     statusCode => PushStatusCode,
-     headers => PushHeaders
-  },
-  io:format("TODO SEND TO DB PushConfig: ~p~n", [PushConfig]),
   case Encrypt of
     '\n' ->
-        { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Filters, []),
+        { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Filters, [], PushMessages, PushUrl, PushRetries, PushStatusCode, PushHeaders),
         Result = buildResponse(element(1, list_to_tuple(AppData))),
         jiffy:encode(Result);
     <<>> ->
-      { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Filters, []),
+      { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Filters, [], PushMessages, PushUrl, PushRetries, PushStatusCode, PushHeaders),
       Result = buildResponse(element(1, list_to_tuple(AppData))),
       jiffy:encode(Result);
     _ ->
       try encryption:msgEncryption(binary:list_to_bin("Testing"), Encrypt) of
         _ ->
-          { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Filters, binary:bin_to_list(Encrypt)),
+          { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Filters, binary:bin_to_list(Encrypt), PushMessages, PushUrl, PushRetries, PushStatusCode, PushHeaders),
           Result = buildResponse(element(1, list_to_tuple(AppData))),
           jiffy:encode(Result)
       catch
@@ -72,7 +64,7 @@ processRequest(<<"DELETE">>, _, AppId, _) ->
 
 % %% Internal functions
 buildResponse(Data) ->
-  {_,Id,Name,Description,ApiKeys,Ownedtopics,SubscribedTopics,CreatedOn,Filters,Encrypt} = element(1, list_to_tuple([Data])),
+  {_,Id,Name,Description,ApiKeys,Ownedtopics,SubscribedTopics,CreatedOn,Filters,Encrypt,PushMessages,PushUrl,PushRetries,PushStatusCode,PushHeaders} = element(1, list_to_tuple([Data])),
   #{
     id => binary:list_to_bin(Id),
     name => binary:list_to_bin(Name),
@@ -81,6 +73,11 @@ buildResponse(Data) ->
     ownedTopics => binary:list_to_bin(Ownedtopics),
     subscribedTopics => binary:list_to_bin(SubscribedTopics),
     encrypt => binary:list_to_bin(Encrypt),
-    filter => Filters, %binary:list_to_bin(Filters),
+    filter => Filters,
+    pushMessages => PushMessages,
+    pushUrl => PushUrl,
+    pushRetries => PushRetries,
+    pushStatusCode => PushStatusCode,
+    pushHeaders => PushHeaders,
     createdOn => binary:list_to_bin(tools:convertDateTime(CreatedOn))
   }.

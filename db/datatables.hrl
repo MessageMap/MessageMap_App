@@ -17,7 +17,12 @@
                   subscribedTopics=[],
                   createdOn,
                   filters=[],
-                  encrypt=[]}).
+                  encrypt=[],
+                  pushMessages,
+                  pushUrl,
+                  pushRetries,
+                  pushStatusCode,
+                  pushHeaders}).
 -record(tblschemas, {id,
                   validation,
                   version,

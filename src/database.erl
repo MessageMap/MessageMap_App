@@ -19,7 +19,7 @@
 -export([setup_admin/0]).
 -export([check_dyn_table/1]).
 -export([getDB/1]).
--export([saveApp/6]).
+-export([saveApp/11]).
 -export([getAppDB/1]).
 -export([getAppDBAppId/1]).
 -export([getAllUsers/0]).
@@ -27,7 +27,7 @@
 -export([insert_dyn_table/5]).
 -export([getAllAppDB/0]).
 -export([deleteAppDBAppId/1]).
--export([updateAppDBAppId/7]).
+-export([updateAppDBAppId/12]).
 -export([login/2]).
 -export([saveSchema/2]).
 -export([getSchemaDBSchemaId/1]).
@@ -81,7 +81,20 @@ init() ->
         ]),
       mnesia:create_table(applications,
         [
-          {attributes, [id,name,description,apikeys,ownedTopics,subscribedTopics,filters,createdOn,encrypt]},
+          {attributes, [id,
+                  name,
+                  description,
+                  apikeys,
+                  ownedTopics,
+                  subscribedTopics,
+                  filters,
+                  createdOn,
+                  encrypt,
+                  pushMessages,
+                  pushUrl,
+                  pushRetries,
+                  pushStatusCode,
+                  pushHeaders]},
           {disc_copies, [node()]}
         ]),
       mnesia:create_table(tblschemas,
@@ -247,8 +260,9 @@ updateTopicDBTopicId(TopicId, Name, Description, SchemaId) ->
   mnesia:sync_transaction(Update).
 
 %%%%%%%%%%%%%% applications
-saveApp(AppName, AppDescription, AppOwnedTopics, AppSubscribedTopics, PayloadFilter, Encrypt) ->
+saveApp(AppName, AppDescription, AppOwnedTopics, AppSubscribedTopics, PayloadFilter, Encrypt, PushMessages, PushUrl, PushRetries, PushStatusCode, PushHeaders) ->
   IsFound = getAppDB(string:to_lower(AppName)),
+  io:format("IsFound: ~p~n", [IsFound]),
   INS = fun() ->
     CreatedOn = calendar:universal_time(),
     mnesia:write(#applications{id=uuid:to_string(uuid:uuid4()),
@@ -259,7 +273,12 @@ saveApp(AppName, AppDescription, AppOwnedTopics, AppSubscribedTopics, PayloadFil
                   subscribedTopics=AppSubscribedTopics,
                   encrypt=Encrypt,
                   filters=PayloadFilter,
-                  createdOn=CreatedOn})
+                  createdOn=CreatedOn,
+                  pushMessages=PushMessages,
+                  pushUrl=PushUrl,
+                  pushRetries=PushRetries,
+                  pushStatusCode=PushStatusCode,
+                  pushHeaders=PushHeaders})
     end,
   if
     IsFound =:= [] ->
@@ -276,6 +295,7 @@ getAppDB(AppName) ->
     qlc:e(Query)
   end,
   {atomic, Results} = mnesia:sync_transaction(PULL),
+  io:format("Result: ~p~n", [Results]),
   Results.
 
 getAppDBAppId(AppId) ->
@@ -306,7 +326,12 @@ validateAppDBAppIdApiKey(AppId, Apikey) ->
         ownedTopics => OneResult#applications.ownedTopics,
         subscribedTopics => OneResult#applications.subscribedTopics,
         filters => OneResult#applications.filters,
-        encrypt => OneResult#applications.encrypt
+        encrypt => OneResult#applications.encrypt,
+        pushMessages => OneResult#applications.pushMessages,
+        pushUrl => OneResult#applications.pushUrl,
+        pushRetries => OneResult#applications.pushRetries,
+        pushStatusCode => OneResult#applications.pushStatusCode,
+        pushHeaders => OneResult#applications.pushHeaders
       }
   end,
   R.
@@ -322,18 +347,12 @@ deleteAppDBAppId(AppId) ->
     mnesia:delete_object(applications, Obj_to_del, write)
   end,
   % TODO: change to delete all tables with appID
-  %AppTbl = check_dyn_table(AppId),
-  %DelTable = lists:nth(1, [ X || X <- mnesia:system_info(tables), X == AppTbl]),
-  %if
-  %  DelTable =:= AppTbl ->
-  %    mnesia:delete_table(DelTable)
-  %end,
   mnesia:sync_transaction(DELETE).
 
-updateAppDBAppId(AppId, Name, Description, OwnedTopics, SubscribedTopics, Filter, Encrypt) ->
+updateAppDBAppId(AppId, Name, Description, OwnedTopics, SubscribedTopics, Filter, Encrypt, PushMessages, PushUrl, PushRetries, PushStatusCode, PushHeaders) ->
   Update = fun() ->
     [Obj_to_del] = getAppDBAppId(AppId),
-    {_,_,_,_,ApiKeys,_,_,_,_,_} = Obj_to_del,
+    {_,_,_,_,ApiKeys,_,_,_,_,_,_,_,_,_,_} = Obj_to_del,
     mnesia:delete_object(applications, Obj_to_del, write),
     INS = fun() ->
       CreatedOn = calendar:universal_time(),
@@ -345,7 +364,12 @@ updateAppDBAppId(AppId, Name, Description, OwnedTopics, SubscribedTopics, Filter
                     subscribedTopics=binary:bin_to_list(SubscribedTopics),
                     createdOn=CreatedOn,
                     filters=Filter,
-                    encrypt=Encrypt})
+                    encrypt=Encrypt,
+                    pushMessages=PushMessages,
+                    pushUrl=PushUrl,
+                    pushRetries=PushRetries,
+                    pushStatusCode=PushStatusCode,
+                    pushHeaders=PushHeaders})
       end,
     mnesia:sync_transaction(INS),
     getAppDBAppId(AppId)
