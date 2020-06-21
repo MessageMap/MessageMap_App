@@ -33,7 +33,19 @@ processRequest(<<"PUT">>, _, AppId, Req) ->
   { _, SubscribedTopics } = lists:keyfind(<<"subscribedTopics">>, 1, Body),
   { _, Encrypt } = lists:keyfind(<<"encryption">>, 1, Body),
   { _, Filters } = lists:keyfind(<<"filters">>, 1, Body),
-  io:format("Filters: ~p~n", [Filters]),
+  { _, PushMessages } = lists:keyfind(<<"pushMessages">>, 1, Body),
+  { _, PushUrl } = lists:keyfind(<<"pushUrl">>, 1, Body),
+  { _, PushRetries } = lists:keyfind(<<"pushRetries">>, 1, Body),
+  { _, PushStatusCode } = lists:keyfind(<<"pushStatusCode">>, 1, Body),
+  { _, PushHeaders } = lists:keyfind(<<"pushHeaders">>, 1, Body),
+  PushConfig = #{
+     messages => PushMessages,
+     url => PushUrl,
+     retries => PushRetries,
+     statusCode => PushStatusCode,
+     headers => PushHeaders
+  },
+  io:format("TODO SEND TO DB PushConfig: ~p~n", [PushConfig]),
   case Encrypt of
     '\n' ->
         { _, AppData } = database:updateAppDBAppId(binary:bin_to_list(AppId), Name, Description, OwnedTopics, SubscribedTopics, Filters, []),
