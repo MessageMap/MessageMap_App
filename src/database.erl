@@ -447,7 +447,7 @@ getResult(AppId, Tbl, UnFilteredResults) ->
 
 insert_dyn_table(AppId, TopicId, SchemaId, Payload, RequestTime) ->
   Tbl = database_manager:insertTblName(AppId),
-  io:format("Write Table: ~p~n", [Tbl]),
+  %io:format("Write Table: ~p~n", [Tbl]),
   INS = fun() ->
        Data = #message{rowId=binary:bin_to_list(RequestTime),
                              appId=AppId,
@@ -455,7 +455,7 @@ insert_dyn_table(AppId, TopicId, SchemaId, Payload, RequestTime) ->
                              schemaId=SchemaId,
                              payload=Payload,  % TODO: Add compression
                              createdOn=calendar:universal_time()},
-       io:format("Data: ~p~n", [Data]),
+       %io:format("Data: ~p~n", [Data]),
        mnesia:write(Tbl, Data, write)
   end,
   Result = mnesia:sync_transaction(INS),
