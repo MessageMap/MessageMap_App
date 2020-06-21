@@ -82,7 +82,6 @@ var controller = {
                 <textarea placeholder="Textarea" id="appDescription" class="form-control">' + app.description + '</textarea>  \
                                 </div>  \
                             </div> \
-                            <div class="line-dashed"></div> \
                             <div class="form-group">  \
                                 <label class="col-sm-2 control-label">API Key: </label>  \
                                 <div class="col-sm-10">  \
@@ -145,6 +144,35 @@ var controller = {
                                 </div> \
                             </div> \
                         </div> \
+												<div class="line-dashed"></div> \
+												<div class="form-horizontal"> \
+												<div class="panel-heading clearfix"> \
+												  <h2 style="padding-bottom: 5px;" class="panel-title">Push Message Configuration</h2><div class="clearfix"></div> \
+												</div> \
+												<a class="btn btn-primary" data-toggle="collapse" id="enablePushMessages" href="#collapsePush" role="button" aria-expanded="false" aria-controls="collapsePush">Enable Push Messages</a> \
+												<div class="collapse" id="collapsePush"> \
+												<div class="form-horizontal"> \
+												<div class="form-group"> \
+												<label class="col-sm-2 control-label">Url To Push Messages Too: </label> \
+												<div class="col-sm-10"> \
+												<input type="text" placeholder="Placeholder" id="pushUrl" value="" class="form-control"> \
+												</div> \
+												<div class="form-group"> \
+												<label class="col-sm-2 control-label">Number of Retries before Fail: </label> \
+												<div class="col-sm-10"><input type="text" style="width:50px;" id="pushRetries" value="0" class="form-control">Time to wait between retries are 2 seconds. After Retry Limit is hit Messages will be Stored for Pull</div> \
+												</div> \
+												<div class="form-group"> \
+												<label class="col-sm-2 control-label">Status Code For Success: </label> \
+												<div class="col-sm-10"><input type="text" id="pushStatusCode" value="200" class="form-control"></div> \
+												</div> \
+												<div class="form-group"> \
+												<label class="col-sm-2 control-label">Headers to Use for Final Endpoint: </label> \
+												<div class="col-sm-10"> \
+												<textarea class="form-control" id="pushHeaders">User-Agent: MessageMap.IO - PushClient; \nMessageMap-Subscriber: SubscriberName;</textarea> \
+												</div> \
+												</div> \
+												</div> \
+												</div></div> \
                             <div class="line-dashed"></div> \
               <div class="form-group"> \
                                 <div class="col-sm-4"> \
@@ -308,6 +336,16 @@ var controller = {
 						});
           }
         });
+				// Start of Push Configuration
+				$('#enablePushMessages').click(function(e){
+				  console.error("Starting to enable push Messages");
+					var statusPush = $('#enablePushMessages').html();
+					if(statusPush == "Enable Push Messages"){
+					  $('#enablePushMessages').html('Disable Push Messages');
+					} else {
+					  $('#enablePushMessages').html('Enable Push Messages');
+					}
+				});
         //Start Message Mapping Configuration
 				var sub_id;
 				$(document).on('click', '.add_config', function(e){
@@ -482,6 +520,10 @@ var controller = {
           var subscribedTopicIds = $.unique($.map($(".subscribedTopicRow"), function(n, i) {
             return n.id;
           }));
+					var pushMessages = false;
+					if ($('#enablePushMessages').html() == "Disable Push Messages") {
+					  pushMessages = true;
+					}
 					var subArray = [];
 					$(subscribedTopicIds).each(function(i){
 					  var id = subscribedTopicIds[i];
@@ -495,6 +537,11 @@ var controller = {
             type: 'PUT',
             contentType: "application/json",
             data: {
+						  "pushMessages": pushMessages,
+							"pushUrl": $('#pushUrl').val(),
+							"pushRetries": $('#pushRetries').val(),
+							"pushStatusCode": $('#pushStatusCode').val(),
+							"pushHeaders": $('#pushHeaders').val(),
               "subscribedTopics": subscribedTopicIds.join(","),
               "ownedTopics": currentTopicIds.join(","),
               "name": $('#appName').val(),
