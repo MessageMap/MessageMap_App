@@ -23,20 +23,22 @@ init(Req, Opts) ->
 
 % Internal functions
 buildResponse(AppId) ->
-%  App = erlang:binary_to_list(AppId),
-  %Tbl = ["All APP Tables"], %database:check_dyn_table(App),
+  Tbl = database_manager:allTblNames(AppId),
   PubPull = mnesia:dirty_read({counter_published, AppId}),
   Pub = resultConversion(PubPull),
   SubPull = mnesia:dirty_read({counter_consumed, AppId}),
   Sub = resultConversion(SubPull),
-  Size = 40, % mnesia:table_info(Tbl, size),
-  Storage = 6, %database:table_storage_size(Tbl),
+  Size = if
+    Tbl =:= [] ->
+      0;
+    true ->
+      lists:foldl(fun(X, Sum) -> mnesia:table_info(X, size) + Sum end, 0, Tbl)
+  end,
   #{
     id => AppId,
     messages_waiting => Size,
     published_messages => binary:list_to_bin(Pub),
-    consumed_messages => binary:list_to_bin(Sub),
-    storage => Storage
+    consumed_messages => binary:list_to_bin(Sub)
   }.
 
 resultConversion([]) ->

@@ -52,6 +52,7 @@ var controller = {
       //UI for seeing One Application
       $.get('/api/application/' + id, function(app) {
         $('#noData').hide();
+				console.error(app);
         var App = '<div class="panel panel-default"> \
                     <div class="panel-heading clearfix"> \
                         <h3 class="panel-title">' + app.name + '</h3> \
@@ -155,20 +156,24 @@ var controller = {
 												<div class="form-group"> \
 												<label class="col-sm-2 control-label">Url To Push Messages Too: </label> \
 												<div class="col-sm-10"> \
-												<input type="text" placeholder="Placeholder" id="pushUrl" value="" class="form-control"> \
+												<input type="text" placeholder="Placeholder" id="pushUrl" value="'+app.pushUrl+'" class="form-control"> \
+												</div> \
 												</div> \
 												<div class="form-group"> \
 												<label class="col-sm-2 control-label">Number of Retries before Fail: </label> \
-												<div class="col-sm-10"><input type="text" style="width:50px;" id="pushRetries" value="0" class="form-control">Time to wait between retries are 2 seconds. After Retry Limit is hit Messages will be Stored for Pull</div> \
+												<div class="col-sm-10"> \
+												Messages will retry every 1 second.  If failer for all all the retrie countes messages will be held for pull.<br /> \
+												<input type="text" style="width:50px;" id="pushRetries" value="'+app.pushRetries+'" class="form-control"></div> \
 												</div> \
 												<div class="form-group"> \
 												<label class="col-sm-2 control-label">Status Code For Success: </label> \
-												<div class="col-sm-10"><input type="text" id="pushStatusCode" value="200" class="form-control"></div> \
+												<div class="col-sm-10"><input type="text" id="pushStatusCode" value="'+app.pushStatusCode+'" class="form-control"></div> \
 												</div> \
 												<div class="form-group"> \
 												<label class="col-sm-2 control-label">Headers to Use for Final Endpoint: </label> \
 												<div class="col-sm-10"> \
-												<textarea class="form-control" id="pushHeaders">User-Agent: MessageMap.IO - PushClient; \nMessageMap-Subscriber: SubscriberName;</textarea> \
+												<pre>Example: <br \>User-Agent: MessageMap.IO - Client-Push;<br />MessageMap-Subsriber: Subscriber;</pre> \
+												<textarea class="form-control" id="pushHeaders">'+app.pushHeaders+'</textarea> \
 												</div> \
 												</div> \
 												</div> \
@@ -346,6 +351,9 @@ var controller = {
 					  $('#enablePushMessages').html('Enable Push Messages');
 					}
 				});
+				if ( app.pushMessages == "true" ) {
+				  $('#enablePushMessages').trigger('click');
+				}
         //Start Message Mapping Configuration
 				var sub_id;
 				$(document).on('click', '.add_config', function(e){
