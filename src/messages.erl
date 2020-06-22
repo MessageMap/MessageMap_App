@@ -129,7 +129,7 @@ pullAppId(Auth) ->
     AppId.
 
 check_topicId_in_App(TopicId, App, Method) ->
-  [{_,_,_,_,_,Ownedtopics,SubscribedTopics,_,_,_}] = App,
+  [{_,_,_,_,_,Ownedtopics,SubscribedTopics,_,_,_,_,_,_,_,_}] = App,
   ArrayOfIds = if
     Method == topicsSubscribed ->
       SubscribedTopics;
@@ -159,8 +159,8 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
   Apps = database:getAllAppDB(),
   R = lists:map(fun(App) ->
     %TODO: Add Push functions here (metrics, Notification, Websockets
-    {_,FoundAppId,_,_,_,_,SubscribedTopics,_,FilterSettings, EncryptValue, PushConfig} = App,
-    io:format("Message Push Configuration: ~p~n", [PushConfig]),
+    {_,FoundAppId,_,_,_,_,SubscribedTopics,_,FilterSettings, EncryptValue, PushMessages, PushUrl, PushRetries, PushStatusCode, PushHeaders } = App,
+    io:format("Message Push Configuration: ~p, ~p, ~p, ~p, ~p~n", [PushMessages,PushUrl,PushRetries,PushStatusCode,PushHeaders]),
     CaseResult = case string:str(SubscribedTopics, TopicId) of
       0 ->
         "bad";
@@ -182,16 +182,29 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
         end,
         % TODO: this is where Push and not Save Action will happen
         % This is where Push will happen and return Fail Max for save in next section
-
+        PushResult = if
+            PushMessages =:= <<"true">> andalso SavedPayload =/= "Payload Is To Long" ->
+               Headers = [ erlang:list_to_tuple(lists:map(fun(X) -> lists:delete($;, X) end, string:tokens(H, ":"))) 
+                           || H <- string:tokens(erlang:binary_to_list(PushHeaders), "\n")],
+               pushMessages(erlang:binary_to_list(PushUrl), erlang:binary_to_integer(PushStatusCode), Headers, jiffy:encode(SavedPayload), erlang:binary_to_integer(PushRetries));
+            true ->
+               true
+        end,
+        io:format("Push Result: ~p~n", [PushResult]),
         HardDriveNotFull = true, % Change This to if HD is Full
         Result = if
-          HardDriveNotFull andalso SavedPayload =/= "Payload Is To Long" ->
+          HardDriveNotFull andalso SavedPayload =/= "Payload Is To Long" andalso PushResult ->
             database:insert_dyn_table(FoundAppId, TopicId, SchemaId, SavedPayload, RequestTime),
             tools:log("info", io_lib:format("Message Published", [])),
             true;
-          true ->
+          true andalso PushResult ->
             tools:log("info", io_lib:format("Tried to Push Messages to App: ~p Hard Drive is Full", [AppId])),
-            false
+            false;
+          true ->
+            % Message was a Push Increase Consume Counters
+            mnesia:dirty_update_counter({counter_consumed, all}, 1),
+            mnesia:dirty_update_counter({counter_consumed, FoundAppId}, 1),
+            true
         end,
         Result
     end,
@@ -220,3 +233,18 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
         }
       }
   end.
+
+% Internal Functions
+pushMessages(_, _, _, _, 0) ->
+   true;
+pushMessages(_, _, _, _, true) ->
+   false;
+pushMessages(PushUrl, PushStatusCode, Headers, Payload, PushRetries) ->
+   Request = {PushUrl, Headers, "application/json", Payload},
+   {_,{{_,StatusCode,_},_,_}} = httpc:request(post, Request, [], []),
+   if
+      StatusCode =:= PushStatusCode ->
+        pushMessages(PushUrl, PushStatusCode, Headers, Payload, true);
+      true ->
+        pushMessages(PushUrl, PushStatusCode, Headers, Payload, (PushRetries-1))
+   end.
