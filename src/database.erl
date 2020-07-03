@@ -346,8 +346,8 @@ deleteAppDBAppId(AppId) ->
     [Obj_to_del] = getAppDBAppId(AppId),
     mnesia:delete_object(applications, Obj_to_del, write)
   end,
-  % TODO: change to delete all tables with appID
-  mnesia:sync_transaction(DELETE).
+  mnesia:sync_transaction(DELETE),
+  database_manager:deleteAppTables(AppId).
 
 updateAppDBAppId(AppId, Name, Description, OwnedTopics, SubscribedTopics, Filter, Encrypt, PushMessages, PushUrl, PushRetries, PushStatusCode, PushHeaders) ->
   Update = fun() ->

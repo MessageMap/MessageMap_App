@@ -14,7 +14,7 @@
 -export([createMsgsTbl/1]).
 -export([recordCount/1]).
 -export([deleteTblName/2]).
-%-export([allTblNames/1]).
+-export([deleteAppTables/1]).
 -export([allTblNames/1]).
 -export([insertTblName/1]).
 -export([selectTblName/1]).
@@ -62,6 +62,11 @@ createMsgsTbl(AppId) ->
   createTbl(TblName),
   addCreateTblMemory(AppId, CountResult, Nodes),
   TblName.
+
+deleteAppTables(AppId) ->
+  lists:foreach(fun(Tbl) ->
+    deleteTblName(Tbl, AppId)
+  end, allTblNames(AppId)).
 
 deleteTblName(Tbl, AppId) ->
   Counter = erlang:list_to_integer(lists:nth(2, string:tokens(erlang:atom_to_list(Tbl), "_"))),
