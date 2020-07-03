@@ -29,21 +29,25 @@
 % List of Functions to Export
 -include_lib("stdlib/include/qlc.hrl").
 -include("db/datatables.hrl").
+-include_lib("kernel/include/file.hrl").
 
 % On boot Setup
 init() ->
   io:format("Loading INIT for DB Manager", []),
   mnesia:load_textfile("db/messagetables.hrl"),
   AllApps = database:getAllAppDB(),
-  io:format(" TODO: Load current apps and table structure into tbl ~n AllApps: ~p ~n TODO: Load Structure into memory table~n", [AllApps]),
-  %AppId = "a6cc9f6b-a146-44a4-b981-4ca0dc33953b", %uuid:to_string(uuid:uuid4()),
-  %io:format("result: ~p~n", [createMsgsTbl(AppId)]),
+  lists:foreach(fun(App) ->
+      { _, AppId, _, _, _, _, _, _, _, _, _, _, _, _, _ } = App,
+      StartTblName = list_to_atom("msgs"++string:join(string:tokens(AppId, "-"),"")),
+      findTblsLike(StartTblName, AppId),
+      ResultsIns = pullTblMemory(AppId),
+      io:format("Tables Saved for: ~p~n -----~n~p~n", [AppId, ResultsIns])
+    end,
+    AllApps),
   true.
 
 createMsgsTbl(AppId) ->
-  io:format("Loaded AppID: ~p~n", [AppId]),
   Results = pullTblMemory(AppId),
-  io:format("results~p~n", [Results]),
   Nodes = [node()],
   {TblName, CountResult} = if
     Results =:= [] ->
@@ -61,7 +65,6 @@ createMsgsTbl(AppId) ->
 
 insertTblName(AppId) ->
   Tbl_list = allTblNames(AppId),
-  io:format("TBL LIST: ~p~n", [Tbl_list]),
   if
     Tbl_list =:= [] ->
       createMsgsTbl(AppId);
@@ -108,16 +111,33 @@ allTblNames(AppId) ->
   end.
 
 % Internal Functions
-% TODO: Calculate Stroage in DB
-% 4> K = #{ 1=>435, 2=>354, 34=>345346 }.
-%#{1 => 435,2 => 354,34 => 345346}
-%5> K.
-%#{1 => 435,2 => 354,34 => 345346}
-%6> maps:find(2, K).
-%{ok,354}
+findTblsLike(TblName, AppId) ->
+   {ok, Filenames} = file:list_dir("/var/messageMap/"),
+   lists:foreach(fun(FileName) ->
+       ListTblName = erlang:atom_to_list(TblName),
+       Unique = length(string:tokens(FileName, "DCD")),
+       tblFound(string:str(FileName, ListTblName), FileName, AppId, Unique)
+     end,
+   Filenames),
+   true.
+
+tblFound(1, FileName, AppId, 2) ->
+    Counter = erlang:list_to_integer(lists:nth(2, string:tokens(lists:nth(1, string:tokens(FileName, ".")), "_"))),
+    Results = pullTblMemory(AppId),
+    Nodes = [node()],
+    CountResult = if
+      Results =:= [] ->
+         [Counter];
+      true ->
+         [{_,AppId,Counters,_}] = Results,
+         lists:usort(lists:merge(lists:sort(Counters), [Counter]))
+    end,
+    addCreateTblMemory(AppId, CountResult, Nodes);
+tblFound(_, _, _, _) ->
+    false.
+
 addCreateTblMemory(AppId, Counter, Nodes) ->
-  InternalResult = pullTblMemory(AppId),
-  io:format("Internal Result: ~p~n", [InternalResult]),
+  %InternalResult = pullTblMemory(AppId),
   INS = fun() ->
       mnesia:write(#tblManager{appid=AppId, counter=Counter,nodes=Nodes})
       end,
@@ -133,7 +153,6 @@ pullTblMemory(AppId) ->
   Results.
 
 createTbl(Tbl) ->
-  io:format("Creating Table: ~p~n", [Tbl]),
   mnesia:create_table(Tbl,
           [
             {type, set},
