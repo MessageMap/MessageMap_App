@@ -72,14 +72,15 @@ pull(Auth, Limit) ->
   AppId = pullAppId(Auth),
   { Tbl, RowCount } = database_manager:selectTblName(AppId),
   io:format("TODO CHANGE TO CHECK Rows If Count Less then Limit, Delete Table and Loop Again to this Function Append Results: Count: ~p Limit: ~p~n", [RowCount, Limit]),
-  if
+  { Result, RollTable } = if
     Tbl =:= false ->
-      [];
+      { [], true };
     Limit < 100 ->
-      database:get_dyn_table(AppId, Tbl, Limit);
+      { database:get_dyn_table(AppId, Tbl, Limit), (RowCount < Limit) };
     true ->
-      database:get_dyn_table(AppId, Tbl, 100)
-  end.
+      { database:get_dyn_table(AppId, Tbl, 100), (RowCount < 100) }
+  end,
+  rollTable( Result, RollTable, Tbl, Auth, Limit, AppId ).
 
 stats(TopicName, Auth) ->
   { _, Scope } = maps:find(scope, Auth),
@@ -94,6 +95,12 @@ stats(TopicName, Auth) ->
   end.
 
 %%%%% Internal Functions
+rollTable(Result, false, _, _, _, _) ->
+   Result;
+rollTable(Result, true, Tbl, Auth, Limit, AppId) ->
+   database_manager:deleteTblName(Tbl, AppId),
+   lists:merge(Result, pull(Auth, Limit)).
+
 % all the Variations
 check_scope("PULL", [<<"read">>,_]) ->
   true;

@@ -13,7 +13,7 @@
 -export([init/0]).
 -export([createMsgsTbl/1]).
 -export([recordCount/1]).
-%-export([deleteTblName/1]).
+-export([deleteTblName/2]).
 %-export([allTblNames/1]).
 -export([allTblNames/1]).
 -export([insertTblName/1]).
@@ -63,6 +63,14 @@ createMsgsTbl(AppId) ->
   addCreateTblMemory(AppId, CountResult, Nodes),
   TblName.
 
+deleteTblName(Tbl, AppId) ->
+  Counter = erlang:list_to_integer(lists:nth(2, string:tokens(erlang:atom_to_list(Tbl), "_"))),
+  ResultTbls = pullTblMemory(AppId),
+  [{ _, _, Counters, Nodes }] = ResultTbls, 
+  NewCounters = lists:filter(fun(X) -> X =/= Counter end, Counters),
+  addCreateTblMemory(AppId, NewCounters, Nodes),
+  mnesia:delete_table(Tbl).
+
 insertTblName(AppId) ->
   Tbl_list = allTblNames(AppId),
   if
@@ -90,7 +98,7 @@ selectTblName(AppId) ->
       TblName = lists:nth(1, lists:sort(Tbl_list)),
       { TblName,  mnesia:table_info(TblName, size) }
   end.
-      
+
 recordCount(AppId) ->
   Tbl_list = allTblNames(AppId),
   if
