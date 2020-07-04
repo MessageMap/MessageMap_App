@@ -88,7 +88,7 @@ var controller = {
         					<div class="panel-heading clearfix"> \
         						<h3 class="panel-title">Attached Schemas</h3> <br /> <br /> \
                     <button id="newSchema" data-toggle="modal" data-target="#topicSchema" class="btn btn-primary btn-md btn-add">Add New Schema</button> \
-                    <p> Adding A Schema to the Topic forces messages to have a topic defined </p> \
+                    <p> Adding/Deleting A Schema from a used topic will force all Publishers to refresh tokens </p> \
         					</div> \
         					<div class="panel-body"> \
         						<div class="table-responsive"> \
