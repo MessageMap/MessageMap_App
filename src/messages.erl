@@ -97,6 +97,8 @@ stats(TopicName, Auth) ->
 %%%%% Internal Functions
 rollTable(Result, false, _, _, _, _) ->
    Result;
+rollTable(Result, _, false, _, _, _ ) ->
+   Result;
 rollTable(Result, true, Tbl, Auth, Limit, AppId) ->
    database_manager:deleteTblName(Tbl, AppId),
    lists:merge(Result, pull(Auth, Limit)).
