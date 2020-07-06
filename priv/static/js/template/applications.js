@@ -343,7 +343,6 @@ var controller = {
         });
 				// Start of Push Configuration
 				$('#enablePushMessages').click(function(e){
-				  console.error("Starting to enable push Messages");
 					var statusPush = $('#enablePushMessages').html();
 					if(statusPush == "Enable Push Messages"){
 					  $('#enablePushMessages').html('Disable Push Messages');
@@ -617,7 +616,7 @@ var controller = {
             namecheck = true;
           }
         });
-        if (namecheck == false){
+        if ((namecheck == false) && (appN.length > 0)){
         $.post('/api/application', {
           appName: $('#appName').val()
         }, function(app) {

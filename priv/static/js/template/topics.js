@@ -291,7 +291,7 @@ var controller = {
           var currentSchemaIds = $.map($(".schemaRow"), function(n, i) {
             return n.id;
           });
-          if (currentSchemaIds.length == 0)
+          if ((currentSchemaIds.length == 0) && ($('#topicName').val().trim().length > 0 )){
             currentSchemaIds = [];
           $.ajax({
             url: '/api/topic/' + id,
@@ -351,7 +351,7 @@ var controller = {
             namecheck = true;
           }
         });
-        if (namecheck == false){
+        if ((namecheck == false) && (appN.length > 0)){
         $.post('/api/topic', {
           topicName: $('#topicName').val()
         }, function(topic) {
