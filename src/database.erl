@@ -482,7 +482,7 @@ insert_dyn_table(AppId, TopicId, SchemaId, Payload, RequestTime) ->
        %io:format("Data: ~p~n", [Data]),
        mnesia:write(Tbl, Data, write)
   end,
-  Result = mnesia:sync_transaction(INS),
+  mnesia:sync_transaction(INS),
   %Update counters
   mnesia:dirty_update_counter({counter_published, all}, 1),
   #{
