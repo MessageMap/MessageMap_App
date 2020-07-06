@@ -167,9 +167,7 @@ processMessageMap(TopicId, Filter, Payload) ->
 process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
   Apps = database:getAllAppDB(),
   R = lists:map(fun(App) ->
-    %TODO: Add Push functions here (metrics, Notification, Websockets
     {_,FoundAppId,_,_,_,_,SubscribedTopics,_,FilterSettings, EncryptValue, PushMessages, PushUrl, PushRetries, PushStatusCode, PushHeaders } = App,
-    io:format("Message Push Configuration: ~p, ~p, ~p, ~p, ~p~n", [PushMessages,PushUrl,PushRetries,PushStatusCode,PushHeaders]),
     CaseResult = case string:str(SubscribedTopics, TopicId) of
       0 ->
         "bad";
@@ -199,7 +197,6 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
             true ->
                true
         end,
-        io:format("Push Result: ~p~n", [PushResult]),
         HardDriveNotFull = true, % Change This to if HD is Full
         Result = if
           HardDriveNotFull andalso SavedPayload =/= "Payload Is To Long" andalso PushResult ->
