@@ -71,7 +71,6 @@ push(Version, TopicName, Auth, Payload, RequestTime) ->
 pull(Auth, Limit) ->
   AppId = pullAppId(Auth),
   { Tbl, RowCount } = database_manager:selectTblName(AppId),
-  io:format("TODO CHANGE TO CHECK Rows If Count Less then Limit, Delete Table and Loop Again to this Function Append Results: Count: ~p Limit: ~p~n", [RowCount, Limit]),
   { Result, RollTable } = if
     Tbl =:= false ->
       { [], true };
@@ -207,6 +206,7 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
             tools:log("info", io_lib:format("Tried to Push Messages to App: ~p Hard Drive is Full", [AppId])),
             false;
           true ->
+            % TODO: Move this to Async background
             % Message was a Push Increase Consume Counters
             mnesia:dirty_update_counter({counter_consumed, all}, 1),
             mnesia:dirty_update_counter({counter_consumed, FoundAppId}, 1),
@@ -216,6 +216,8 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
     end,
     CaseResult
   end, Apps),
+  % TODO: is this a duplidate from above?
+  % Looks like Appis being added Two
   database:add_published_counter(AppId),
   Success = length(lists:filter(fun(X) -> X =:= true end, R)),
   Failed = length(lists:filter(fun(X) -> X =:= false end, R)),

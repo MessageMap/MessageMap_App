@@ -303,6 +303,7 @@ var controller = {
               "schemaid": currentSchemaIds.join(",")
             }
           });
+					}
         });
         $('#cancelTopic').on('click', function(e) {
           e.preventDefault();

@@ -13,7 +13,6 @@
 init(Req, Opts) ->
   { Claims, Req2 } = tools:verifyAuth(Req),
   % redirect if Claims = Bad
-  io:format("Check if Claims Are Bad: ~p~n", [Claims]),
   AppId = cowboy_req:binding(appId, Req),
   Result = buildResponse(AppId),
   ReqFinal = cowboy_req:reply(200, tools:resp_headers(),

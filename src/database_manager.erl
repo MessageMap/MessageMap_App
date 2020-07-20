@@ -23,8 +23,7 @@
 -export([addCreateTblMemory/3]).
 -export([createTbl/1]).
 
-%-define(Max_Table_Size, 1077483648).
--define(Max_Table_Size, 104857600).
+-define(Max_Table_Size, 1077483648).
 
 % List of Functions to Export
 -include_lib("stdlib/include/qlc.hrl").
@@ -40,8 +39,7 @@ init() ->
       { _, AppId, _, _, _, _, _, _, _, _, _, _, _, _, _ } = App,
       StartTblName = list_to_atom("msgs"++string:join(string:tokens(AppId, "-"),"")),
       findTblsLike(StartTblName, AppId),
-      ResultsIns = pullTblMemory(AppId),
-      io:format("Tables Saved for: ~p~n -----~n~p~n", [AppId, ResultsIns])
+      pullTblMemory(AppId)
     end,
     AllApps),
   true.
