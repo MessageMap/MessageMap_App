@@ -179,6 +179,7 @@ var controller = {
 												</div> \
 												</div></div> \
                             <div class="line-dashed"></div> \
+														<div id="appError"></div> \
               <div class="form-group"> \
                                 <div class="col-sm-4"> \
                                     <button type="submit" class="btn btn-white" id="cancelApplication">Cancel</button> \
@@ -539,6 +540,13 @@ var controller = {
 							subArray.push({ "id": id, "value": JSON.parse(val) });
 						}
 					}).promise().done(function(e){
+					var pushurl = $('#pushUrl').val().trim();
+					if ( pushUrl.includes('localhost') ||
+					     pushUrl.includes('msgmap') ||
+							 pushUrl.includes('127.0.0.1') ){
+					   $('#appError').html('Push URL Is Invalid');
+						 $('#appError').addClass('alert alert-danger');
+					} else {
           $.ajax({
             url: '/api/application/' + id,
             type: 'PUT',
@@ -560,6 +568,7 @@ var controller = {
               window.location.hash = '#/applications';
             }
           });
+					}
 					});
         });
         $('#cancelApplication').on('click', function(e) {
