@@ -293,6 +293,7 @@ var controller = {
           });
           if ((currentSchemaIds.length == 0) && ($('#topicName').val().trim().length > 0 )){
             currentSchemaIds = [];
+          }
           $.ajax({
             url: '/api/topic/' + id,
             type: 'PUT',
@@ -303,7 +304,7 @@ var controller = {
               "schemaid": currentSchemaIds.join(",")
             }
           });
-					}
+          window.location.hash = '#/topics';
         });
         $('#cancelTopic').on('click', function(e) {
           e.preventDefault();

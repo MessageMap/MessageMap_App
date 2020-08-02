@@ -46,9 +46,10 @@ init() ->
 
 createMsgsTbl(AppId) ->
   Results = pullTblMemory(AppId),
+  CTable = tableChecking(Results),
   Nodes = [node()],
   {TblName, CountResult} = if
-    Results =:= [] ->
+    CTable ->
       Tbl = list_to_atom("msgs"++string:join(string:tokens(AppId, "-"),"")++"_0"),
       {Tbl, [0]};
     true ->
@@ -60,6 +61,11 @@ createMsgsTbl(AppId) ->
   createTbl(TblName),
   addCreateTblMemory(AppId, CountResult, Nodes),
   TblName.
+
+tableChecking([]) ->
+  true;
+tableChecking([{ _, _, [], _}]) ->
+  true.
 
 deleteAppTables(AppId) ->
   lists:foreach(fun(Tbl) ->

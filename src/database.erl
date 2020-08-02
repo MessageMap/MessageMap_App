@@ -493,7 +493,6 @@ add_published_counter(AppId) ->
   mnesia:dirty_update_counter({counter_published, AppId}, 1).
 
 async_dyn_delete(AppId, Tbl, Results) ->
-    io:format("Running Delete on: ~p~n", [Tbl]),
     DELETE = fun() ->
       lists:foreach(fun(Object) ->
         mnesia:dirty_update_counter({counter_consumed, all}, 1),

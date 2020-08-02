@@ -24,7 +24,7 @@ init(Req, Opts) ->
 processRequest(<<"POST">>, _, Req) ->
   {ok, Body, _} = cowboy_req:read_urlencoded_body(Req),
   {_, EncryptString } = lists:keyfind(<<"encrypt">>, 1, Body),
-  try encryption:msgEncryption("Testing", EncryptString) of
+  try encryption:msgEncryption(<<"Testing">>, EncryptString) of
     _ ->
       jiffy:encode(#{ result => good })
     catch

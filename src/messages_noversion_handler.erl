@@ -34,8 +34,7 @@ init(Req, Opts) ->
         Method == <<"POST">> andalso OsOk ->
           {ok, [{ Payload, _}] , _} = cowboy_req:read_urlencoded_body(Req),
           Ltopic = binary:bin_to_list(Topic),
-          [{topics,_,Ltopic,_,CheckSchemas,_}] = database:getTopicDB(Ltopic),
-          { Status, Result } = sendMessages(CheckSchemas, Topic, Auth, Payload, RequestTime),
+          { Status, Result } = processTopic(database:getTopicDB(Ltopic), Topic, Auth, Payload, RequestTime),
           Req2 = cowboy_req:reply(Status, tools:resp_headers(),
             jiffy:encode(Result),
             Req),
@@ -53,7 +52,13 @@ init(Req, Opts) ->
        end
   end.
 
+% Internal functions
 sendMessages([], Topic, Auth, Payload, RequestTime) ->
   messages:push("None", Topic, Auth, Payload, RequestTime);
 sendMessages(_,_,_,_,_) ->
   { 422, #{ message => <<"Topic Requires a Schema Version">> } }.
+
+processTopic([{topics, _, _, _, CheckSchemas, _}], Topic, Auth, Payload, RequestTime) ->
+  sendMessages(CheckSchemas, Topic, Auth, Payload, RequestTime);
+processTopic(_, _, _, _, _) ->
+  { 404, [] }.
