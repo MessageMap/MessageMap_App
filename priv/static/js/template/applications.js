@@ -52,7 +52,6 @@ var controller = {
       //UI for seeing One Application
       $.get('/api/application/' + id, function(app) {
         $('#noData').hide();
-				console.error(app);
         var App = '<div class="panel panel-default"> \
                     <div class="panel-heading clearfix"> \
                         <h3 class="panel-title">' + app.name + '</h3> \
@@ -312,15 +311,14 @@ var controller = {
         $('#addEncryption').click(function(e){
            //Validate Key Here
            $.post('/api/validateEncryption', { 'encrypt': $('#EncryptionValue').val() }, function(data, status){
-              if(status == 200){
+              if(data.result == "good"){
                   $('#encryptionModal').find(".close").click();
+									$('#encryptionModal').hide();
                 } else {
                   $('#encryptionError').html('Invalid Value for Public Certificate Key').addClass('alert alert-danger');
                 }
            }).done(function(){
              $('#encryptionModal').find(".close").click();
-           }).fail(function(jqxhr, settings, ex) {
-              $('#encryptionError').html('Invalid Value for Public Certificate Key').addClass('alert alert-danger');
            });
         });
         //Start Subscribed Topics
@@ -540,7 +538,7 @@ var controller = {
 							subArray.push({ "id": id, "value": JSON.parse(val) });
 						}
 					}).promise().done(function(e){
-					var pushurl = $('#pushUrl').val().trim();
+					var pushUrl = $('#pushUrl').val().trim();
 					if ( pushUrl.includes('localhost') ||
 					     pushUrl.includes('msgmap') ||
 							 pushUrl.includes('127.0.0.1') ){
