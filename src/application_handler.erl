@@ -23,10 +23,14 @@ init(Req, Opts) ->
 % Internal functions
 processRequest(<<"POST">>, _, Req) ->
   {ok, Body, _} = cowboy_req:read_urlencoded_body(Req),
+  MaxApps = tools:pullAppLimit(),
+  CurrentAppCount = length(database:getAllAppDB()),
   {_, AppName} = lists:keyfind(<<"appName">>, 1, Body),
   if
+    MaxApps =< CurrentAppCount ->
+      jiffy:encode(#{ "Error" => "You are at Max Number of Applications For Env Plan" });
     AppName =:= 1 ->
-      jiffy:encode(#{ "Error" => "Bad Application Name or Missing Application name"});
+      jiffy:encode(#{ "Error" => "Bad Application Name or Missing Application name" });
     true ->
       AppData = database:saveApp(binary:bin_to_list(AppName), "", [], [], [], [], [], [], [], [], []),
       io:format("Response From Save: ~p~n", [AppData]),

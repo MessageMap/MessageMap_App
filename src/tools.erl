@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(tools).
 
--export([log/2, osStats/0, pull_global_stats/0, resp_headers/0, integer_check/1, verifyAuthAdmin/1, verifyAuth/1, version/0, convertDateTime/1]).
+-export([log/2, osStats/0, pull_global_stats/0, resp_headers/0, integer_check/1, verifyAuthAdmin/1, verifyAuth/1, version/0, convertDateTime/1, pullAppLimit/0]).
 
 -define(server, "MessageMap.io").
 -define(version, "0.0.1 Beta").
@@ -96,3 +96,16 @@ pull_global_stats() ->
         }
         end, Apps),
     Result.
+
+pullAppLimit() ->
+  {_, Size, _} = lists:nth(2, disksup:get_disk_data()),
+  if
+     Size > 640000000 ->
+       200;
+     Size > 300000000 ->
+       100;
+     Size > 150000000 ->
+       50;
+     true ->
+       20
+  end.
