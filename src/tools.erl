@@ -13,6 +13,7 @@
 -define(server, "MessageMap.io").
 -define(version, "0.0.1 Beta").
 -define(hostname, os:getenv("MM_HOSTNAME")).
+-define(loggly, "http://logs-01.loggly.com/inputs/a6f62204-c858-423f-8cf1-725f9149cd30/tag/http/").
 
 resp_headers()->
   #{
@@ -32,37 +33,34 @@ osStats() ->
     "mem" => Mem
   },
   Limit = ((Cpu < 400) and (Disk < 90) and (Mem < 90)),
-  tools:log("info", io_lib:format("CPU LOAD: ~p~n", [{Limit, Usage}])),
+  %tools:log("info", io_lib:format("CPU LOAD: ~p~n", [{Limit, Usage}])),
   { Limit, Usage }.
 
 log(Level="info", MsgRaw)->
   Msg = erlang:binary_to_list(erlang:iolist_to_binary(MsgRaw)),
   MsgWrite = erlang:binary_to_list(erlang:iolist_to_binary(io_lib:format(" { 'host': '~p', 'level': '~p', 'msg': ~p }", [?hostname, Level, Msg]))),
-  os:cmd("logger -t msgmap " ++ MsgWrite).
+  % curl -H "content-type:application/json" -d '{ "message" : "hello" }' http://logs-01.loggly.com/inputs/a6f62204-c858-423f-8cf1-725f9149cd30/tag/http/
+  %TODO SETUP IF IN Dev by hostname
+  %os:cmd("logger -t msgmap " ++ MsgWrite).
+  httpc:request(post, {?loggly, [], "application/json", MsgWrite}, [], []).
 
 verifyAuth(Req) ->
-  tools:log("info", io_lib:format("Pulling user Token", [])),
   #{messageMapAuth := AuthValue } = cowboy_req:match_cookies([{messageMapAuth, [], <<"Bad">>}], Req),
-  tools:log("info", io_lib:format("Cookie: ~p", [AuthValue])),
   if
     AuthValue == <<"Bad">> ->
       { AuthValue, Req };
     true ->
       Claims = encryption:ewtDecode(AuthValue),
-      tools:log("info", io_lib:format("Claims: ~p~n", [Claims])),
       { Claims, Req }
   end.
 
 verifyAuthAdmin(Req) ->
-  tools:log("info", io_lib:format("Pull Admin Token", [])),
   #{adminMessageMapAuth := AuthValue } = cowboy_req:match_cookies([{adminMessageMapAuth, [], <<"Bad">>}], Req),
-  tools:log("info", io_lib:format("Admin Cookie: ~p", [AuthValue])),
   if
     AuthValue == <<"Bad">> ->
       { AuthValue, Req };
     true ->
       Claims = encryption:adminEwtDecode(AuthValue),
-      tools:log("info", io_lib:format("Admin Claims: ~p~n", [Claims])),
       { Claims, Req }
   end.
 
