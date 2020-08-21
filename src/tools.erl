@@ -19,10 +19,10 @@
 
 resp_headers()->
   #{
-    <<"content-type">> => <<"application/json">>,
-    <<"company">> => <<"MessageMap.io">>,
-    <<"server">> => <<?server>>,
-    <<"version">> => <<?version>>
+    <<"Content-Type">> => <<"application/json">>,
+    <<"Company">> => <<"MessageMap.io">>,
+    <<"Server">> => <<?server>>,
+    <<"Version">> => <<?version>>
   }.
 
 osStats() ->

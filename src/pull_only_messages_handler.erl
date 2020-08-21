@@ -35,12 +35,18 @@ init(Req, Opts) ->
             jiffy:encode(Result),
             Req),
           {ok, Req2, Opts};
-% TODO: ADD THIS SUPPORT!!!
-%        Method == <<"HEAD">> ->
-%          Headers = maps:merge(tools:resp_headers(), #{<<"messages">> => "345345"}),
-%          Headers = tools:resp_headers(),
-%          Req2 = cowboy_req:reply(200, Headers, "", Req),
-%          {ok, Req2, Opts};
+        Method == <<"HEAD">> ->
+          {_, AppId} = maps:find(id, Auth),
+          Tbl = database_manager:allTblNames(AppId),
+          Size = if
+            Tbl =:= [] ->
+              0;
+            true ->
+              lists:foldl(fun(X, Sum) -> mnesia:table_info(X, size) + Sum end, 0, Tbl)
+          end,
+          Headers = maps:merge(tools:resp_headers(), #{<<"Messages-Waiting">> => list_to_binary(integer_to_list(Size))}),
+          Req2 = cowboy_req:reply(200, Headers, "", Req),
+          {ok, Req2, Opts};
         true ->
          Req2 = cowboy_req:reply(405, tools:resp_headers(),
            jiffy:encode(#{ message => <<"Invalid Method">> }),
