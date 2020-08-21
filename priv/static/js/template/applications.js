@@ -583,10 +583,19 @@ var controller = {
         $.each(result, function(idx, app) {
           var Pub = "";
           var Sub = "";
-          if(app.ownedTopics.length > 0)
-            Pub = '<span class="badge badge-primary">Publisher</span>';
-          if(app.subscribedTopics.length > 0)
-            Sub = '<span class="badge badge-warning">Subscriber</span>';
+					var Push = "";
+					var Encrypt = "";
+					var Mapping = "";
+          if (app.ownedTopics.length > 0)
+            Pub = '<button type="button" class="btn btn-primary">Publisher</button>';
+          if (app.subscribedTopics.length > 0)
+            Sub = '<button type="button" class="btn btn-success">Subscriber</button>';
+					if (app.pushMessages != "false")
+					  Push = '<button type="button" class="btn btn-default">Push Messages</button>';
+					if (app.encrypt.length > 0)
+					  Encrypt = '<button type="button" class="btn btn-warning">Encryption</button>';
+					if (app.filters.length > 5)
+					  Mapping = '<button type="button" class="btn btn-danger">Message Mapping</button>';
           var addApp = '<!-- Card --> \
                         <div class="card"> \
                             <!-- Card Header --> \
@@ -594,9 +603,10 @@ var controller = {
                                 <!-- Card Short Description --> \
                                 <div class="card-short-description"> \
                                     <h5> \
-                                    <span class="app-name"><a class="appNameFull" href="#/applications/' + app.id + '">' + app.name + '</a></span>' + Pub + Sub + ' \
+                                    <span class="app-name"><a class="appNameFull" href="#/applications/' + app.id + '">' + app.name + '</a></span> \
                                     </h5> \
                                     <p>API KEY: ' + app.apiKeys + '</p> \
+																		<div class="btn-toolbar">'+Pub+Sub+Push+Encrypt+Mapping+'</div> \
                                 </div> \
                                 <!-- /card short description --> \
                             </div> \
