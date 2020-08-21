@@ -38,7 +38,7 @@ osStats() ->
 
 log(Level="info", MsgRaw)->
   Msg = erlang:binary_to_list(erlang:iolist_to_binary(MsgRaw)),
-  MsgWrite = erlang:binary_to_list(erlang:iolist_to_binary(io_lib:format(" { 'host': '~p', 'level': '~p', 'msg': ~p }", [?hostname, Level, Msg]))),
+  MsgWrite = erlang:binary_to_list(erlang:iolist_to_binary(io_lib:format('{ "host": "~s", "level": "~s", "msg": ~p }', [?hostname, Level, Msg]))),
   % curl -H "content-type:application/json" -d '{ "message" : "hello" }' http://logs-01.loggly.com/inputs/a6f62204-c858-423f-8cf1-725f9149cd30/tag/http/
   %TODO SETUP IF IN Dev by hostname
   %os:cmd("logger -t msgmap " ++ MsgWrite).
