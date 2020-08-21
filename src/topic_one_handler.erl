@@ -14,7 +14,7 @@ init(Req, Opts) ->
   { Claims, Req2 } = tools:verifyAuth(Req),
   Method = cowboy_req:method(Req),
   Id = cowboy_req:binding(topicId, Req),
-  Result = processRequest(Method, Claims, Id, Req),
+  Result = processRequest(Method, Claims, Id, Req2),
   { ok, ReqFinal } = cowboy_req:reply(200, tools:resp_headers(),
       Result,
       Req2),

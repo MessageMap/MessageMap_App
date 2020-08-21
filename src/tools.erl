@@ -8,7 +8,9 @@
 %%%-------------------------------------------------------------------
 -module(tools).
 
--export([log/2, osStats/0, pull_global_stats/0, resp_headers/0, integer_check/1, verifyAuthAdmin/1, verifyAuth/1, version/0, convertDateTime/1, pullAppLimit/0]).
+-export([log/2]).
+-export([osStats/0, pull_global_stats/0, resp_headers/0, integer_check/1, verifyAuthAdmin/1, verifyAuth/1, version/0, convertDateTime/1, pullAppLimit/0]).
+-export([logmap/2]).
 
 -define(server, "MessageMap.io").
 -define(version, "0.0.1 Beta").
@@ -33,16 +35,22 @@ osStats() ->
     "mem" => Mem
   },
   Limit = ((Cpu < 400) and (Disk < 90) and (Mem < 90)),
-  %tools:log("info", io_lib:format("CPU LOAD: ~p~n", [{Limit, Usage}])),
   { Limit, Usage }.
+
+logmap(Level, Log) ->
+  Data = #{
+    <<"host">> => list_to_binary(?hostname),
+    <<"level">> => list_to_binary(Level),
+    <<"detail">> => Log
+  },
+  spawn(fun() ->
+    httpc:request(post, {?loggly, [], "application/json", jiffy:encode(Data)}, [], [])
+  end).
 
 log(Level="info", MsgRaw)->
   Msg = erlang:binary_to_list(erlang:iolist_to_binary(MsgRaw)),
   MsgWrite = erlang:binary_to_list(erlang:iolist_to_binary(io_lib:format('{ "host": "~s", "level": "~s", "msg": ~p }', [?hostname, Level, Msg]))),
-  % curl -H "content-type:application/json" -d '{ "message" : "hello" }' http://logs-01.loggly.com/inputs/a6f62204-c858-423f-8cf1-725f9149cd30/tag/http/
-  %TODO SETUP IF IN Dev by hostname
-  %os:cmd("logger -t msgmap " ++ MsgWrite).
-  httpc:request(post, {?loggly, [], "application/json", MsgWrite}, [], []).
+  os:cmd("logger -t msgmap " ++ MsgWrite).
 
 verifyAuth(Req) ->
   #{messageMapAuth := AuthValue } = cowboy_req:match_cookies([{messageMapAuth, [], <<"Bad">>}], Req),

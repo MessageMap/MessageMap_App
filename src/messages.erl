@@ -47,6 +47,7 @@ push(Version, TopicName, Auth, Payload, RequestTime) ->
                 status => 'Invalid Schema Name'
               } };
             true ->
+              tools:logmap("info", #{ <<"Feature">> => <<"JSON Schema Used">>}),
               SchemaIsValid = validate:schema(Schema, MapPayload),
               if
                 SchemaIsValid /= error ->
@@ -158,6 +159,7 @@ processMessageMap(TopicId, Filter, Payload) ->
     LTid = binary:bin_to_list(Tid),
     if
       TopicId =:= LTid ->
+        tools:logmap("info", #{ <<"Feature">> => <<"Mapping">> }),
         mapping:msgMapper(Values, Payload);
       true ->
         Payload
@@ -184,6 +186,7 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
            [] ->
              MapMessageResult;
            _ ->
+             tools:logmap("info", #{ <<"Feature">> => <<"Encryption Used">> }),
              binary:list_to_bin(encryption:msgEncryption(jiffy:encode(MapMessageResult), binary:list_to_bin(EncryptValue)))
         end,
         % TODO: this is where Push and not Save Action will happen
@@ -192,6 +195,7 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
             PushMessages =:= <<"true">> andalso SavedPayload =/= "Payload Is To Long" ->
                Headers = [ erlang:list_to_tuple(lists:map(fun(X) -> lists:delete($;, X) end, string:tokens(H, ":"))) 
                            || H <- string:tokens(erlang:binary_to_list(PushHeaders), "\n")],
+               tools:logmap("info", #{<<"Feature">> => <<"Push Messages">> }),
                pushMessages(erlang:binary_to_list(PushUrl), erlang:binary_to_integer(PushStatusCode), Headers, jiffy:encode(SavedPayload), erlang:binary_to_integer(PushRetries));
             true ->
                true
@@ -200,16 +204,18 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
         Result = if
           HardDriveNotFull andalso SavedPayload =/= "Payload Is To Long" andalso PushResult ->
             database:insert_dyn_table(FoundAppId, TopicId, SchemaId, SavedPayload, RequestTime),
-            tools:log("info", io_lib:format("Message Published", [])),
+            % Don't Need to do this Just SPAM
+            % TODO: Disable
+            tools:logmap("info", #{ <<"Feature">> => <<"Message Published">>}),
             true;
           true andalso PushResult ->
             tools:log("info", io_lib:format("Tried to Push Messages to App: ~p Hard Drive is Full", [AppId])),
             false;
           true ->
-            % TODO: Move this to Async background
-            % Message was a Push Increase Consume Counters
-            mnesia:dirty_update_counter({counter_consumed, all}, 1),
-            mnesia:dirty_update_counter({counter_consumed, FoundAppId}, 1),
+            spawn(fun() ->
+              mnesia:dirty_update_counter({counter_consumed, all}, 1),
+              mnesia:dirty_update_counter({counter_consumed, FoundAppId}, 1)
+            end),
             true
         end,
         Result
@@ -225,7 +231,7 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
     0 =:= Failed ->
       { 200, #{
           status => 'good',
-          subscrier_Result => #{
+          subscriber_Result => #{
                success => Success,
                failed => Failed
           }

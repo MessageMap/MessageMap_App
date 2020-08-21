@@ -44,6 +44,11 @@ schema(Schema, Payload) ->
 validateSchema({ error, _}, _) ->
   error;
 validateSchema(S, Payload) ->
-  {Result, _} = jesse:validate_with_schema(S, Payload),
-  tools:log("info", io_lib:format("Result: ~p", [Result])),% jesse:validate_with_schema(S, Payload)])),
+  {Result, Detail} = jesse:validate_with_schema(S, Payload),
+  if
+    Result == error ->
+      tools:log("info", io_lib:format('{ "Type": "Json Schema Validation", "Result": "~p", "Detail": "~p"}', [Result, Detail]));
+    true ->
+      true
+  end,
   Result.

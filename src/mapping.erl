@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
 %%% @author Ben Adams
-%%% @copyright (C) 2017, MessageMap.io
+%%% @copyright (C) 2020, MessageMap.IO LLC
 %%% @doc
-%%% Websocket to stream information back to client browser
+%%% Mapping module to convert payload to required mapping value
 %%% @end
-%%% Created : 10, Nov 2017
+%%% Created : 10, Nov 2019
 %%%-------------------------------------------------------------------
 -module(mapping).
 -export([msgMapper/2]).
@@ -25,6 +25,7 @@ filter(Action, PathElements, FullData, OldName) ->
         is_list(Data) =:= false ->
             [ FinalElement ] = PathElements,
             { SubData } = Data,
+            tools:logmap("info", #{ <<"TypeMapping">> => Action }),
             runNewAction(binary:bin_to_list(Action), FinalElement, SubData, OldName);
         length(PathElements) > 0 ->
             Element = lists:nth(1, PathElements),
