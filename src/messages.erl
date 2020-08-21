@@ -249,10 +249,15 @@ pushMessages(_, _, _, _, true) ->
    false;
 pushMessages(PushUrl, PushStatusCode, Headers, Payload, PushRetries) ->
    Request = {PushUrl, Headers, "application/json", Payload},
-   {_,{{_,StatusCode,_},_,_}} = httpc:request(post, Request, [], []),
+   StatusCode = pushCheck(httpc:request(post, Request, [], [])),
    if
       StatusCode =:= PushStatusCode ->
         pushMessages(PushUrl, PushStatusCode, Headers, Payload, true);
       true ->
         pushMessages(PushUrl, PushStatusCode, Headers, Payload, (PushRetries-1))
    end.
+
+pushCheck({_,{{_,StatusCode,_},_,_}}) ->
+   StatusCode;
+pushCheck(_) ->
+   false.
