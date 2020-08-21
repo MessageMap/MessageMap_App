@@ -204,9 +204,6 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
         Result = if
           HardDriveNotFull andalso SavedPayload =/= "Payload Is To Long" andalso PushResult ->
             database:insert_dyn_table(FoundAppId, TopicId, SchemaId, SavedPayload, RequestTime),
-            % Don't Need to do this Just SPAM
-            % TODO: Disable
-            tools:logmap("info", #{ <<"Feature">> => <<"Message Published">>}),
             true;
           true andalso PushResult ->
             tools:log("info", io_lib:format("Tried to Push Messages to App: ~p Hard Drive is Full", [AppId])),
