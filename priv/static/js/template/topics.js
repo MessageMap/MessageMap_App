@@ -1,4 +1,3 @@
-//TODO: Hide global Add Topic for One
 //  Add Application name for trail
 var controller = {
   'template': '<!-- Secondary header --> \
@@ -294,6 +293,8 @@ var controller = {
           if ((currentSchemaIds.length == 0) && ($('#topicName').val().trim().length > 0 )){
             currentSchemaIds = [];
           }
+					var regex = /^[A-Za-z0-9]+$/;
+					if (regex.test($('#topicName').val())) {
           $.ajax({
             url: '/api/topic/' + id,
             type: 'PUT',
@@ -304,7 +305,14 @@ var controller = {
               "schemaid": currentSchemaIds.join(",")
             }
           });
-          window.location.hash = '#/topics';
+					window.location.hash = '#/topics';
+					}
+					else
+					{
+						$(".deleteWarning").show();
+						$(".deleteWarning").addClass("alert alert-warning");
+						$(".deleteWarning").html("Invalid Topic Name");
+					}
         });
         $('#cancelTopic').on('click', function(e) {
           e.preventDefault();
@@ -353,7 +361,8 @@ var controller = {
             namecheck = true;
           }
         });
-        if ((namecheck == false) && (appN.length > 0)){
+				var regex = /^[A-Za-z0-9]+$/;
+        if ((regex.test(appN)) && (namecheck == false) && (appN.length > 0)){
         $.post('/api/topic', {
           topicName: $('#topicName').val()
         }, function(topic) {
@@ -383,7 +392,11 @@ var controller = {
           $('.cards-container').append(addTopic);
         });
         } else {
-          $('#topicNameError').html("Topic Name is already in use");
+				  if (!regex.test(appN)){
+						$('#topicNameError').html("Invalid Topic Name");
+					} else {
+          	$('#topicNameError').html("Topic Name is already in use");
+					}
           $('#topicNameError').show();
         }
       });
