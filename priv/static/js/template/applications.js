@@ -590,7 +590,7 @@ var controller = {
             Pub = '<button type="button" class="btn btn-primary">Publisher</button>';
           if (app.subscribedTopics.length > 0)
             Sub = '<button type="button" class="btn btn-success">Subscriber</button>';
-					if (app.pushMessages != "false")
+					if (app.pushMessages == "true")
 					  Push = '<button type="button" class="btn btn-default">Push Messages</button>';
 					if (app.encrypt.length > 0)
 					  Encrypt = '<button type="button" class="btn btn-warning">Encryption</button>';
