@@ -262,7 +262,6 @@ updateTopicDBTopicId(TopicId, Name, Description, SchemaId) ->
 %%%%%%%%%%%%%% applications
 saveApp(AppName, AppDescription, AppOwnedTopics, AppSubscribedTopics, PayloadFilter, Encrypt, PushMessages, PushUrl, PushRetries, PushStatusCode, PushHeaders) ->
   IsFound = getAppDB(string:to_lower(AppName)),
-  io:format("IsFound: ~p~n", [IsFound]),
   INS = fun() ->
     CreatedOn = calendar:universal_time(),
     mnesia:write(#applications{id=uuid:to_string(uuid:uuid4()),
@@ -295,7 +294,6 @@ getAppDB(AppName) ->
     qlc:e(Query)
   end,
   {atomic, Results} = mnesia:sync_transaction(PULL),
-  io:format("Result: ~p~n", [Results]),
   Results.
 
 getAppDBAppId(AppId) ->

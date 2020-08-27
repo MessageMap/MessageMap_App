@@ -33,7 +33,6 @@ processRequest(<<"POST">>, _, Req) ->
       jiffy:encode(#{ "Error" => "Bad Application Name or Missing Application name" });
     true ->
       AppData = database:saveApp(binary:bin_to_list(AppName), "", [], [], [], [], [], [], [], [], []),
-      io:format("Response From Save: ~p~n", [AppData]),
       Result = buildResponse(element(1, list_to_tuple(AppData))),
       jiffy:encode(Result)
   end;

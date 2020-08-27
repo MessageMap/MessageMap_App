@@ -11,7 +11,7 @@
 -export([start/0, stop/0]).
 
 start() ->
-  tools:logmap("info", #{ "Boot_Start": "Startup Script Has begun" }),
+  tools:logmap("info", #{ <<"Boot_Start">> => <<"Startup Script Has begun">> }),
   database:init(),
   bootup(),
   application:start(os_mon),
@@ -21,20 +21,20 @@ start() ->
   timer:apply_interval(600000, database, backupDB, ["/tmp/db_app_backup.db"]),
   % Run Renew Cert Every 24hrs
   timer:apply_interval(86400, encryption, certRenew, []),
-  tools:logmap("info", #{ "Boot_Start": "Startup Script Has Finished" }),
-  tools:logmap("info", #{ "Boot_Start": "Welcome to MessageMap !!" }),
-  tools:logmap("info", #{ "Boot_Start": #{ "Version": jiffy:decode(tools:version()) } } ).
+  tools:logmap("info", #{ <<"Boot_Start">> => <<"Startup Script Has Finished">> }),
+  tools:logmap("info", #{ <<"Boot_Start">> => <<"Welcome to MessageMap !!">> }),
+  tools:logmap("info", #{ <<"Boot_Start">> => #{ <<"Version">> => tools:version() } } ).
 
 stop() ->
-  tools:logmap("info", #{ "Boot_Shutdown": "Shutdown Script Has begun" }),
+  tools:logmap("info", #{ <<"Boot_Shutdown">> => <<"Shutdown Script Has begun">> }),
   % TODO: Find why this halts shutdown
   mnesia:stop(), % Stopping Database
   application:stop(os_mon),
-  tools:logmap("info", #{ "Boot_Shutdown": "Shutdown Script Has Finished" }).
+  tools:logmap("info", #{ <<"Boot_Shutdown">> => <<"Shutdown Script Has Finished">> }).
 
 %% Internal Functions
 bootup() ->
-  tools:logmap("info", #{ "Starting Bootup OS Functions" }),
+  tools:logmap("info", #{ <<"Boot_Start">> => <<"OS Functions">> }),
   os:cmd("grep -qxF 'block return on ! lo0 proto tcp to port 8080:8080' /etc/pf.conf || echo 'block return on ! lo0 proto tcp to port 8080:8080' >> /etc/pf.conf"),
   os:cmd("grep -qxF 'pass in on egress inet proto tcp from any to port 80 flags S/SA modulate state' /etc/pf.conf || echo 'pass in on egress inet proto tcp from any to port 80 flags S/SA modulate state' >> /etc/pf.conf"),
   os:cmd("rcctl enable pf"),
