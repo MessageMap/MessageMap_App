@@ -13,7 +13,7 @@
 -export([logmap/2]).
 
 -define(server, "MessageMap.io").
--define(version, "0.0.1 Beta").
+-define(version, "0.1.0").
 -define(hostname, os:getenv("MM_HOSTNAME")).
 -define(loggly, "http://logs-01.loggly.com/inputs/a6f62204-c858-423f-8cf1-725f9149cd30/tag/http/").
 
