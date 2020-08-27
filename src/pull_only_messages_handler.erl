@@ -12,8 +12,9 @@
 
 init(Req, Opts) ->
   Method = cowboy_req:method(Req),
-  AuthToken = cowboy_req:header(<<"authorization">>, Req, []),
-  Auth = encryption:ewtDecode(AuthToken),
+  FullAuthToken = cowboy_req:header(<<"authorization">>, Req, []),
+  AuthToken = lists:last(string:tokens(binary:bin_to_list(FullAuthToken), " ")),
+  Auth = encryption:ewtDecode(binary:list_to_bin(AuthToken)),
   #{limit := Limit} = cowboy_req:match_qs([{limit, int, 10}], Req),
   if
     AuthToken == [] ->
@@ -33,6 +34,18 @@ init(Req, Opts) ->
           Req2 = cowboy_req:reply(200, tools:resp_headers(),
             jiffy:encode(Result),
             Req),
+          {ok, Req2, Opts};
+        Method == <<"HEAD">> ->
+          {_, AppId} = maps:find(id, Auth),
+          Tbl = database_manager:allTblNames(AppId),
+          Size = if
+            Tbl =:= [] ->
+              0;
+            true ->
+              lists:foldl(fun(X, Sum) -> mnesia:table_info(X, size) + Sum end, 0, Tbl)
+          end,
+          Headers = maps:merge(tools:resp_headers(), #{<<"Messages-Waiting">> => list_to_binary(integer_to_list(Size))}),
+          Req2 = cowboy_req:reply(200, Headers, "", Req),
           {ok, Req2, Opts};
         true ->
          Req2 = cowboy_req:reply(405, tools:resp_headers(),

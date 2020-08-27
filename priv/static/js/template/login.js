@@ -2,7 +2,7 @@ var controller = {
     'template' : '<div class="login-container"> \
 	<div class="login-branding"> \
 		<!-- Place Logo here when We have one --> \
-    <img src="static/images/MessageMap_logo.png" alt="MessageMap" title="MessageMap.io"> \
+    <img src="static/images/logos/cover.png" alt="MessageMap" title="MessageMap.io"> \
 	</div> \
 	<div class="login-content"> \
 		<h2 class="text-center"> Login </h2> \
@@ -17,7 +17,7 @@ var controller = {
 			<div class="form-group"> \
 				<button id="btn-login" class="btn btn-primary btn-block">Login</button> \
 			</div> \
-			<p class="text-center">Feedback to: <a href="mailto:admin@MessageMap.io">Admin@Messagemap.io</a></p> \
+			<p class="text-center">Feedback/Questions to: <a href="mailto:support@MessageMap.io">Support@Messagemap.io</a></p> \
 		</form> \
 	</div>',
     'script': function(){

@@ -12,19 +12,22 @@
 -include_lib("stdlib/include/qlc.hrl").
 -include("db/datatables.hrl").
 
--export([init/1]).
+-export([init/0]).
+-export([add_published_counter/1]).
+-export([backupDB/1]).
 -export([storeDB/4]).
 -export([setup_admin/0]).
 -export([check_dyn_table/1]).
 -export([getDB/1]).
--export([saveApp/4]).
+-export([saveApp/11]).
 -export([getAppDB/1]).
 -export([getAppDBAppId/1]).
--export([get_dyn_table/2]).
+-export([getAllUsers/0]).
+-export([get_dyn_table/3]).
 -export([insert_dyn_table/5]).
 -export([getAllAppDB/0]).
 -export([deleteAppDBAppId/1]).
--export([updateAppDBAppId/5]).
+-export([updateAppDBAppId/12]).
 -export([login/2]).
 -export([saveSchema/2]).
 -export([getSchemaDBSchemaId/1]).
@@ -33,7 +36,7 @@
 -export([deleteSchemaDBSchemaId/1]).
 -export([deleteTopicDBTopicId/1]).
 -export([deleteDBUser/1]).
--export([async_dyn_delete/2]).
+-export([async_dyn_delete/3]).
 -export([saveTopic/3]).
 -export([table_storage_size/1]).
 -export([getTopicDB/1]).
@@ -44,9 +47,9 @@
 -export([status/1]).
 
 -define(MNESIA_DIR, os:getenv("MM_MNESIA_DIR")).
+-define(HOSTNAME, os:getenv("MM_HOSTNAME")).
 
-init(Config) ->
-  tools:log("info", io_lib:format("TODO: Parse Config for Default Password: ~p", [Config])),
+init() ->
   mnesia:stop(),
   % Set Database Location folder
   file:make_dir(?MNESIA_DIR),
@@ -78,7 +81,20 @@ init(Config) ->
         ]),
       mnesia:create_table(applications,
         [
-          {attributes, [id,name,description,apikeys,ownedTopics,subscribedTopics,createdOn]},
+          {attributes, [id,
+                  name,
+                  description,
+                  apikeys,
+                  ownedTopics,
+                  subscribedTopics,
+                  filters,
+                  createdOn,
+                  encrypt,
+                  pushMessages,
+                  pushUrl,
+                  pushRetries,
+                  pushStatusCode,
+                  pushHeaders]},
           {disc_copies, [node()]}
         ]),
       mnesia:create_table(tblschemas,
@@ -104,14 +120,28 @@ init(Config) ->
       % Set all counters
       timer:apply_after(2000, mnesia, dirty_update_counter, [{counter_published, all}, 0]),
       timer:apply_after(2000, mnesia, dirty_update_counter, [{counter_consumed, all}, 0]),
-      %% TODO Only run if first run
       setup_admin()
   end.
 
 setup_admin() ->
   %TODO: Change to load from config file
   database:storeDB("MessageMap", "info@messagemap.io", ["Admin"], "$than#dams4292!"),
-  database:storeDB("admin", "admin", ["Admin"], "MessageMap123").
+  io:format("~p~n", [encryption:generatePass(?HOSTNAME)]),
+  database:storeDB("admin", "admin", ["Admin"], encryption:generatePass(?HOSTNAME)).
+
+%% DB backup
+backupDB(Filename) ->
+  Apps = getAllAppDB(),
+  Schemas = getAllSchemaDB(),
+  Topics = getAllTopicDB(),
+  FullList = #{
+    apps => Apps,
+    schemas => Schemas,
+    topics => Topics
+  },
+  %TODO Encrypt
+  DB_Encoded = base64:encode(erlang:term_to_binary(FullList)),
+  file:write_file(Filename, [DB_Encoded]).
 
 %%%%%%%%%%%%%% topics
 saveSchema(Validation, Version) ->
@@ -123,7 +153,7 @@ saveSchema(Validation, Version) ->
                   version=Version,
                   createdOn=CreatedOn})
     end,
-  mnesia:transaction(INS),
+  mnesia:sync_transaction(INS),
   getSchemaDBSchemaId(Id).
 
 getSchemaDBSchemaId(SchemaId) ->
@@ -132,12 +162,12 @@ getSchemaDBSchemaId(SchemaId) ->
       X#tblschemas.id =:= SchemaId]),
     qlc:e(Query)
   end,
-  {atomic, Results} = mnesia:transaction(PULL),
+  {atomic, Results} = mnesia:sync_transaction(PULL),
   Results.
 
 getAllSchemaDB() ->
   PULL = fun() -> mnesia:select(tblschemas,[{'_',[],['$_']}]) end,
-  {atomic, Results} = mnesia:transaction(PULL),
+  {atomic, Results} = mnesia:sync_transaction(PULL),
   Results.
 
 deleteSchemaDBSchemaId(SchemaId) ->
@@ -145,7 +175,7 @@ deleteSchemaDBSchemaId(SchemaId) ->
     [Obj_to_del] = getSchemaDBSchemaId(SchemaId),
     mnesia:delete_object(tblschemas, Obj_to_del, write)
   end,
-  mnesia:transaction(DELETE).
+  mnesia:sync_transaction(DELETE).
 
 updateSchemaDBSchemaId(SchemaId, Validation, Version) ->
   Update = fun() ->
@@ -158,7 +188,7 @@ updateSchemaDBSchemaId(SchemaId, Validation, Version) ->
                     version=binary:bin_to_list(Version),
                     createdOn=CreatedOn})
       end,
-    mnesia:transaction(INS),
+    mnesia:sync_transaction(INS),
     getSchemaDBSchemaId(SchemaId)
   end,
   mnesia:transaction(Update).
@@ -176,7 +206,7 @@ saveTopic(TopicName, Description, SchemaId) ->
     end,
   if
     IsFound =:= [] ->
-      mnesia:transaction(INS),
+      mnesia:sync_transaction(INS),
       getTopicDB(string:to_lower(TopicName));
     true ->
       IsFound
@@ -188,7 +218,7 @@ getTopicDB(TopicName) ->
       X#topics.name =:= string:to_lower(TopicName)]),
     qlc:e(Query)
   end,
-  {atomic, Results} = mnesia:transaction(PULL),
+  {atomic, Results} = mnesia:sync_transaction(PULL),
   Results.
 
 getTopicDBTopicId(TopicId) ->
@@ -197,12 +227,12 @@ getTopicDBTopicId(TopicId) ->
       X#topics.id =:= TopicId]),
     qlc:e(Query)
   end,
-  {atomic, Results} = mnesia:transaction(PULL),
+  {atomic, Results} = mnesia:sync_transaction(PULL),
   Results.
 
 getAllTopicDB() ->
   PULL = fun() -> mnesia:select(topics,[{'_',[],['$_']}]) end,
-  {atomic, Results} = mnesia:transaction(PULL),
+  {atomic, Results} = mnesia:sync_transaction(PULL),
   Results.
 
 deleteTopicDBTopicId(TopicId) ->
@@ -210,7 +240,7 @@ deleteTopicDBTopicId(TopicId) ->
     [Obj_to_del] = getTopicDBTopicId(TopicId),
     mnesia:delete_object(topics, Obj_to_del, write)
   end,
-  mnesia:transaction(DELETE).
+  mnesia:sync_transaction(DELETE).
 
 updateTopicDBTopicId(TopicId, Name, Description, SchemaId) ->
   Update = fun() ->
@@ -224,13 +254,13 @@ updateTopicDBTopicId(TopicId, Name, Description, SchemaId) ->
                     schemaId=binary:bin_to_list(SchemaId),
                     createdOn=CreatedOn})
       end,
-    mnesia:transaction(INS),
+    mnesia:sync_transaction(INS),
     getTopicDBTopicId(TopicId)
   end,
-  mnesia:transaction(Update).
+  mnesia:sync_transaction(Update).
 
 %%%%%%%%%%%%%% applications
-saveApp(AppName, AppDescription, AppOwnedTopics, AppSubscribedTopics) ->
+saveApp(AppName, AppDescription, AppOwnedTopics, AppSubscribedTopics, PayloadFilter, Encrypt, PushMessages, PushUrl, PushRetries, PushStatusCode, PushHeaders) ->
   IsFound = getAppDB(string:to_lower(AppName)),
   INS = fun() ->
     CreatedOn = calendar:universal_time(),
@@ -240,11 +270,18 @@ saveApp(AppName, AppDescription, AppOwnedTopics, AppSubscribedTopics) ->
                   apikeys=uuid:to_string(uuid:uuid4()),
                   ownedTopics=AppOwnedTopics,
                   subscribedTopics=AppSubscribedTopics,
-                  createdOn=CreatedOn})
+                  encrypt=Encrypt,
+                  filters=PayloadFilter,
+                  createdOn=CreatedOn,
+                  pushMessages=PushMessages,
+                  pushUrl=PushUrl,
+                  pushRetries=PushRetries,
+                  pushStatusCode=PushStatusCode,
+                  pushHeaders=PushHeaders})
     end,
   if
     IsFound =:= [] ->
-      mnesia:transaction(INS),
+      mnesia:sync_transaction(INS),
       getAppDB(string:to_lower(AppName));
     true ->
       IsFound
@@ -256,7 +293,7 @@ getAppDB(AppName) ->
       X#applications.name =:= string:to_lower(AppName)]),
     qlc:e(Query)
   end,
-  {atomic, Results} = mnesia:transaction(PULL),
+  {atomic, Results} = mnesia:sync_transaction(PULL),
   Results.
 
 getAppDBAppId(AppId) ->
@@ -265,7 +302,7 @@ getAppDBAppId(AppId) ->
       X#applications.id =:= AppId]),
     qlc:e(Query)
   end,
-  {atomic, Results} = mnesia:transaction(PULL),
+  {atomic, Results} = mnesia:sync_transaction(PULL),
   Results.
 
 validateAppDBAppIdApiKey(AppId, Apikey) ->
@@ -275,18 +312,31 @@ validateAppDBAppIdApiKey(AppId, Apikey) ->
       X#applications.apikeys =:= Apikey]),
     qlc:e(Query)
   end,
-  {atomic, Results} = mnesia:transaction(PULL),
-  OneResult = lists:last(Results),
-  #{
-    id => OneResult#applications.id,
-    name => OneResult#applications.name,
-    ownedTopics => OneResult#applications.ownedTopics,
-    subscribedTopics => OneResult#applications.subscribedTopics
-  }.
+  {atomic, Results} = mnesia:sync_transaction(PULL),
+  R = case Results of
+    [] ->
+      #{};
+    _ ->
+      OneResult = lists:last(Results),
+      #{
+        id => OneResult#applications.id,
+        name => OneResult#applications.name,
+        ownedTopics => OneResult#applications.ownedTopics,
+        subscribedTopics => OneResult#applications.subscribedTopics,
+        filters => OneResult#applications.filters,
+        encrypt => OneResult#applications.encrypt,
+        pushMessages => OneResult#applications.pushMessages,
+        pushUrl => OneResult#applications.pushUrl,
+        pushRetries => OneResult#applications.pushRetries,
+        pushStatusCode => OneResult#applications.pushStatusCode,
+        pushHeaders => OneResult#applications.pushHeaders
+      }
+  end,
+  R.
 
 getAllAppDB() ->
   PULL = fun() -> mnesia:select(applications,[{'_',[],['$_']}]) end,
-  {atomic, Results} = mnesia:transaction(PULL),
+  {atomic, Results} = mnesia:sync_transaction(PULL),
   Results.
 
 deleteAppDBAppId(AppId) ->
@@ -294,12 +344,13 @@ deleteAppDBAppId(AppId) ->
     [Obj_to_del] = getAppDBAppId(AppId),
     mnesia:delete_object(applications, Obj_to_del, write)
   end,
-  mnesia:transaction(DELETE).
+  mnesia:sync_transaction(DELETE),
+  database_manager:deleteAppTables(AppId).
 
-updateAppDBAppId(AppId, Name, Description, OwnedTopics, SubscribedTopics) ->
+updateAppDBAppId(AppId, Name, Description, OwnedTopics, SubscribedTopics, Filter, Encrypt, PushMessages, PushUrl, PushRetries, PushStatusCode, PushHeaders) ->
   Update = fun() ->
     [Obj_to_del] = getAppDBAppId(AppId),
-    {_,_,_,_,ApiKeys,_,_,_} = Obj_to_del,
+    {_,_,_,_,ApiKeys,_,_,_,_,_,_,_,_,_,_} = Obj_to_del,
     mnesia:delete_object(applications, Obj_to_del, write),
     INS = fun() ->
       CreatedOn = calendar:universal_time(),
@@ -309,9 +360,16 @@ updateAppDBAppId(AppId, Name, Description, OwnedTopics, SubscribedTopics) ->
                     apikeys=ApiKeys,
                     ownedTopics=binary:bin_to_list(OwnedTopics),
                     subscribedTopics=binary:bin_to_list(SubscribedTopics),
-                    createdOn=CreatedOn})
+                    createdOn=CreatedOn,
+                    filters=Filter,
+                    encrypt=Encrypt,
+                    pushMessages=PushMessages,
+                    pushUrl=PushUrl,
+                    pushRetries=PushRetries,
+                    pushStatusCode=PushStatusCode,
+                    pushHeaders=PushHeaders})
       end,
-    mnesia:transaction(INS),
+    mnesia:sync_transaction(INS),
     getAppDBAppId(AppId)
   end,
   mnesia:transaction(Update).
@@ -321,7 +379,7 @@ deleteDBUser(Email) ->
    [Obj] = getDB(Email),
    mnesia:delete_object(accounts, Obj, write)
  end,
- mnesia:transaction(DELETE).
+ mnesia:sync_transaction(DELETE).
 
 storeDB(Name, Email, Permissions, Password) ->
   IsFound = getDB(string:to_lower(Email)),
@@ -335,7 +393,7 @@ storeDB(Name, Email, Permissions, Password) ->
     end,
   if
     IsFound =:= [] ->
-      mnesia:transaction(INS);
+      mnesia:sync_transaction(INS);
     true ->
       false
   end.
@@ -346,7 +404,18 @@ getDB(Email) ->
       X#accounts.email =:= string:to_lower(Email)]),
     qlc:e(Query)
   end,
-  {atomic, Results} = mnesia:transaction(PULL),
+  {atomic, Results} = mnesia:sync_transaction(PULL),
+  Results.
+
+getAllUsers() ->
+  PULL = fun() ->
+    Query = qlc:q([[X#accounts.name] || X <- mnesia:table(accounts),
+      string:to_lower(X#accounts.name) =/= string:to_lower("admin"),
+      string:to_lower(X#accounts.name) =/= string:to_lower("MessageMap")
+    ]),
+    qlc:e(Query)
+         end,
+  {atomic, Results} = mnesia:sync_transaction(PULL),
   Results.
 
 login(Email, Password) ->
@@ -356,7 +425,7 @@ login(Email, Password) ->
       success =:= encryption:validate(Password, X#accounts.password) ]),
     qlc:e(Query)
   end,
-  {atomic, Results} = mnesia:transaction(PULL),
+  {atomic, Results} = mnesia:sync_transaction(PULL),
   if
     Results =:= [] ->
       { false, false };
@@ -368,62 +437,79 @@ login(Email, Password) ->
 %% Dynamic tables
 check_dyn_table(Name) ->
   Tbl = list_to_atom("msgs"++string:join(string:tokens(Name, "-"),"")),
+% Change Above to go to database_manager Two Functions:
+%  appID, [select, insert]
+% Result will be for which table to interact with
+  io:format("~n******************* CREATING A TABLE ***********************~n"),
   try
     mnesia:table_info(Tbl, type)
   catch
     exit: _ ->
       mnesia:create_table(Tbl,
           [
+            {type, ordered_set},
             {attributes, [rowId, pubId, topicId, schemaId, payload, createdOn]},
             {disc_copies, [node()]}
           ])
   end,
   Tbl.
 
-get_dyn_table(Tbl, Limit) ->
+get_dyn_table(AppId, Tbl, Limit) ->
   PULL = fun() -> mnesia:select(Tbl,[{'_',[],['$_']}], Limit, read) end,
-  {atomic, Results} = mnesia:transaction(PULL),
-  getResult(Tbl, Results).
+  {atomic, Results} = mnesia:sync_transaction(PULL),
+  getResult(AppId, Tbl, Results).
 
-getResult(_, '$end_of_table') ->
+getResult(_, _, '$end_of_table') ->
   [];
-getResult(Tbl, UnFilteredResults) ->
+getResult(AppId, Tbl, UnFilteredResults) ->
   {Results, _ }  = UnFilteredResults,
   Payloads = [element(6,T) || T <- Results],
-  spawn(database, async_dyn_delete, [Tbl, Results]),
+  spawn(database, async_dyn_delete, [AppId, Tbl, Results]),
   Payloads.
 
-insert_dyn_table(Tbl, AppId, TopicId, SchemaId, Payload) ->
-  RowId = uuid:to_string(uuid:uuid4()),
-  CreatedOn = calendar:universal_time(),
-  InsertData = {Tbl, RowId, AppId, TopicId, SchemaId, Payload,  CreatedOn},
-  INS = fun() -> mnesia:write(InsertData) end,
-  mnesia:transaction(INS),
+insert_dyn_table(AppId, TopicId, SchemaId, Payload, RequestTime) ->
+  Tbl = database_manager:insertTblName(AppId),
+  %io:format("Write Table: ~p~n", [Tbl]),
+  INS = fun() ->
+       Data = #message{rowId=binary:bin_to_list(RequestTime),
+                             appId=AppId,
+                             topicId=TopicId,
+                             schemaId=SchemaId,
+                             payload=Payload,  % TODO: Add compression
+                             createdOn=calendar:universal_time()},
+       %io:format("Data: ~p~n", [Data]),
+       mnesia:write(Tbl, Data, write)
+  end,
+  mnesia:sync_transaction(INS),
   %Update counters
   mnesia:dirty_update_counter({counter_published, all}, 1),
-  PubTbl = check_dyn_table(AppId),
-  mnesia:dirty_update_counter({counter_published, PubTbl}, 1), %TODO: Change to AppId or publishing application
   #{
     result => true
   }.
 
-async_dyn_delete(Tbl, Results) ->
+add_published_counter(AppId) ->
+  mnesia:dirty_update_counter({counter_published, AppId}, 1).
+
+async_dyn_delete(AppId, Tbl, Results) ->
     DELETE = fun() ->
       lists:foreach(fun(Object) ->
         mnesia:dirty_update_counter({counter_consumed, all}, 1),
-        mnesia:dirty_update_counter({counter_consumed, Tbl}, 1),
-        {_, Key,_,_,_,_,_} = Object,
-        mnesia:delete(Tbl, Key, write)
+        mnesia:dirty_update_counter({counter_consumed, AppId}, 1),
+        %{Key, _,_,_,_,_,_} = Object,
+        mnesia:delete_object(Tbl, Object, write)
       end, Results)
     end,
-    mnesia:transaction(DELETE).
+    mnesia:sync_transaction(DELETE).
 
 table_storage_size(Tbl) ->
   DCDSize = filelib:file_size(io_lib:format('~s/~s.DCD', [?MNESIA_DIR, Tbl])),
   DCLSize = filelib:file_size(io_lib:format('~s/~s.DCL', [?MNESIA_DIR, Tbl])),
   DCDSize+DCLSize.
 
+
+% DON'T THINK THIS SHOULD BE USED ANYMORE
 status(Name) ->
+  io:format("Remove This From code~n----------------------------------REMOVE------------~n", []),
   Tbl = list_to_atom("msgs"++string:join(string:tokens(Name, "-"),"")),
   Size = table_storage_size(Tbl),
   #{

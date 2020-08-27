@@ -1,0 +1,14 @@
+
+Hope you enjoy your new logo, here are the people that
+made your beautiful logo happen :)
+font name: Prociono
+font link: https://fonts.google.com/specimen/Prociono
+font author: Barry Schwartz
+font author site: http://crudfactory.com/
+Slogan Font: SpaceMono-Regular.ttf
+
+icon designer: Yamini Ahluwalia
+icon designer link: /yaminiahluwalia
+        
+{"bg":"#41A2FF","icon":"#054EA4","font":"#ffffff","slogan":"#ffffff"}
+      

@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
 %%% @author Benjamin Adams
-%%% @copyright (C) 2017, Ethan Solutions
+%%% @copyright (C) 2020, MessageMap LLC
 %%% @doc
 %%%  Return to the user contents of their token
 %%% @end
-%%% Created : 8. Sept 2017
+%%% Created : 4. Jun 2020
 %%%-------------------------------------------------------------------
 -module(application_handler).
 
@@ -23,12 +23,16 @@ init(Req, Opts) ->
 % Internal functions
 processRequest(<<"POST">>, _, Req) ->
   {ok, Body, _} = cowboy_req:read_urlencoded_body(Req),
+  MaxApps = tools:pullAppLimit(),
+  CurrentAppCount = length(database:getAllAppDB()),
   {_, AppName} = lists:keyfind(<<"appName">>, 1, Body),
   if
+    MaxApps =< CurrentAppCount ->
+      jiffy:encode(#{ "Error" => "You are at Max Number of Applications For Env Plan" });
     AppName =:= 1 ->
-      jiffy:encode(#{ "Error" => "Bad Application Name or Missing Application name"});
+      jiffy:encode(#{ "Error" => "Bad Application Name or Missing Application name" });
     true ->
-      AppData = database:saveApp(binary:bin_to_list(AppName), "", [], []),
+      AppData = database:saveApp(binary:bin_to_list(AppName), "", [], [], [], [], [], [], [], [], []),
       Result = buildResponse(element(1, list_to_tuple(AppData))),
       jiffy:encode(Result)
   end;
@@ -44,7 +48,7 @@ buildResponses(Data) ->
   end, Data).
 
 buildResponse(Data) ->
-  {_,Id,Name,Description,ApiKeys,Ownedtopics,SubscribedTopics,CreatedOn} = element(1, list_to_tuple([Data])),
+  {_, Id, Name, Description, ApiKeys, Ownedtopics, SubscribedTopics, CreatedOn, Filter, Encrypt, PushMessages, PushUrl, PushRetries, PushStatusCode, PushHeaders} = element(1, list_to_tuple([Data])),
   #{
     id => binary:list_to_bin(Id),
     name => binary:list_to_bin(Name),
@@ -52,5 +56,12 @@ buildResponse(Data) ->
     apiKeys => binary:list_to_bin(ApiKeys),
     ownedTopics => binary:list_to_bin(Ownedtopics),
     subscribedTopics => binary:list_to_bin(SubscribedTopics),
+    encrypt => binary:list_to_bin(Encrypt),
+    filters => binary:list_to_bin([Filter]),
+    pushMessages => PushMessages,
+    pushUrl => PushUrl,
+    pushRetries => PushRetries,
+    pushStatusCode => PushStatusCode,
+    pushHeaders => PushHeaders,
     createdOn => binary:list_to_bin(tools:convertDateTime(CreatedOn))
   }.

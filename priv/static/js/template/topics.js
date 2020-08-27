@@ -1,4 +1,3 @@
-//TODO: Hide global Add Topic for One
 //  Add Application name for trail
 var controller = {
   'template': '<!-- Secondary header --> \
@@ -35,6 +34,7 @@ var controller = {
             <h4 class="modal-title">Add Topic</h4> \
           </div> \
           <div class="modal-body"> \
+            <p style="display:none;" class="alert alert-danger" id="topicNameError"></p> \
             <p>Topic Name: <input type="text" id="topicName" /></p> \
           </div> \
           <div class="modal-footer"> \
@@ -48,8 +48,6 @@ var controller = {
   'script': function(id) {
     if (id) {
       $('#newTopic').hide();
-      //TODO: Build UI for looking at one topic
-      console.error("Loading ID: " + id);
       //UI for seeing One Topic
       $.get('/api/topic/' + id, function(topic) {
         $('#noData').hide();
@@ -72,6 +70,12 @@ var controller = {
 								</div>  \
 							</div> \
 						 	<div class="form-group">  \
+								<label class="col-sm-2 control-label">Created/Modified on: </label>  \
+								<div class="col-sm-10">  \
+									<span style="font-size:14px">' + topic.createdOn + '</span>  \
+								</div>  \
+							</div> \
+						 	<div class="form-group">  \
 								<label class="col-sm-2 control-label">Description: </label>  \
 								<div class="col-sm-10">  \
                 <textarea placeholder="Textarea" id="topicDescription" class="form-control">' + topic.description + '</textarea>  \
@@ -83,6 +87,7 @@ var controller = {
         					<div class="panel-heading clearfix"> \
         						<h3 class="panel-title">Attached Schemas</h3> <br /> <br /> \
                     <button id="newSchema" data-toggle="modal" data-target="#topicSchema" class="btn btn-primary btn-md btn-add">Add New Schema</button> \
+                    <p> Adding/Deleting A Schema from a used topic will force all Publishers to refresh tokens </p> \
         					</div> \
         					<div class="panel-body"> \
         						<div class="table-responsive"> \
@@ -91,8 +96,7 @@ var controller = {
         									<tr>  \
         										<th>#</th>  \
         										<th>Version</th>  \
-        										<th>Number of Messages</th>  \
-        										<!--th>View Schema</th-->  \
+        										<th>View Schema</th>  \
         										<th>Remove Schema</th>  \
         									</tr>  \
         								</thead>  \
@@ -103,11 +107,14 @@ var controller = {
         					</div> \
         				</div> \
 							<div class="line-dashed"></div> \
-              <div class="form-group"> \
+                                <div class="form-group"> \
+                                <div class="col-sm-12 deleteWarning"> \
+                                <h5> Delete All Schema And Save Before Deleting Topic </h5> \
+                                </div> \
 								<div class="col-sm-4"> \
 									<button type="submit" class="btn btn-white" id="cancelTopic">Cancel</button> \
 									<button type="submit" class="btn btn-primary" id="saveTopic">Save changes</button> \
-                  <button type="submit" class="btn btn-danger" id="deleteTopic">Delete Topic</button> \
+                                    <button type="submit" class="btn btn-danger" id="deleteTopic">Delete Topic</button> \
 								</div> \
 							</div> \
 						</form> \
@@ -121,21 +128,45 @@ var controller = {
               </div> \
               <div class="modal-body"> \
                 <p>Version: <input type="text" id="schemaVersion" /></p> \
+                <p><span id="schemaVersionError" class="alert alert-danger" style="display:none" /></p> \
                 <p>Validation (JSON): <br /> \
                 <textarea placeholder="Textarea" style="height: 200px" id="schemaValidation" class="form-control"></textarea>  \
                 </p> \
               </div> \
-            </div> \
               <div class="modal-footer"> \
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
                 <button type="button" class="btn btn-primary" id="schemaAdd">Add Schema</button> \
               </div> \
+              </div> \
             </div><!-- /.modal-content --> \
           </div><!-- /.modal-dialog --> \
-				</div>';
+				</div> \
+				<div id="viewSchema" class="modal fade" tabindex="-1" role="dialog" style="display: none;"> \
+                          <div class="modal-dialog"> \
+                            <div class="modal-content"> \
+                              <div class="modal-header"> \
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button> \
+                                <h4 class="modal-title">Schema:</h4> \
+                              </div> \
+                              <div class="modal-body"> \
+                                <p>Version: <input type="text" class="schemaTitle" disabled /></p> \
+                                <p>DateTime: <input type="text" class="schemaCreatedOn" disabled /></p> \
+                                <p>Validation (JSON): <br /> \
+                                <pre style="height: auto;overflow-x: auto;white-space: pre-wrap;white-space: -moz-pre-wrap;white-space: -pre-wrap;white-space: -o-pre-wrap;word-wrap: break-word;" class="schemaViewValidation form-control"></pre>  \
+                                </p> \
+                              </div> \
+                              <div class="modal-footer"> \
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
+                              </div> \
+                              </div> \
+                            </div><!-- /.modal-content --> \
+                          </div><!-- /.modal-dialog --> \
+                				</div>';
         $('.cards-container').empty();
         $('.cards-container').html(Topic);
+          $('.deleteWarning').hide();
         if (topic.schemaId) {
+          $('.deleteWarning').show();
           topic.schemaId.split(',').forEach(function(schemaId) {
             $.ajax({
               url: '/api/schema/' + schemaId,
@@ -143,18 +174,33 @@ var controller = {
               success: function(schema) {
                 var schemaHtml = '<tr class="schemaRow" id="' + schema.id + '">  \
                   <th scope="row">' + schema.id + '</th>  \
-                  <td>' + schema.version + '</td>  \
-                  <td style="text-align:right">0</td>  \
-                  <!--td><button type="submit" class="btn btn-info" id="viewSchema">View schema</button></td-->  \
+                  <td class="schemaVersions">' + schema.version + '</td>  \
+                  <td><button data-toggle="modal" data-target="#viewSchema" type="submit" class="btn btn-info" id="btnViewSchema">View schema</button></td>  \
                   <td><button type="submit" class="btn btn-danger" id="deleteSchema">Remove schema</button></td>  \
                 </tr>';
                 $('#schemaRows').append(schemaHtml);
+                $('#deleteTopic').prop('disabled', true);
+                $
               }
             })
           });
+          $(document).on('click', '#btnViewSchema', function(e) {
+            e.preventDefault();
+            var schemaId = $(this).closest('tr').attr('id');
+             $.ajax({
+                  url: '/api/schema/' + schemaId,
+                  type: 'GET',
+                  success: function(schema) {
+                   var schemaObj = JSON.parse(schema.validation);
+                   var formattedSchema = JSON.stringify(schemaObj, null, '\t');
+                   $('.schemaTitle').val(schema.version);
+                   $('.schemaCreatedOn').val(schema.createdOn);
+                   $('.schemaViewValidation').html(formattedSchema);
+                }
+              });
+        });
           $(document).on('click', '#deleteSchema', function(e) {
             e.preventDefault();
-	    if( id != '5cabed43-c268-41a4-ad1f-dc34cb98d37e'){ 
             var schemaid = $(this).closest('tr').attr('id');
             $.ajax({
               url: '/api/schema/' + schemaid,
@@ -181,13 +227,26 @@ var controller = {
                 });
               }
             });
-	   }
           });
         }
+
         $('#schemaAdd').on('click', function(e) {
           e.preventDefault();
-          if(id != '5cabed43-c268-41a4-ad1f-dc34cb98d37e') {
-          $.ajax({
+          var schemaVersion = $('#schemaVersion').val();
+          var schemaAlreadyFound = false;
+          // Test value is version number
+          if ( ! /^\d*\.?\d*\.?\d*\.?\d*$/.test(schemaVersion)){
+            schemaAlreadyFound = true;
+          }
+          $('.schemaVersions').each(function(e){
+            if (schemaVersion == $(this).html()){
+                schemaAlreadyFound = true;
+            }
+          });
+          if (schemaAlreadyFound){
+            $('#schemaVersionError').html('Schema Version Already Inuse/Version is not a number').show();
+          } else{
+            $.ajax({
             url: '/api/schema',
             type: 'POST',
             contentType: "application/json",
@@ -216,26 +275,26 @@ var controller = {
               });
             }
           });
-	  }
+          }
         });
         $('#deleteTopic').on('click', function(e) {
           e.preventDefault();
-          if(id != '5cabed43-c268-41a4-ad1f-dc34cb98d37e') {
           $.ajax({
             url: '/api/topic/' + id,
             type: 'DELETE'
           });
           window.location.hash = '#/topics';
-          }
         });
         $('#saveTopic').on('click', function(e) {
           e.preventDefault();
-          if(id != '5cabed43-c268-41a4-ad1f-dc34cb98d37e') {
           var currentSchemaIds = $.map($(".schemaRow"), function(n, i) {
             return n.id;
           });
-          if (currentSchemaIds.length == 0)
+          if ((currentSchemaIds.length == 0) && ($('#topicName').val().trim().length > 0 )){
             currentSchemaIds = [];
+          }
+					var regex = /^[A-Za-z0-9]+$/;
+					if (regex.test($('#topicName').val())) {
           $.ajax({
             url: '/api/topic/' + id,
             type: 'PUT',
@@ -246,7 +305,14 @@ var controller = {
               "schemaid": currentSchemaIds.join(",")
             }
           });
-          }
+					window.location.hash = '#/topics';
+					}
+					else
+					{
+						$(".deleteWarning").show();
+						$(".deleteWarning").addClass("alert alert-warning");
+						$(".deleteWarning").html("Invalid Topic Name");
+					}
         });
         $('#cancelTopic').on('click', function(e) {
           e.preventDefault();
@@ -267,7 +333,7 @@ var controller = {
     							<!-- Card Short Description --> \
     							<div class="card-short-description"> \
     								<h5> \
-                      <span class="app-name"><a href="#/topics/' + topic.id + '">' + topic.name + '</a></span> \
+                      <span class="app-name"><a class="topicNameFull" href="#/topics/' + topic.id + '">' + topic.name + '</a></span> \
                     </h5> \
         						<div class="card-content"> \
         							<p>' + topic.description + '</p> \
@@ -287,6 +353,16 @@ var controller = {
 
       $('#topicNameAdd').click(function(e) {
         e.preventDefault();
+        var appN = $('#topicName').val().trim();
+        var namecheck = false;
+        $('.topicNameFull').each(function(e){
+          checkname = $(this).html().trim();
+          if (checkname == appN) {
+            namecheck = true;
+          }
+        });
+				var regex = /^[A-Za-z0-9]+$/;
+        if ((regex.test(appN)) && (namecheck == false) && (appN.length > 0)){
         $.post('/api/topic', {
           topicName: $('#topicName').val()
         }, function(topic) {
@@ -315,6 +391,14 @@ var controller = {
           $('#noData').hide();
           $('.cards-container').append(addTopic);
         });
+        } else {
+				  if (!regex.test(appN)){
+						$('#topicNameError').html("Invalid Topic Name");
+					} else {
+          	$('#topicNameError').html("Topic Name is already in use");
+					}
+          $('#topicNameError').show();
+        }
       });
     }
   }

@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
 %%% @author Benjamin Adams
-%%% @copyright (C) 2017, Message.io
+%%% @copyright (C) 2020, MessageMap LLC
 %%% @doc
 %%%  Return One topic for listing
 %%% @end
-%%% Created : 8. Sept 2017
+%%% Created : 04. Jun 2020
 %%%-------------------------------------------------------------------
 -module(topic_one_handler).
 
@@ -14,7 +14,7 @@ init(Req, Opts) ->
   { Claims, Req2 } = tools:verifyAuth(Req),
   Method = cowboy_req:method(Req),
   Id = cowboy_req:binding(topicId, Req),
-  Result = processRequest(Method, Claims, Id, Req),
+  Result = processRequest(Method, Claims, Id, Req2),
   { ok, ReqFinal } = cowboy_req:reply(200, tools:resp_headers(),
       Result,
       Req2),
@@ -45,4 +45,5 @@ buildResponse(Data) ->
     name => binary:list_to_bin(Name),
     description => binary:list_to_bin(Description),
     schemaId => binary:list_to_bin(SchemaId),
-    createdOn => binary:list_to_bin(tools:convertDateTime(CreatedOn))}.
+    createdOn => binary:list_to_bin(tools:convertDateTime(CreatedOn))
+}.
