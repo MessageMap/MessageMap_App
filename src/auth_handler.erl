@@ -21,6 +21,7 @@ init(Req, Opts) ->
   Result = jiffy:encode(io_lib:format("{ \"request\": ~p }", [ResultOfLogin])),
   if
     ResultOfLogin ->
+      tools:logmap("info", #{<<"Login">> => Email}),
       Req2 = cowboy_req:set_resp_cookie(<<"messageMapAuth">>, EwtToken, Req0,  #{domain => ?DOMAIN});
     true ->
       Req2 = Req0
