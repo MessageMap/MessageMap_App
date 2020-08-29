@@ -637,6 +637,10 @@ var controller = {
         $.post('/api/application', {
           appName: $('#appName').val()
         }, function(app) {
+           if ("Error" in app){
+            $('#appNameError').html(app.Error);
+            $('#appNameError').show();
+          } else {
           $('#appModal').find(".close").click();
           var Pub = '<span class="badge badge-primary" style="display:none">Publisher</span>';
           var Sub = '<span class="badge badge-warning" style="display:none">Subscriber</span>';
@@ -665,6 +669,7 @@ var controller = {
           $('#noData').hide();
           $('.cards-container').append(addApp);
         });
+        }
         } else {
           $('#appNameError').html("Application Name is already in use");
           $('#appNameError').show();
