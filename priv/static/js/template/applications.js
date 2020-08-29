@@ -668,8 +668,8 @@ var controller = {
           $('#appName').val('');
           $('#noData').hide();
           $('.cards-container').append(addApp);
-        });
         }
+        });
         } else {
           $('#appNameError').html("Application Name is already in use");
           $('#appNameError').show();
