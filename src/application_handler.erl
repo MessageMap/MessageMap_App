@@ -28,9 +28,9 @@ processRequest(<<"POST">>, _, Req) ->
   {_, AppName} = lists:keyfind(<<"appName">>, 1, Body),
   if
     MaxApps =< CurrentAppCount ->
-      jiffy:encode(#{ "Error" => "You are at Max Number of Applications For Env Plan" });
+      jiffy:encode(#{ <<"Error">> => <<"You are at Max Number of Applications For Env Plan">> });
     AppName =:= 1 ->
-      jiffy:encode(#{ "Error" => "Bad Application Name or Missing Application name" });
+      jiffy:encode(#{ <<"Error">> => <<"Bad Application Name or Missing Application name">> });
     true ->
       AppData = database:saveApp(binary:bin_to_list(AppName), "", [], [], [], [], [], [], [], [], []),
       Result = buildResponse(element(1, list_to_tuple(AppData))),
