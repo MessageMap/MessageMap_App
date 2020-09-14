@@ -23,7 +23,7 @@ start() ->
   timer:apply_interval(86400, encryption, certRenew, []),
   tools:logmap("info", #{ <<"Boot_Start">> => <<"Startup Script Has Finished">> }),
   tools:logmap("info", #{ <<"Boot_Start">> => <<"Welcome to MessageMap !!">> }),
-  tools:logmap("info", #{ <<"Boot_Start">> => #{ <<"Version">> => tools:version() } } ).
+  tools:logmap("info", #{ <<"Boot_Start">> => tools:resp_headers() } ).
 
 stop() ->
   tools:logmap("info", #{ <<"Boot_Shutdown">> => <<"Shutdown Script Has begun">> }),
