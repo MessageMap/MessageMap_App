@@ -85,7 +85,7 @@ var controller = {
                             <div class="form-group">  \
                                 <label class="col-sm-2 control-label">API Key: </label>  \
                                 <div class="col-sm-10">  \
-                  <span class="label label-default" style="font-size:12px">'+ app.apiKeys + '</label>  \
+                  <span class="label label-default" style="font-size:12px">#############################</label><button class="apikey-copy btn btn-success" v='+ app.apiKeys + '>Copy API KEY</button>  \
                                 </div>  \
                             </div> \
                             <div class="line-dashed"></div> \
@@ -321,6 +321,15 @@ var controller = {
              $('#encryptionModal').find(".close").click();
            });
         });
+$('.apikey-copy').click(function (e) {
+  e.preventDefault();
+  
+  var $temp = $("<input>");
+  $("body").append($temp);
+  $temp.val($(this).attr('v')).select();
+  document.execCommand("copy");
+  $temp.remove();
+});
         //Start Subscribed Topics
         app.subscribedTopics.split(",").forEach(function(topic) {
           if(topic.length > 1){
@@ -605,7 +614,6 @@ var controller = {
                                     <h5> \
                                     <span class="app-name"><a class="appNameFull" href="#/applications/' + app.id + '">' + app.name + '</a></span> \
                                     </h5> \
-                                    <p>API KEY: ' + app.apiKeys + '</p> \
 																		<div class="btn-toolbar">'+Pub+Sub+Push+Encrypt+Mapping+'</div> \
                                 </div> \
                                 <!-- /card short description --> \
