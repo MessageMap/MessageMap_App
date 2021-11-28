@@ -10,14 +10,18 @@
 %% Application callbacks
 -export([start/2, stop/1]).
 
-%% Define constant variables
--define(PORT_NUM, os:getenv("MM_PORT")).
+%% Pull value of port from config file
+-define(port, erlang:list_to_integer(tools:configFile("port"))).
+-define(sslenabled, tools:configFile("ssl_enabled")).
+-define(certfile, tools:configFile("ssl_certfile")).
+-define(keyfile, tools:configFile("ssl_keyfile")).
 
 %%====================================================================
 %% API
 %%====================================================================
 
 start(_StartType, _StartArgs) ->
+    checkDBRestore(),
     appmanager:start(), % On boot run startup scripts
     Routes = [
      {"/", cowboy_static, {priv_file, messagemap, "index.html" }},
@@ -37,34 +41,53 @@ start(_StartType, _StartArgs) ->
      {"/api/schema", schema_handler, []},
      {"/api/schema/:schemaId", schema_one_handler, []},
      {"/api/stats/:appId", stats_handler, []},
-     {"/api/user", user_handler, []},
+     {"/api/users", user_handler, []},
      {"/api/version", version_handler, []},
      %MESSAGES API ENDPOINTS
      {"/api/auth/token", token_handler, []},
      {"/messages/:version/:topic", messages_handler, []},
      {"/messages/:topic", messages_noversion_handler, []},
      {"/messages", pull_only_messages_handler, []},
-     %{"/message/:topic/stats, messagestats_handler, []},
      {"/api/sum", messages_sum_handler, []},
      %% Start Admin API Section
-     {"/admin/adduser", admin_add_user_handler, []},
-     {"/admin/moduser", admin_modify_user_handler, []}
-     %{"/admin/lock", admin_msg_lock_handler, []}
+     {"/api/adduser", admin_add_user_handler, []},
+     {"/api/moduser", admin_modify_user_handler, []},
+     {"/api/deluser/:userId", admin_delete_user_handler, []}
   ],
   Dispatch = cowboy_router:compile([
      {'_', Routes}
   ]),
-  {ok, _} = cowboy:start_clear(http, [ { port, erlang:list_to_integer(?PORT_NUM) }], #{
-    env => #{dispatch => Dispatch},
-    stream_handlers => [cowboy_compress_h, cowboy_stream_h]
-  }),
+  starter(?sslenabled, Dispatch),
   messagemap_sup:start_link().
 
 %%--------------------------------------------------------------------
 stop(_State) ->
     appmanager:stop(), % On boot run startup scripts
-    ok = cowboy:stop_listener(http).
+    ok = cowboy:stop_listener(https).
 
 %%====================================================================
 %% Internal functions
 %%====================================================================
+starter("True", Dispatch) ->
+  {ok, _} = cowboy:start_tls(https, [ { port, ?port },
+      {cacertfile, "/etc/ssl/certs/ca-certificates.crt"},
+      {certfile, ?certfile},
+      {keyfile, ?keyfile}],
+    #{
+    env => #{dispatch => Dispatch}
+    });
+starter(_, Dispatch) ->
+  {ok, _} = cowboy:start_clear(http, [ { port, ?port }], #{
+    env => #{dispatch => Dispatch}
+  }).
+
+checkDBRestore() ->
+  try tools:configFile("database_restore_filename") of
+    _ ->
+      Filename = tools:configFile("database_restore_filename"),
+      tools:log("info", "Boot_Start- Starting Database Restore from File"),
+      tools:log("info", io_lib:format("Boot_Start - Restore Filename: ~s", [Filename]) )
+  catch
+    _:_ ->
+      tools:log("info", "Boot_Start - No Database Restore")
+  end.

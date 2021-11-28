@@ -11,13 +11,21 @@
 -export([init/2]).
 
 init(Req, Opts) ->
-  { _, Req2 } = tools:verifyAuth(Req),
-  % redirect if Claims = Bad
+  { Claims, Req2 } = tools:verifyAuth(Req),
+  response(Claims, Req2, Opts).
+
+% Internal functions
+response(<<"Bad">>, Req, Opts) ->
+  ReqFinal = cowboy_req:reply(200, tools:resp_headers(),
+      jiffy:encode(#{ result => <<"Invalid Authorization">> }),
+      Req),
+  {ok, ReqFinal, Opts};
+response(Claims, Req, Opts) ->
   AppId = cowboy_req:binding(appId, Req),
   Result = buildResponse(binary_to_list(AppId)),
   ReqFinal = cowboy_req:reply(200, tools:resp_headers(),
       jiffy:encode(Result),
-      Req2),
+      Req),
   {ok, ReqFinal, Opts}.
 
 % Internal functions

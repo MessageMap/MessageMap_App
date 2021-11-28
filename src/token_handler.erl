@@ -17,7 +17,7 @@ init(Req, Opts) ->
   Method = cowboy_req:method(Req),
   if
     Method == <<"POST">> ->
-      #{ 
+      #{
          client_id := Client_id,
          grant_type := Grant_type,
          code := Code,
@@ -42,7 +42,7 @@ init(Req, Opts) ->
 
 %%%%%%%%%%%%%%%%%%% Internal Functions
 %% Build Response
-getResponse(Client_id, <<"refresh_token">>, Code, Refresh_token) ->
+getResponse(_, <<"refresh_token">>, _, Refresh_token) ->
   Claims = encryption:ewtDecode(Refresh_token),
   { _, App } = maps:find(app, Claims),
   returnApp(App);
@@ -71,27 +71,21 @@ returnApp([]) ->
     }
   };
 returnApp(App) ->
-  %TODO: Continue Here for building Ewt (App validation is done)
   { ok, Id } = maps:find(id,App),
   { ok, Owned } = maps:find(ownedTopics,App),
   Schemas = buildSchemas(Owned), %TODO: Fix support no schema
   { ok, Subscribed } = maps:find(subscribedTopics,App),
   %Verify Pub and Sub of App
   Scope = buildScope(Owned, Subscribed),
-  Access_Claims = #{
-          id => Id,
-          scope => Scope,
-          info => #{
-            topicsOwned => buildIds(Owned),
-            schemas => lists:flatten(Schemas),
-            topicsSubscribed => buildIds(Subscribed)
-          }
+  Info = #{
+    topicsOwned => buildIds(Owned),
+    schemas => lists:flatten(Schemas),
+    topicsSubscribed => buildIds(Subscribed)
   },
-  AccessToken = encryption:oauthCreate(Access_Claims, ?access_exp),
-  Refresh_Claims = #{
-	app => App
-  },
-  RefreshToken = encryption:oauthCreate(Refresh_Claims, ?refresh_exp),
+  Access_Claims = buildClaims(Id, Scope, Info, ?access_exp),
+  AccessToken = encryption:oauthCreate(Access_Claims),
+  Refresh_Claims = buildClaims(App, ?refresh_exp, 0, 0),
+  RefreshToken = encryption:oauthCreate(Refresh_Claims),
   { 200,
     #{
       access_token => AccessToken,
@@ -103,6 +97,28 @@ returnApp(App) ->
   }.
 
 % Determine the scope allowed for the application
+buildClaims(Id, Scope, Info, ?access_exp) ->
+  Exp = calendar:datetime_to_gregorian_seconds(calendar:universal_time()) + ?access_exp,
+  #{
+      id => Id,
+      scope => Scope,
+      info => Info,
+      <<"iss">> => <<"MessageMap - App">>,
+      <<"exp">> => Exp
+  };
+buildClaims(App, ?refresh_exp, _, _) ->
+  Exp = calendar:datetime_to_gregorian_seconds(calendar:universal_time()) + ?refresh_exp,
+  #{
+    app => App,
+    <<"iss">> => <<"MessageMap - App">>,
+    <<"exp">> => Exp
+  };
+buildClaims(_,_,_,_) ->
+  #{
+    <<"iss">> => <<"MessageMap - Bad App">>,
+    <<"exp">> => calendar:datetime_to_gregorian_seconds(calendar:universal_time())
+  }.
+
 buildScope([],[]) ->
   [];
 buildScope(_,[]) ->

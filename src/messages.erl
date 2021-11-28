@@ -18,17 +18,17 @@ push("latest", _, _ , _, _) ->
     status => 'Topic Is attached to Schemas Send message with schema: /messages/{SchemaVersion}/{topicName}'
   } };
 push(Version, TopicName, Auth, Payload, RequestTime) ->
-  { _, Scope } = maps:find(scope, Auth),
+  { _, Scope } = maps:find(<<"scope">>, Auth),
   Check = check_scope("PUSH", Scope),
   if
     Check ->
       { _, TopicId } = pullIds(Auth, TopicName, ownedTopics),
-      { ok , AppId } = maps:find(id, Auth),
+      { ok , AppId } = maps:find(<<"id">>, Auth),
       % Add Schemas (For Validation)
       if
         TopicId /= fail ->
           { SchemaId, Schema } = validate:lookup(Auth, TopicId, Version),
-          MapPayload = try 
+          MapPayload = try
                jiffy:decode(Payload)
           catch
                _Type:_Error ->
@@ -47,7 +47,6 @@ push(Version, TopicName, Auth, Payload, RequestTime) ->
                 status => 'Invalid Schema Name'
               } };
             true ->
-              tools:logmap("info", #{ <<"Feature">> => <<"JSON Schema Used">>}),
               SchemaIsValid = validate:schema(Schema, MapPayload),
               if
                 SchemaIsValid /= error ->
@@ -83,7 +82,7 @@ pull(Auth, Limit) ->
   rollTable( Result, RollTable, Tbl, Auth, Limit, AppId ).
 
 stats(TopicName, Auth) ->
-  { _, Scope } = maps:find(scope, Auth),
+  { _, Scope } = maps:find(<<"scope">>, Auth),
   Check =  check_scope("PULL", Scope),
   if
     Check ->
@@ -121,7 +120,7 @@ check_scope(_, _) ->
 
 % Pull Basic Variables
 pullIds(Auth, TopicName, Method) ->
-    { ok , AppId } = maps:find(id, Auth),
+    { ok , AppId } = maps:find(<<"id">>, Auth),
     App = database:getAppDBAppId(AppId),
     Topic = database:getTopicDB(binary:bin_to_list(TopicName)),
     if
@@ -134,7 +133,7 @@ pullIds(Auth, TopicName, Method) ->
     end.
 
 pullAppId(Auth) ->
-    { ok, AppId } = maps:find(id, Auth),
+    { ok, AppId } = maps:find(<<"id">>, Auth),
     AppId.
 
 check_topicId_in_App(TopicId, App, Method) ->
@@ -159,7 +158,6 @@ processMessageMap(TopicId, Filter, Payload) ->
     LTid = binary:bin_to_list(Tid),
     if
       TopicId =:= LTid ->
-        tools:logmap("info", #{ <<"Feature">> => <<"Mapping">> }),
         mapping:msgMapper(Values, Payload);
       true ->
         Payload
@@ -186,16 +184,14 @@ process_Messages(TopicId, MapPayload, AppId, SchemaId, RequestTime) ->
            [] ->
              MapMessageResult;
            _ ->
-             tools:logmap("info", #{ <<"Feature">> => <<"Encryption Used">> }),
              binary:list_to_bin(encryption:msgEncryption(jiffy:encode(MapMessageResult), binary:list_to_bin(EncryptValue)))
         end,
         % TODO: this is where Push and not Save Action will happen
         % This is where Push will happen and return Fail Max for save in next section
         PushResult = if
             PushMessages =:= <<"true">> andalso SavedPayload =/= "Payload Is To Long" ->
-               Headers = [ erlang:list_to_tuple(lists:map(fun(X) -> lists:delete($;, X) end, string:tokens(H, ":"))) 
+               Headers = [ erlang:list_to_tuple(lists:map(fun(X) -> lists:delete($;, X) end, string:tokens(H, ":")))
                            || H <- string:tokens(erlang:binary_to_list(PushHeaders), "\n")],
-               tools:logmap("info", #{<<"Feature">> => <<"Push Messages">> }),
                pushMessages(erlang:binary_to_list(PushUrl), erlang:binary_to_integer(PushStatusCode), Headers, jiffy:encode(SavedPayload), erlang:binary_to_integer(PushRetries));
             true ->
                true

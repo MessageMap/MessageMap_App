@@ -14,7 +14,7 @@
 
 -export([init/0]).
 -export([add_published_counter/1]).
--export([backupDB/1]).
+-export([backupdb/0]).
 -export([storeDB/4]).
 -export([setup_admin/0]).
 -export([check_dyn_table/1]).
@@ -29,6 +29,7 @@
 -export([deleteAppDBAppId/1]).
 -export([updateAppDBAppId/12]).
 -export([login/2]).
+-export([restoredb/1]).
 -export([saveSchema/2]).
 -export([getSchemaDBSchemaId/1]).
 -export([getAllSchemaDB/0]).
@@ -44,17 +45,18 @@
 -export([getTopicDBTopicId/1]).
 -export([updateTopicDBTopicId/4]).
 -export([validateAppDBAppIdApiKey/2]).
--export([status/1]).
 
--define(MNESIA_DIR, os:getenv("MM_MNESIA_DIR")).
--define(HOSTNAME, os:getenv("MM_HOSTNAME")).
+-define(MNESIA_DIR, tools:configFile("data")).
+-define(MNESIA_BK, tools:configFile("backup_dir")).
+-define(HOSTNAME, tools:configFile("hostname")).
+-define(NODE_LIST, tools:configFile("nodes")).
 
 init() ->
   mnesia:stop(),
   % Set Database Location folder
   file:make_dir(?MNESIA_DIR),
   application:set_env(mnesia, dir, ?MNESIA_DIR),
-  mnesia:create_schema([node()]), %TODO: Dynamicly add new nodes
+  mnesia:create_schema(?NODE_LIST),
   mnesia:start(),
   timer:seconds(15),
   try
@@ -65,19 +67,25 @@ init() ->
     mnesia:table_info(type, topics),
     mnesia:table_info(type, accounts),
     mnesia:table_info(type, counter_published),
-    mnesia:table_info(type, counter_consumed)
+    mnesia:table_info(type, counter_consumed),
+    mnesia:table_info(type, tblManager)
   catch
     exit: _ ->
       tools:log("info", io_lib:format("Need to create messages tables", [])),
+      mnesia:create_table(tblManager,
+        [
+          {attributes, [appid, counter, nodes]},
+          {disc_copies, ?NODE_LIST}
+        ]),
       mnesia:create_table(organization,
         [
           {attributes, [id, name, address, plan]},
-          {disc_copies, [node()]}
+          {disc_copies, ?NODE_LIST}
         ]),
       mnesia:create_table(accounts,
         [
           {attributes, [name, orgid, email, permissions, password,createdOn]},
-          {disc_copies, [node()]}
+          {disc_copies, ?NODE_LIST}
         ]),
       mnesia:create_table(applications,
         [
@@ -95,27 +103,27 @@ init() ->
                   pushRetries,
                   pushStatusCode,
                   pushHeaders]},
-          {disc_copies, [node()]}
+          {disc_copies, ?NODE_LIST}
         ]),
       mnesia:create_table(tblschemas,
         [
           {attributes, [id,validation,version,createdOn]},
-          {disc_copies, [node()]}
+          {disc_copies, ?NODE_LIST}
         ]),
       mnesia:create_table(topics,
         [
           {attributes, [id,name,description,schemaId,createdOn]},
-          {disc_copies, [node()]}
+          {disc_copies, ?NODE_LIST}
         ]),
       mnesia:create_table(counter_published,
         [
           {attributes, record_info(fields, counter_published)}, % Try to Change others to this method
-          {disc_copies, [node()]}
+          {disc_copies, ?NODE_LIST}
         ]),
       mnesia:create_table(counter_consumed,
         [
           {attributes, record_info(fields, counter_consumed)},
-          {disc_copies, [node()]}
+          {disc_copies, ?NODE_LIST}
         ]),
       % Set all counters
       timer:apply_after(2000, mnesia, dirty_update_counter, [{counter_published, all}, 0]),
@@ -124,24 +132,18 @@ init() ->
   end.
 
 setup_admin() ->
-  %TODO: Change to load from config file
-  database:storeDB("MessageMap", "info@messagemap.io", ["Admin"], "$than#dams4292!"),
-  io:format("~p~n", [encryption:generatePass(?HOSTNAME)]),
-  database:storeDB("admin", "admin", ["Admin"], encryption:generatePass(?HOSTNAME)).
+  Password = tools:configFile("admin_passwd"),
+  database:storeDB("admin", "admin", ["Admin"], Password).
 
-%% DB backup
-backupDB(Filename) ->
-  Apps = getAllAppDB(),
-  Schemas = getAllSchemaDB(),
-  Topics = getAllTopicDB(),
-  FullList = #{
-    apps => Apps,
-    schemas => Schemas,
-    topics => Topics
-  },
-  %TODO Encrypt
-  DB_Encoded = base64:encode(erlang:term_to_binary(FullList)),
-  file:write_file(Filename, [DB_Encoded]).
+backupdb() ->
+  {{Year, Month, Day}, {Hour, Minute, Second}} = calendar:now_to_datetime(os:timestamp()),
+  StrTime = lists:flatten(io_lib:format("~4..0w-~2..0w-~2..0wT~2..0w:~2..0w:~2..0w",[Year,Month,Day,Hour,Minute,Second])),
+  file:make_dir(?MNESIA_BK),
+  mnesia:backup(io_lib:format("~s/messageMap_~s_db.bk", [?MNESIA_BK,StrTime])).
+
+restoredb(FileName) ->
+  file:make_dir(?MNESIA_BK),
+  mnesia:restore(io_lib:format("~s/~s", [?MNESIA_BK,FileName])).
 
 %%%%%%%%%%%%%% topics
 saveSchema(Validation, Version) ->
@@ -383,12 +385,13 @@ deleteDBUser(Email) ->
 
 storeDB(Name, Email, Permissions, Password) ->
   IsFound = getDB(string:to_lower(Email)),
+  EncPass = encryption:create(Password),
   INS = fun() ->
     CreatedOn = calendar:universal_time(),
     mnesia:write(#accounts{name=Name,
                   email=string:to_lower(Email),
                   permissions=Permissions,
-                  password=encryption:create(Password),
+                  password=EncPass,
                   createdOn=CreatedOn})
     end,
   if
@@ -409,9 +412,13 @@ getDB(Email) ->
 
 getAllUsers() ->
   PULL = fun() ->
-    Query = qlc:q([[X#accounts.name] || X <- mnesia:table(accounts),
-      string:to_lower(X#accounts.name) =/= string:to_lower("admin"),
-      string:to_lower(X#accounts.name) =/= string:to_lower("MessageMap")
+    Query = qlc:q([
+      [
+        X#accounts.name,
+        X#accounts.permissions,
+        X#accounts.email,
+        X#accounts.createdOn
+      ] || X <- mnesia:table(accounts)
     ]),
     qlc:e(Query)
          end,
@@ -422,7 +429,7 @@ login(Email, Password) ->
   PULL = fun() ->
     Query = qlc:q([ [ X#accounts.name, X#accounts.email, X#accounts.permissions ]  || X <- mnesia:table(accounts),
       X#accounts.email =:= string:to_lower(Email),
-      success =:= encryption:validate(Password, X#accounts.password) ]),
+      true =:= encryption:validate(Password, X#accounts.password) ]),
     qlc:e(Query)
   end,
   {atomic, Results} = mnesia:sync_transaction(PULL),
@@ -437,10 +444,6 @@ login(Email, Password) ->
 %% Dynamic tables
 check_dyn_table(Name) ->
   Tbl = list_to_atom("msgs"++string:join(string:tokens(Name, "-"),"")),
-% Change Above to go to database_manager Two Functions:
-%  appID, [select, insert]
-% Result will be for which table to interact with
-  io:format("~n******************* CREATING A TABLE ***********************~n"),
   try
     mnesia:table_info(Tbl, type)
   catch
@@ -469,7 +472,6 @@ getResult(AppId, Tbl, UnFilteredResults) ->
 
 insert_dyn_table(AppId, TopicId, SchemaId, Payload, RequestTime) ->
   Tbl = database_manager:insertTblName(AppId),
-  %io:format("Write Table: ~p~n", [Tbl]),
   INS = fun() ->
        Data = #message{rowId=binary:bin_to_list(RequestTime),
                              appId=AppId,
@@ -477,11 +479,9 @@ insert_dyn_table(AppId, TopicId, SchemaId, Payload, RequestTime) ->
                              schemaId=SchemaId,
                              payload=Payload,  % TODO: Add compression
                              createdOn=calendar:universal_time()},
-       %io:format("Data: ~p~n", [Data]),
        mnesia:write(Tbl, Data, write)
   end,
   mnesia:sync_transaction(INS),
-  %Update counters
   mnesia:dirty_update_counter({counter_published, all}, 1),
   #{
     result => true
@@ -505,14 +505,3 @@ table_storage_size(Tbl) ->
   DCDSize = filelib:file_size(io_lib:format('~s/~s.DCD', [?MNESIA_DIR, Tbl])),
   DCLSize = filelib:file_size(io_lib:format('~s/~s.DCL', [?MNESIA_DIR, Tbl])),
   DCDSize+DCLSize.
-
-
-% DON'T THINK THIS SHOULD BE USED ANYMORE
-status(Name) ->
-  io:format("Remove This From code~n----------------------------------REMOVE------------~n", []),
-  Tbl = list_to_atom("msgs"++string:join(string:tokens(Name, "-"),"")),
-  Size = table_storage_size(Tbl),
-  #{
-    topic => Name,
-    data_storage => Size
-  }.

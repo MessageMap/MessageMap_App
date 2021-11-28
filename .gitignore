@@ -15,3 +15,9 @@ deps
 .rebar3
 _build/
 _checkouts/
+
+# package Release files
+packages/
+rel/
+*.rpm
+*.deb

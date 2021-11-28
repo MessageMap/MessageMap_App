@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 3. Sept 2019
 %%%-------------------------------------------------------------------
--module(admin_modify_user_handler).
+-module(admin_delete_user_handler).
 
 -export([init/2]).
 
@@ -29,21 +29,12 @@ response(_, Method, Req, Opts) ->
       Req),
   {ok, ReqFinal, Opts}.
 
-processRequest(<<"POST">>, Req) ->
-  {ok, Body, _} = cowboy_req:read_urlencoded_body(Req),
-  {_, Username} = lists:keyfind(<<"email">>, 1, Body),
-  {_, Permissions} = lists:keyfind(<<"permissions">>, 1, Body),
-  {_, Password} = lists:keyfind(<<"password">>, 1, Body),
+processRequest(<<"DELETE">>, Req) ->
+  Username = cowboy_req:binding(userId, Req),
   if
     Username =:= 1 ->
       jiffy:encode(#{ "Error" => "Bad Username"});
-    Password =:= 1 ->
-      jiffy:encode(#{ "Error" => "Bad Password"});
     true ->
       database:deleteDBUser(binary_to_list(Username)),
-      database:storeDB(binary_to_list(Username),
-        binary_to_list(Username),
-        [binary_to_list(Permissions)],
-        binary_to_list(Password)),
-      jiffy:encode(#{ update => true })
+      jiffy:encode(#{ removed => true })
   end.

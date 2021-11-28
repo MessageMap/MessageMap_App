@@ -4,7 +4,7 @@ var controller = {
 	<div class="header-secondary row gray-bg"> \
 		<div class="col-lg-12"> \
 			<div class="page-heading clearfix"> \
-				<h1 class="page-title pull-left">Topics</h1><button id="newTopic" data-toggle="modal" data-target="#topicModal" class="btn btn-primary btn-sm btn-add">Add Topic</button> \
+				<h1 class="page-title pull-left">Topics</h1><button id="newTopic" data-toggle="modal" data-target="#topicModal" class="requirewrite btn btn-primary btn-sm btn-add">Add Topic</button> \
 			</div> \
 			<!-- Breadcrumb --> \
 			<ol class="breadcrumb breadcrumb-2">  \
@@ -38,18 +38,18 @@ var controller = {
             <p>Topic Name: <input type="text" id="topicName" /></p> \
           </div> \
           <div class="modal-footer"> \
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
-            <button type="button" class="btn btn-primary" id="topicNameAdd">Add Topic</button> \
+            <button type="button" class="requirewrite btn btn-default" data-dismiss="modal">Close</button> \
+            <button type="button" class="requirewrite btn btn-primary" id="topicNameAdd">Add Topic</button> \
           </div> \
         </div><!-- /.modal-content --> \
       </div><!-- /.modal-dialog --> \
     </div> \
 		</div>',
-  'script': function(id) {
+  'script': function (id) {
     if (id) {
       $('#newTopic').hide();
       //UI for seeing One Topic
-      $.get('/api/topic/' + id, function(topic) {
+      $.get('/api/topic/' + id, function (topic) {
         $('#noData').hide();
         var Topic = '<div class="panel panel-default"> \
 					<div class="panel-heading clearfix"> \
@@ -86,7 +86,7 @@ var controller = {
         				<div class="panel panel-default"> \
         					<div class="panel-heading clearfix"> \
         						<h3 class="panel-title">Attached Schemas</h3> <br /> <br /> \
-                    <button id="newSchema" data-toggle="modal" data-target="#topicSchema" class="btn btn-primary btn-md btn-add">Add New Schema</button> \
+                    <button id="newSchema" data-toggle="modal" data-target="#topicSchema" class="requirewrite btn btn-primary btn-md btn-add">Add New Schema</button> \
                     <p> Adding/Deleting A Schema from a used topic will force all Publishers to refresh tokens </p> \
         					</div> \
         					<div class="panel-body"> \
@@ -113,8 +113,8 @@ var controller = {
                                 </div> \
 								<div class="col-sm-4"> \
 									<button type="submit" class="btn btn-white" id="cancelTopic">Cancel</button> \
-									<button type="submit" class="btn btn-primary" id="saveTopic">Save changes</button> \
-                                    <button type="submit" class="btn btn-danger" id="deleteTopic">Delete Topic</button> \
+									<button type="submit" class="requirewrite btn btn-primary" id="saveTopic">Save changes</button> \
+                                    <button type="submit" class="requirewrite btn btn-danger" id="deleteTopic">Delete Topic</button> \
 								</div> \
 							</div> \
 						</form> \
@@ -134,8 +134,8 @@ var controller = {
                 </p> \
               </div> \
               <div class="modal-footer"> \
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
-                <button type="button" class="btn btn-primary" id="schemaAdd">Add Schema</button> \
+                <button type="button" class="requirewrite btn btn-default" data-dismiss="modal">Close</button> \
+                <button type="button" class="requirewrite btn btn-primary" id="schemaAdd">Add Schema</button> \
               </div> \
               </div> \
             </div><!-- /.modal-content --> \
@@ -156,7 +156,7 @@ var controller = {
                                 </p> \
                               </div> \
                               <div class="modal-footer"> \
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
+                                <button type="button" class="requirewrite btn btn-default" data-dismiss="modal">Close</button> \
                               </div> \
                               </div> \
                             </div><!-- /.modal-content --> \
@@ -164,50 +164,51 @@ var controller = {
                 				</div>';
         $('.cards-container').empty();
         $('.cards-container').html(Topic);
-          $('.deleteWarning').hide();
+        checkpermissions();
+        $('.deleteWarning').hide();
         if (topic.schemaId) {
           $('.deleteWarning').show();
-          topic.schemaId.split(',').forEach(function(schemaId) {
+          topic.schemaId.split(',').forEach(function (schemaId) {
             $.ajax({
               url: '/api/schema/' + schemaId,
               type: 'GET',
-              success: function(schema) {
+              success: function (schema) {
                 var schemaHtml = '<tr class="schemaRow" id="' + schema.id + '">  \
                   <th scope="row">' + schema.id + '</th>  \
                   <td class="schemaVersions">' + schema.version + '</td>  \
-                  <td><button data-toggle="modal" data-target="#viewSchema" type="submit" class="btn btn-info" id="btnViewSchema">View schema</button></td>  \
-                  <td><button type="submit" class="btn btn-danger" id="deleteSchema">Remove schema</button></td>  \
+                  <td><button data-toggle="modal" data-target="#viewSchema" type="submit" class="requirewrite btn btn-info" id="btnViewSchema">View schema</button></td>  \
+                  <td><button type="submit" class="requirewrite btn btn-danger" id="deleteSchema">Remove schema</button></td>  \
                 </tr>';
                 $('#schemaRows').append(schemaHtml);
                 $('#deleteTopic').prop('disabled', true);
-                $
+                checkpermissions();
               }
             })
           });
-          $(document).on('click', '#btnViewSchema', function(e) {
+          $(document).on('click', '#btnViewSchema', function (e) {
             e.preventDefault();
             var schemaId = $(this).closest('tr').attr('id');
-             $.ajax({
-                  url: '/api/schema/' + schemaId,
-                  type: 'GET',
-                  success: function(schema) {
-                   var schemaObj = JSON.parse(schema.validation);
-                   var formattedSchema = JSON.stringify(schemaObj, null, '\t');
-                   $('.schemaTitle').val(schema.version);
-                   $('.schemaCreatedOn').val(schema.createdOn);
-                   $('.schemaViewValidation').html(formattedSchema);
-                }
-              });
-        });
-          $(document).on('click', '#deleteSchema', function(e) {
+            $.ajax({
+              url: '/api/schema/' + schemaId,
+              type: 'GET',
+              success: function (schema) {
+                var schemaObj = JSON.parse(schema.validation);
+                var formattedSchema = JSON.stringify(schemaObj, null, '\t');
+                $('.schemaTitle').val(schema.version);
+                $('.schemaCreatedOn').val(schema.createdOn);
+                $('.schemaViewValidation').html(formattedSchema);
+              }
+            });
+          });
+          $(document).on('click', '#deleteSchema', function (e) {
             e.preventDefault();
             var schemaid = $(this).closest('tr').attr('id');
             $.ajax({
               url: '/api/schema/' + schemaid,
               type: 'DELETE',
               contentType: "application/json",
-              success: function(data) {
-                var currentSchemaIds = $.map($(".schemaRow"), function(n, i) {
+              success: function (data) {
+                var currentSchemaIds = $.map($(".schemaRow"), function (n, i) {
                   if (n.id !== schemaid)
                     return n.id;
                 });
@@ -220,7 +221,7 @@ var controller = {
                     "description": $('#topicDescription').val(),
                     "schemaid": currentSchemaIds.join(",")
                   },
-                  success: function(e) {
+                  success: function (e) {
                     $('#topicSchema').find(".close").click();
                     location.reload(true);
                   }
@@ -230,54 +231,54 @@ var controller = {
           });
         }
 
-        $('#schemaAdd').on('click', function(e) {
+        $('#schemaAdd').on('click', function (e) {
           e.preventDefault();
           var schemaVersion = $('#schemaVersion').val();
           var schemaAlreadyFound = false;
           // Test value is version number
-          if ( ! /^\d*\.?\d*\.?\d*\.?\d*$/.test(schemaVersion)){
+          if (! /^\d*\.?\d*\.?\d*\.?\d*$/.test(schemaVersion)) {
             schemaAlreadyFound = true;
           }
-          $('.schemaVersions').each(function(e){
-            if (schemaVersion == $(this).html()){
-                schemaAlreadyFound = true;
+          $('.schemaVersions').each(function (e) {
+            if (schemaVersion == $(this).html()) {
+              schemaAlreadyFound = true;
             }
           });
-          if (schemaAlreadyFound){
+          if (schemaAlreadyFound) {
             $('#schemaVersionError').html('Schema Version Already Inuse/Version is not a number').show();
-          } else{
+          } else {
             $.ajax({
-            url: '/api/schema',
-            type: 'POST',
-            contentType: "application/json",
-            data: {
-              "version": $('#schemaVersion').val(),
-              "validation": $('#schemaValidation').val()
-            },
-            success: function(data) {
-              var currentSchemaIds = $.map($(".schemaRow"), function(n, i) {
-                return n.id;
-              });
-              currentSchemaIds.push(data.id);
-              $.ajax({
-                url: '/api/topic/' + id,
-                type: 'PUT',
-                contentType: "application/json",
-                data: {
-                  "name": $('#topicName').val(),
-                  "description": $('#topicDescription').val(),
-                  "schemaid": currentSchemaIds.join(",")
-                },
-                success: function(e) {
-                  $('#topicSchema').find(".close").click();
-                  location.reload(true);
-                }
-              });
-            }
-          });
+              url: '/api/schema',
+              type: 'POST',
+              contentType: "application/json",
+              data: {
+                "version": $('#schemaVersion').val(),
+                "validation": $('#schemaValidation').val()
+              },
+              success: function (data) {
+                var currentSchemaIds = $.map($(".schemaRow"), function (n, i) {
+                  return n.id;
+                });
+                currentSchemaIds.push(data.id);
+                $.ajax({
+                  url: '/api/topic/' + id,
+                  type: 'PUT',
+                  contentType: "application/json",
+                  data: {
+                    "name": $('#topicName').val(),
+                    "description": $('#topicDescription').val(),
+                    "schemaid": currentSchemaIds.join(",")
+                  },
+                  success: function (e) {
+                    $('#topicSchema').find(".close").click();
+                    location.reload(true);
+                  }
+                });
+              }
+            });
           }
         });
-        $('#deleteTopic').on('click', function(e) {
+        $('#deleteTopic').on('click', function (e) {
           e.preventDefault();
           $.ajax({
             url: '/api/topic/' + id,
@@ -285,36 +286,35 @@ var controller = {
           });
           window.location.hash = '#/topics';
         });
-        $('#saveTopic').on('click', function(e) {
+        $('#saveTopic').on('click', function (e) {
           e.preventDefault();
-          var currentSchemaIds = $.map($(".schemaRow"), function(n, i) {
+          var currentSchemaIds = $.map($(".schemaRow"), function (n, i) {
             return n.id;
           });
-          if ((currentSchemaIds.length == 0) && ($('#topicName').val().trim().length > 0 )){
+          if ((currentSchemaIds.length == 0) && ($('#topicName').val().trim().length > 0)) {
             currentSchemaIds = [];
           }
-					var regex = /^[A-Za-z0-9]+$/;
-					if (regex.test($('#topicName').val())) {
-          $.ajax({
-            url: '/api/topic/' + id,
-            type: 'PUT',
-            contentType: "application/json",
-            data: {
-              "name": $('#topicName').val(),
-              "description": $('#topicDescription').val(),
-              "schemaid": currentSchemaIds.join(",")
-            }
-          });
-					window.location.hash = '#/topics';
-					}
-					else
-					{
-						$(".deleteWarning").show();
-						$(".deleteWarning").addClass("alert alert-warning");
-						$(".deleteWarning").html("Invalid Topic Name");
-					}
+          var regex = /^[A-Za-z0-9]+$/;
+          if (regex.test($('#topicName').val())) {
+            $.ajax({
+              url: '/api/topic/' + id,
+              type: 'PUT',
+              contentType: "application/json",
+              data: {
+                "name": $('#topicName').val(),
+                "description": $('#topicDescription').val(),
+                "schemaid": currentSchemaIds.join(",")
+              }
+            });
+            window.location.hash = '#/topics';
+          }
+          else {
+            $(".deleteWarning").show();
+            $(".deleteWarning").addClass("alert alert-warning");
+            $(".deleteWarning").html("Invalid Topic Name");
+          }
         });
-        $('#cancelTopic').on('click', function(e) {
+        $('#cancelTopic').on('click', function (e) {
           e.preventDefault();
           window.location.hash = '#/topics';
         });
@@ -322,10 +322,10 @@ var controller = {
     } else {
       $('#newTopic').show();
       //UI for seeing All Topics
-      $.get('/api/topic', function(result) {
+      $.get('/api/topic', function (result) {
         $('.cards-container').html('');
         $('.cards-container').empty();
-        $.each(result, function(idx, topic) {
+        $.each(result, function (idx, topic) {
           var addTopic = '<!-- Card --> \
     					<div class="card"> \
     						<!-- Card Header --> \
@@ -351,23 +351,23 @@ var controller = {
         });
       });
 
-      $('#topicNameAdd').click(function(e) {
+      $('#topicNameAdd').click(function (e) {
         e.preventDefault();
         var appN = $('#topicName').val().trim();
         var namecheck = false;
-        $('.topicNameFull').each(function(e){
+        $('.topicNameFull').each(function (e) {
           checkname = $(this).html().trim();
           if (checkname == appN) {
             namecheck = true;
           }
         });
-				var regex = /^[A-Za-z0-9]+$/;
-        if ((regex.test(appN)) && (namecheck == false) && (appN.length > 0)){
-        $.post('/api/topic', {
-          topicName: $('#topicName').val()
-        }, function(topic) {
-          $('#topicModal').find(".close").click();
-          var addTopic = '<!-- Card --> \
+        var regex = /^[A-Za-z0-9]+$/;
+        if ((regex.test(appN)) && (namecheck == false) && (appN.length > 0)) {
+          $.post('/api/topic', {
+            topicName: $('#topicName').val()
+          }, function (topic) {
+            $('#topicModal').find(".close").click();
+            var addTopic = '<!-- Card --> \
     					<div class="card"> \
     						<!-- Card Header --> \
     						<div class="card-header"> \
@@ -387,20 +387,21 @@ var controller = {
     						<!-- /card content --> \
     					</div> \
     					<!-- /card -->';
-          $('#topicName').val('');
-          $('#noData').hide();
-          $('.cards-container').append(addTopic);
-        });
+            $('#topicName').val('');
+            $('#noData').hide();
+            $('.cards-container').append(addTopic);
+          });
         } else {
-				  if (!regex.test(appN)){
-						$('#topicNameError').html("Invalid Topic Name");
-					} else {
-          	$('#topicNameError').html("Topic Name is already in use");
-					}
+          if (!regex.test(appN)) {
+            $('#topicNameError').html("Invalid Topic Name");
+          } else {
+            $('#topicNameError').html("Topic Name is already in use");
+          }
           $('#topicNameError').show();
         }
       });
     }
+    checkpermissions();
   }
 
 };

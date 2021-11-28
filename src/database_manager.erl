@@ -23,7 +23,9 @@
 -export([addCreateTblMemory/3]).
 -export([createTbl/1]).
 
+-define(MNESIA_DIR, tools:configFile("data")).
 -define(Max_Table_Size, 1077483648).
+-define(NODE_LIST, tools:nodeListing("dataNodes")).
 
 % List of Functions to Export
 -include_lib("stdlib/include/qlc.hrl").
@@ -32,7 +34,6 @@
 
 % On boot Setup
 init() ->
-  io:format("Loading INIT for DB Manager", []),
   mnesia:load_textfile("db/messagetables.hrl"),
   AllApps = database:getAllAppDB(),
   lists:foreach(fun(App) ->
@@ -65,7 +66,9 @@ createMsgsTbl(AppId) ->
 tableChecking([]) ->
   true;
 tableChecking([{ _, _, [], _}]) ->
-  true.
+  true;
+tableChecking(_) ->
+  false.
 
 deleteAppTables(AppId) ->
   lists:foreach(fun(Tbl) ->
@@ -75,7 +78,7 @@ deleteAppTables(AppId) ->
 deleteTblName(Tbl, AppId) ->
   Counter = erlang:list_to_integer(lists:nth(2, string:tokens(erlang:atom_to_list(Tbl), "_"))),
   ResultTbls = pullTblMemory(AppId),
-  [{ _, _, Counters, Nodes }] = ResultTbls, 
+  [{ _, _, Counters, Nodes }] = ResultTbls,
   NewCounters = lists:filter(fun(X) -> X =/= Counter end, Counters),
   addCreateTblMemory(AppId, NewCounters, Nodes),
   mnesia:delete_table(Tbl).
@@ -87,8 +90,6 @@ insertTblName(AppId) ->
       createMsgsTbl(AppId);
     true ->
       TblName = lists:nth(1, lists:reverse(lists:sort(Tbl_list))),
-      % DCD file Ext for ordered_set
-      %{_,{_,SizeBytes,_,_,_,_,_,_,_,_,_,_,_,_}} = file:read_file_info("/var/messageMap/"++erlang:atom_to_list(TblName)++".DAT"),
       SizeBytes = (mnesia:table_info(TblName,memory)*erlang:system_info(wordsize)),
       if
         SizeBytes > ?Max_Table_Size ->
@@ -129,7 +130,7 @@ allTblNames(AppId) ->
 
 % Internal Functions
 findTblsLike(TblName, AppId) ->
-   {ok, Filenames} = file:list_dir("/var/messageMap/"),
+   {ok, Filenames} = file:list_dir(?MNESIA_DIR),
    lists:foreach(fun(FileName) ->
        ListTblName = erlang:atom_to_list(TblName),
        Unique = length(string:tokens(FileName, "DCD")),
@@ -141,7 +142,7 @@ findTblsLike(TblName, AppId) ->
 tblFound(1, FileName, AppId, 2) ->
     Counter = erlang:list_to_integer(lists:nth(2, string:tokens(lists:nth(1, string:tokens(FileName, ".")), "_"))),
     Results = pullTblMemory(AppId),
-    Nodes = [node()],
+    Nodes = ?NODE_LIST,
     CountResult = if
       Results =:= [] ->
          [Counter];

@@ -13,14 +13,22 @@
 init(Req, Opts) ->
   { Claims, Req2 } = tools:verifyAuth(Req),
   Method = cowboy_req:method(Req),
-  Id = cowboy_req:binding(topicId, Req),
-  Result = processRequest(Method, Claims, Id, Req2),
-  { ok, ReqFinal } = cowboy_req:reply(200, tools:resp_headers(),
-      Result,
-      Req2),
-  {ok, ReqFinal, Opts}.
+  response(Claims, Method, Req2, Opts).
 
 % Internal functions
+response(<<"Bad">>, _, Req, Opts) ->
+  ReqFinal = cowboy_req:reply(200, tools:resp_headers(),
+      jiffy:encode(#{ result => <<"Invalid Authorization">> }),
+      Req),
+  {ok, ReqFinal, Opts};
+response(Claims, Method, Req, Opts) ->
+  Id = cowboy_req:binding(topicId, Req),
+  Result = processRequest(Method, Claims, Id, Req),
+  ReqFinal = cowboy_req:reply(200, tools:resp_headers(),
+      Result,
+      Req),
+  {ok, ReqFinal, Opts}.
+
 processRequest(<<"GET">>, _, TopicId, _) ->
   TopicData = database:getTopicDBTopicId(binary:bin_to_list(TopicId)),
   Result = buildResponse(element(1, list_to_tuple(TopicData))),

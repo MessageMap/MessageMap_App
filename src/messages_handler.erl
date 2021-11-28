@@ -10,6 +10,9 @@
 
 -export([init/2]).
 
+%Load from externalFile
+-define(MAX_SIZE, 1000000). % TODO make size by enterprise vs non (1MB default 64 KB)
+
 init(Req, Opts) ->
   Method = cowboy_req:method(Req),
   Version = cowboy_req:binding(version, Req),
@@ -18,7 +21,6 @@ init(Req, Opts) ->
   AuthToken = lists:last(string:tokens(binary:bin_to_list(FullAuthToken), " ")),
   Auth = encryption:ewtDecode(binary:list_to_bin(AuthToken)),
   RequestTime = cowboy_req:header(<<"x-request-time">>, Req, binary:list_to_bin(uuid:to_string(uuid:uuid4()))),
-  { OsOk, _ } = tools:osStats(),
   if
     AuthToken == [] ->
        Req2 = cowboy_req:reply(401, tools:resp_headers(),
@@ -32,18 +34,13 @@ init(Req, Opts) ->
        {ok, Req2, Opts};
     true ->
       if
-        Method == <<"POST">> andalso OsOk ->
-          {ok,  [{ Payload, _}] , _} = cowboy_req:read_urlencoded_body(Req),
+        Method == <<"POST">> ->
+          {ok,  [{ Payload, _}] , _} = cowboy_req:read_urlencoded_body(Req, #{length => ?MAX_SIZE}),
           { Status, Result } = messages:push(Version, Topic, Auth, Payload, RequestTime),
           Req2 = cowboy_req:reply(Status, tools:resp_headers(),
             jiffy:encode(Result),
             Req),
           {ok, Req2, Opts};
-        OsOk =/= true ->
-          Req2 = cowboy_req:reply(429, tools:resp_headers(),
-            jiffy:encode(#{ message => <<"Env Overloaded" >> }),
-            Req),
-         {ok, Req2, Opts};
         true ->
          Req2 = cowboy_req:reply(405, tools:resp_headers(),
            jiffy:encode(#{ message => <<"Invalid Method">> }),
