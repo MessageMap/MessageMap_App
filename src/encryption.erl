@@ -11,50 +11,54 @@
 
 -export([create/1]).
 -export([ewtCreate/3]).
--export([adminEwtDecode/1]).
 -export([ewtDecode/1]).
 -export([generatePass/1]).
--export([oauthCreate/2]).
+-export([oauthCreate/1]).
 -export([validate/2]).
 -export([msgEncryption/2]).
--export([certRenew/0]).
 
 -define(saltround, 10).
--define(ewtKey, os:getenv("MM_ENCRYPTION")).
--define(ewtAdminKey, "EthanAdams_4292").
+-define(ewtKey, tools:configFile("auth_key")).
+-define(ewtTimeout, tools:configFile("auth_timeout")).
 
 create(Password) ->
- os:cmd(io_lib:format("openssl passwd -1 -salt ~s ~s", [?ewtKey, Password])).
+  mcrypto:encrypt(Password, ?ewtKey).
 
 ewtCreate(Name, Email, Permissions) ->
-  Expiration = calendar:datetime_to_gregorian_seconds(calendar:universal_time()) + 1*60*60,
-  Claims = #{user => Email, name => Name, roles => [Permissions] },
-  ewt:token(Expiration, Claims, ?ewtKey, sha256).
+  Expiration = calendar:datetime_to_gregorian_seconds(calendar:universal_time()) + 1 * list_to_integer(?ewtTimeout),
+  Claims = #{
+    <<"iss">> => <<"MessageMap">>,
+    <<"exp">> => Expiration,
+    user => Email,
+    name => Name,
+    roles => [Permissions]
+  },
+  [JWK, JWS] = setupJWTRequirements(),
+  Signed = jose_jwt:sign(JWK, JWS, Claims),
+  { _, Value } = jose_jws:compact(Signed),
+  Value.
 
 ewtDecode(Ewt) ->
-  Value = ewt:claims(Ewt, ?ewtKey),
-  pullDecodeResponse(Value).
-
-adminEwtDecode(Ewt) ->
-  Value = ewt:claims(Ewt, ?ewtAdminKey),
-  pullDecodeResponse(Value).
+  [JWK, _] = setupJWTRequirements(),
+  { _, { jose_jwt, Value }, _ } = jose_jwt:verify(JWK, Ewt),
+  Value.
 
 validate(Password, ExistingHash) ->
-  ProvidedHash = create(Password),
-  case ProvidedHash == ExistingHash of
-    true -> success;
-    false -> fail
-  end.
+  mcrypto:validation(Password, ExistingHash).
 
-oauthCreate(Claims, Exp) ->
-  Expiration = calendar:datetime_to_gregorian_seconds(calendar:universal_time()) + Exp,
-  ewt:token(Expiration, Claims, ?ewtKey, sha256).
+oauthCreate(Claims) ->
+  [JWK, JWS] = setupJWTRequirements(),
+  Signed = jose_jwt:sign(JWK, JWS, Claims),
+  { _, Value } = jose_jws:compact(Signed),
+  Value.
 
 msgEncryption(Msg, PKey) ->
   LenPayload = length(erlang:binary_to_list(Msg)),
   if
     LenPayload > 500 ->
       "Publisher Payload is to long to support Encryption (Decrease Publisher Payload to Under 500 Chars to support Encryption)";
+    % Fix for this is for Enterprise level using our client and key to deycrypt
+    % on encrypt string split full string by 400 Chars and in encrypt then combind to one string
     true ->
       EE = iolist_to_binary(PKey),
       [Entry] = public_key:pem_decode(EE),
@@ -67,16 +71,13 @@ generatePass(Value) ->
   ShortName = lists:nth(1, string:tokens(string:to_lower(Value), ".")),
   lists:sublist(binary:bin_to_list(base64:encode(ShortName ++ ShortName ++ ShortName)), 3, 10).
 
-certRenew() ->
-  os:cmd("which acme-client && acme-client -v $(hostname).msgmap.io && nginx -s reload").
-
 %%%% Internal Functions
-pullDecodeResponse(bad) ->
-  fail;
-pullDecodeResponse(expired) ->
-  fail;
-pullDecodeResponse({reason,{badmatch,expired}}) ->
-  fail;
-pullDecodeResponse(V) ->
-  {ok, Response} = V,
-  Response.
+setupJWTRequirements() ->
+  JWK = #{
+    <<"kty">> => <<"oct">>,
+    <<"k">> => jose_base64url:encode(?ewtKey)
+  },
+  JWS = #{
+    <<"alg">> => <<"HS256">>
+  },
+  [JWK, JWS].

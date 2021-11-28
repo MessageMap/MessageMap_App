@@ -1,0 +1,18 @@
+[Unit]
+Description=MessageMap Daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/usr/messagemap
+Environment=HOME=/usr/messagemap
+ExecStart=/usr/messagemap/rel/messagemap/bin/messagemap foreground
+Restart=always
+RestartSec=5
+ExecStop=/usr/messagemap/rel/messagemap/bin/messagemap stop
+Type=simple
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -5,7 +5,7 @@ var controller = {
     <div class="header-secondary row gray-bg"> \
         <div class="col-lg-12"> \
             <div class="page-heading clearfix"> \
-                <h1 class="page-title pull-left">Applications</h1><button id="newApp" data-toggle="modal" data-target="#appModal" class="btn btn-primary btn-sm btn-add">Add Application</button> \
+                <h1 class="page-title pull-left">Applications</h1><button id="newApp" data-toggle="modal" data-target="#appModal" class="requirewrite btn btn-primary btn-sm btn-add">Add Application</button> \
             </div> \
             <!-- Breadcrumb --> \
             <ol class="breadcrumb breadcrumb-2">  \
@@ -39,18 +39,18 @@ var controller = {
             <p>Application Name: <input type="text" id="appName" /></p> \
           </div> \
           <div class="modal-footer"> \
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
-            <button type="button" class="btn btn-primary" id="appNameAdd">Add Application</button> \
+            <button type="button" class="requirewrite btn btn-default" data-dismiss="modal">Close</button> \
+            <button type="button" class="requirewrite btn btn-primary" id="appNameAdd">Add Application</button> \
           </div> \
         </div><!-- /.modal-content --> \
       </div><!-- /.modal-dialog --> \
     </div> \
         </div>',
-  'script': function(id) {
+  'script': function (id) {
     if (id) {
       $('#newApp').hide();
       //UI for seeing One Application
-      $.get('/api/application/' + id, function(app) {
+      $.get('/api/application/' + id, function (app) {
         $('#noData').hide();
         var App = '<div class="panel panel-default"> \
                     <div class="panel-heading clearfix"> \
@@ -102,7 +102,7 @@ var controller = {
                         <div class=""> \
                             <div class="panel-heading clearfix"> \
                                 <h2 style="padding-bottom: 5px;" class="panel-title float-left">Topics Owned</h2><div class="clearfix"></div> \
-                    <button id="newTopic" data-toggle="modal" data-target="#newTopicModal" class="btn btn-primary btn-md btn-add">Add New Owned Topic</button> \
+                    <button id="newTopic" data-toggle="modal" data-target="#newTopicModal" class="requirewrite btn btn-primary btn-md btn-add">Add New Owned Topic</button> \
                             </div> \
                             <div class="panel-body"> \
                                 <div class="table-responsive"> \
@@ -124,8 +124,8 @@ var controller = {
                         <div class=""> \
                             <div class="panel-heading clearfix"> \
                                 <h2 style="padding-bottom: 5px;" class="panel-title">Topics Subscribed</h2><div class="clearfix"></div> \
-                    <button id="newSubscribe" data-toggle="modal" data-target="#newSubscribeTopicModal" class="btn btn-primary btn-md btn-add">Add New Subscription</button> \
-                    <button id="encryption" data-toggle="modal" data-target="#encryptionModal" class="btn btn-primary bt-md btn-add"><span class="glyphicon glyphicon-lock"></span id="encyptLabel">Enable Message Encryption</button> \
+                    <button id="newSubscribe" data-toggle="modal" data-target="#newSubscribeTopicModal" class="requirewrite btn btn-primary btn-md btn-add">Add New Subscription</button> \
+                    <button id="encryption" data-toggle="modal" data-target="#encryptionModal" class="requirewrite btn btn-primary bt-md btn-add"><span class="glyphicon glyphicon-lock"></span id="encyptLabel">Enable Message Encryption</button> \
                             </div> \
                             <div class="panel-body"> \
                                 <div class="table-responsive"> \
@@ -149,30 +149,30 @@ var controller = {
 												<div class="panel-heading clearfix"> \
 												  <h2 style="padding-bottom: 5px;" class="panel-title">Push Message Configuration</h2><div class="clearfix"></div> \
 												</div> \
-												<a class="btn btn-primary" data-toggle="collapse" id="enablePushMessages" href="#collapsePush" role="button" aria-expanded="false" aria-controls="collapsePush">Enable Push Messages</a> \
+												<a class="requirewrite btn btn-primary" data-toggle="collapse" id="enablePushMessages" href="#collapsePush" role="button" aria-expanded="false" aria-controls="collapsePush">Enable Push Messages</a> \
 												<div class="collapse" id="collapsePush"> \
 												<div class="form-horizontal"> \
 												<div class="form-group"> \
 												<label class="col-sm-2 control-label">Url To Push Messages Too: </label> \
 												<div class="col-sm-10"> \
-												<input type="text" placeholder="Placeholder" id="pushUrl" value="'+app.pushUrl+'" class="form-control"> \
+												<input type="text" placeholder="Placeholder" id="pushUrl" value="'+ app.pushUrl + '" class="form-control"> \
 												</div> \
 												</div> \
 												<div class="form-group"> \
 												<label class="col-sm-2 control-label">Number of Retries before Fail: </label> \
 												<div class="col-sm-10"> \
 												Messages will retry every 1 second.  If failer for all all the retrie countes messages will be held for pull.<br /> \
-												<input type="text" style="width:50px;" id="pushRetries" value="'+app.pushRetries+'" class="form-control"></div> \
+												<input type="text" style="width:50px;" id="pushRetries" value="'+ app.pushRetries + '" class="form-control"></div> \
 												</div> \
 												<div class="form-group"> \
 												<label class="col-sm-2 control-label">Status Code For Success: </label> \
-												<div class="col-sm-10"><input type="text" id="pushStatusCode" value="'+app.pushStatusCode+'" class="form-control"></div> \
+												<div class="col-sm-10"><input type="text" id="pushStatusCode" value="'+ app.pushStatusCode + '" class="form-control"></div> \
 												</div> \
 												<div class="form-group"> \
 												<label class="col-sm-2 control-label">Headers to Use for Final Endpoint: </label> \
 												<div class="col-sm-10"> \
 												<pre>Example: <br \>User-Agent: MessageMap.IO - Client-Push;<br />MessageMap-Subsriber: Subscriber;</pre> \
-												<textarea class="form-control" id="pushHeaders">'+app.pushHeaders+'</textarea> \
+												<textarea class="form-control" id="pushHeaders">'+ app.pushHeaders + '</textarea> \
 												</div> \
 												</div> \
 												</div> \
@@ -182,8 +182,8 @@ var controller = {
               <div class="form-group"> \
                                 <div class="col-sm-4"> \
                                     <button type="submit" class="btn btn-white" id="cancelApplication">Cancel</button> \
-                                    <button type="submit" class="btn btn-primary" id="saveApplication">Save changes</button> \
-                  <button type="submit" class="btn btn-danger" id="deleteApplication">Delete Application</button> \
+                                    <button type="submit" class="requirewrite btn btn-primary" id="saveApplication">Save changes</button> \
+                  <button type="submit" class="requirewrite btn btn-danger" id="deleteApplication">Delete Application</button> \
                                 </div> \
                             </div> \
                         </form> \
@@ -212,9 +212,9 @@ var controller = {
               </row> \
               </div> \
               <div class="modal-footer"> \
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
-                <button type="button" class="btn btn-default" id="resetMessageMapping" data-dismiss="modal">Reset remove Message Mapping</button> \
-                <button type="button" class="btn btn-primary" id="saveMessageMapping">Save Message Mapping</button> \
+                <button type="button" class="requirewrite btn btn-default" data-dismiss="modal">Close</button> \
+                <button type="button" class="requirewrite btn btn-default" id="resetMessageMapping" data-dismiss="modal">Reset remove Message Mapping</button> \
+                <button type="button" class="requirewrite btn btn-primary" id="saveMessageMapping">Save Message Mapping</button> \
               </div> \
               </div> \
             </div><!-- /.modal-content --> \
@@ -232,8 +232,8 @@ var controller = {
                 <!--p class="topicDescriptionSelect"> </p--> \
               </div> \
               <div class="modal-footer"> \
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
-                <button type="button" class="btn btn-primary" id="ownedAdd">Add Topic to Owned List</button> \
+                <button type="button" class="requirewrite btn btn-default" data-dismiss="modal">Close</button> \
+                <button type="button" class="requirewrite btn btn-primary" id="ownedAdd">Add Topic to Owned List</button> \
               </div> \
                             </div> \
             </div><!-- /.modal-content --> \
@@ -268,9 +268,9 @@ var controller = {
                 </p> \
               </div> \
               <div class="modal-footer"> \
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
-                <button type="button" class="btn btn-primary" id="addEncryption">Add/Update Encryption</button> \
-                <button type="button" class="btn btn-primary" id="removeEncryption">Remove All Encryption</button> \
+                <button type="button" class="requirewrite btn btn-default" data-dismiss="modal">Close</button> \
+                <button type="button" class="requirewrite btn btn-primary" id="addEncryption">Add/Update Encryption</button> \
+                <button type="button" class="requirewrite btn btn-primary" id="removeEncryption">Remove All Encryption</button> \
               </div> \
                             </div> \
             </div><!-- /.modal-content --> \
@@ -288,8 +288,8 @@ var controller = {
                 </select></p> \
               </div> \
               <div class="modal-footer"> \
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> \
-                <button type="button" class="btn btn-primary" id="subscribedAdd">Add Topic to Subscribe List</button> \
+                <button type="button" class="requirewrite btn btn-default" data-dismiss="modal">Close</button> \
+                <button type="button" class="requirewrite btn btn-primary" id="subscribedAdd">Add Topic to Subscribe List</button> \
               </div> \
                             </div> \
             </div><!-- /.modal-content --> \
@@ -297,29 +297,30 @@ var controller = {
                 </div>';
         $('.cards-container').empty();
         $('.cards-container').html(App);
+        checkpermissions();
         //Encryption Value
-        if (app.encrypt.length > 1){
+        if (app.encrypt.length > 1) {
           $('#encryption').html('<span class="glyphicon glyphicon-lock"></span>Modify/Remove Message Encryption</button>');
           $('#EncryptionValue').val(app.encrypt);
-        } else{
+        } else {
           $('#encryption').html('<span class="glyphicon glyphicon-unlock"></span>Enable Message Encryption</button>');
         }
-        $('#removeEncryption').click(function(e){
-           $('#EncryptionValue').val('');
-           $('#encryptionModal').find(".close").click();
+        $('#removeEncryption').click(function (e) {
+          $('#EncryptionValue').val('');
+          $('#encryptionModal').find(".close").click();
         });
-        $('#addEncryption').click(function(e){
-           //Validate Key Here
-           $.post('/api/validateEncryption', { 'encrypt': $('#EncryptionValue').val() }, function(data, status){
-              if(data.result == "good"){
-                  $('#encryptionModal').find(".close").click();
-									$('#encryptionModal').hide();
-                } else {
-                  $('#encryptionError').html('Invalid Value for Public Certificate Key').addClass('alert alert-danger');
-                }
-           }).done(function(){
-             $('#encryptionModal').find(".close").click();
-           });
+        $('#addEncryption').click(function (e) {
+          //Validate Key Here
+          $.post('/api/validateEncryption', { 'encrypt': $('#EncryptionValue').val() }, function (data, status) {
+            if (data.result == "good") {
+              $('#encryptionModal').find(".close").click();
+              $('#encryptionModal').hide();
+            } else {
+              $('#encryptionError').html('Invalid Value for Public Certificate Key').addClass('alert alert-danger');
+            }
+          }).done(function () {
+            $('#encryptionModal').find(".close").click();
+          });
         });
 $('.apikey-copy').click(function (e) {
   e.preventDefault();
@@ -331,254 +332,261 @@ $('.apikey-copy').click(function (e) {
   $temp.remove();
 });
         //Start Subscribed Topics
-        app.subscribedTopics.split(",").forEach(function(topic) {
-          if(topic.length > 1){
-            $.get('/api/topic/' + topic, function(result) {
+        app.subscribedTopics.split(",").forEach(function (topic) {
+          if (topic.length > 1) {
+            $.get('/api/topic/' + topic, function (result) {
               $('#listSubscribedTopics').append('<tr id="' + result.id + '" class="subscribedTopicRow">  \
                   <th scope="row">' + result.id + '</th>  \
                   <td><a href="#/topics/' + result.id + '">' + result.name + '</a></td>  \
-                   <td><span id="saved_mapping_'+result.id+'" style="display:none"></span><button sub_id="' + result.id +'" data-toggle="modal" data-target="#configMessageMapModal" type="button" class="btn btn-info add_config" id="viewConfigMessageMapping">Configure MessageMapping</button><br /> \
-                      <div>(Number of Elements: <span class="currentMapCount_'+result.id+'">0</span>)</div> <div id="toSaveFilters" style="display:none;" /></td> \
-                  <td><button  type="button" class="btn btn-danger" id="deleteSubscribed">Remove Topic</button></td>  \
+                   <td><span id="saved_mapping_'+ result.id + '" style="display:none"></span><button sub_id="' + result.id + '" data-toggle="modal" data-target="#configMessageMapModal" type="button" class="requirewrite btn btn-info add_config" id="viewConfigMessageMapping">Configure MessageMapping</button><br /> \
+                      <div>(Number of Elements: <span class="currentMapCount_'+ result.id + '">0</span>)</div> <div id="toSaveFilters" style="display:none;" /></td> \
+                  <td><button  type="button" class="requirewrite btn btn-danger" id="deleteSubscribed">Remove Topic</button></td>  \
                 </tr>');
-            }).promise().done(function(e){
- $.each($.parseJSON(app.filter), function(ind, sub){
-         $('#saved_mapping_'+sub['id']).text(JSON.stringify(sub['value']));
-         $('.currentMapCount_'+sub['id']).text(sub['value'].length);
-       });
-						});
+                checkpermissions();
+            }).promise().done(function (e) {
+              $.each($.parseJSON(app.filter), function (ind, sub) {
+                $('#saved_mapping_' + sub['id']).text(JSON.stringify(sub['value']));
+                $('.currentMapCount_' + sub['id']).text(sub['value'].length);
+              });
+            });
           }
         });
-				// Start of Push Configuration
-				$('#enablePushMessages').click(function(e){
-					var statusPush = $('#enablePushMessages').html();
-					if(statusPush == "Enable Push Messages"){
-					  $('#enablePushMessages').html('Disable Push Messages');
-					} else {
-					  $('#enablePushMessages').html('Enable Push Messages');
-					}
-				});
-				if ( app.pushMessages == "true" ) {
-				  $('#enablePushMessages').trigger('click');
-				}
+        // Start of Push Configuration
+        $('#enablePushMessages').click(function (e) {
+          var statusPush = $('#enablePushMessages').html();
+          if (statusPush == "Enable Push Messages") {
+            $('#enablePushMessages').html('Disable Push Messages');
+          } else {
+            $('#enablePushMessages').html('Enable Push Messages');
+          }
+        });
+        if (app.pushMessages == "true") {
+          $('#enablePushMessages').trigger('click');
+        }
+        checkpermissions();
         //Start Message Mapping Configuration
-				var sub_id;
-				$(document).on('click', '.add_config', function(e){
-				  sub_id = $(this).attr('sub_id');
-					var values = $('#saved_mapping_'+sub_id).text();
+        var sub_id;
+        $(document).on('click', '.add_config', function (e) {
+          sub_id = $(this).attr('sub_id');
+          var values = $('#saved_mapping_' + sub_id).text();
           $('#currentFilters').html('');
-          if (values.length > 0){
-          $.each(JSON.parse(values), function(i,v){
-               if(v['type'] != 'rename'){
-                  var str = 'Type: <b>'+ v['type'] + '</b> | Key: <b>'+ v['value']+'</b>';
-               } else {
-                  var str = 'Type: <b>'+ v['type'] + '</b> | Key: <b>'+ v['key'] +'</b> | New Value: <b> '+v['value'] + '</b>';
-               }
-               $('#currentFilters').append('<pre class="FilterRow">'+str+'<button class="removeFilter">Clear</button></pre>');
-           });
-           }
-        });
-        $(document).on('change', '#typeof', function(e){
-           e.preventDefault();
-           if($('#typeof').val() != 'Rename'){
-             $('#htmlModifyValue').hide();
-           } else {
-             $('#htmlModifyValue').show();
-           }
-        });
-        $(document).on('click', '#addFilter', function(e){
-           e.preventDefault();
-           if($('#newkey').val().length > 0){
-              if($('#typeof').val() != 'Rename'){
-                 var str = 'Type: <b>'+ $('#typeof').val() + '</b> | Key: <b>'+ $('#newkey').val()+'</b>';
+          if (values.length > 0) {
+            $.each(JSON.parse(values), function (i, v) {
+              if (v['type'] != 'rename') {
+                var str = 'Type: <b>' + v['type'] + '</b> | Key: <b>' + v['value'] + '</b>';
               } else {
-                 var str = 'Type: <b>'+ $('#typeof').val() + '</b> | Key: <b>'+ $('#newkey').val()+'</b> | New Value: <b>'+$('#ModifyValue').val()+'</b>';
+                var str = 'Type: <b>' + v['type'] + '</b> | Key: <b>' + v['key'] + '</b> | New Value: <b> ' + v['value'] + '</b>';
               }
-              $('#currentFilters').append('<pre class="FilterRow">'+str+'<button class="removeFilter">Clear</button></pre>');
-           }
+              $('#currentFilters').append('<pre class="FilterRow">' + str + '<button class="removeFilter">Clear</button></pre>');
+            });
+          }
+        });
+        $(document).on('change', '#typeof', function (e) {
+          e.preventDefault();
+          if ($('#typeof').val() != 'Rename') {
+            $('#htmlModifyValue').hide();
+          } else {
+            $('#htmlModifyValue').show();
+          }
+        });
+        $(document).on('click', '#addFilter', function (e) {
+          e.preventDefault();
+          if ($('#newkey').val().length > 0) {
+            if ($('#typeof').val() != 'Rename') {
+              var str = 'Type: <b>' + $('#typeof').val() + '</b> | Key: <b>' + $('#newkey').val() + '</b>';
+            } else {
+              var str = 'Type: <b>' + $('#typeof').val() + '</b> | Key: <b>' + $('#newkey').val() + '</b> | New Value: <b>' + $('#ModifyValue').val() + '</b>';
+            }
+            $('#currentFilters').append('<pre class="FilterRow">' + str + '<button class="removeFilter">Clear</button></pre>');
+          }
           $('#newkey').val('');
           $('#ModifyValue').val('');
         });
-        $(document).on('click', ".removeFilter", function(e){
+        $(document).on('click', ".removeFilter", function (e) {
           e.preventDefault();
           $(this).closest('pre').remove();
         });
-        $(document).on('click', '#saveMessageMapping', function(e){
+        $(document).on('click', '#saveMessageMapping', function (e) {
           e.preventDefault();
           result = [];
-          $('.FilterRow').each(function(e){
-            var mapping =  $(this).html().toString().replace( /(<([^>]+)>)/ig, '').split(':');
-            if ( $.inArray( mapping[1].split('|')[0].toLowerCase().trim(), [ "masking", "remove" ] ) > -1 ){
-							var type = mapping[1].split("|")[0].toLowerCase().trim();
-							var value = mapping[2].toLowerCase().trim().replace("clear", "");
-							result.push({ "type": type, "value": value });
-            } else if( $.inArray( mapping[1].split('|')[0].toLowerCase().trim(), [ "rename" ] ) > -1 ){
-						  var old = mapping[2].trim();
-							var value = mapping[3].trim().replace("Clear", "");
-						  result.push({ "type": "rename", "key": old.split('|')[0].trim(), "value": value});
+          $('.FilterRow').each(function (e) {
+            var mapping = $(this).html().toString().replace(/(<([^>]+)>)/ig, '').split(':');
+            if ($.inArray(mapping[1].split('|')[0].toLowerCase().trim(), ["masking", "remove"]) > -1) {
+              var type = mapping[1].split("|")[0].toLowerCase().trim();
+              var value = mapping[2].toLowerCase().trim().replace("clear", "");
+              result.push({ "type": type, "value": value });
+            } else if ($.inArray(mapping[1].split('|')[0].toLowerCase().trim(), ["rename"]) > -1) {
+              var old = mapping[2].trim();
+              var value = mapping[3].trim().replace("Clear", "");
+              result.push({ "type": "rename", "key": old.split('|')[0].trim(), "value": value });
             }
           });
-          $('#saved_mapping_'+sub_id).text(JSON.stringify(result));
-					$('#configMessageMapModal').find(".close").click();
-					$('.currentMapCount_'+sub_id).text(result.length);
+          $('#saved_mapping_' + sub_id).text(JSON.stringify(result));
+          $('#configMessageMapModal').find(".close").click();
+          $('.currentMapCount_' + sub_id).text(result.length);
         });
-        $.get('/api/stats/'+app.id, function(result){
+        $.get('/api/stats/' + app.id, function (result) {
           var wait = result.messages_waiting
-          var percentFull = parseFloat((wait/20000)*100).toFixed(2);
-          $('#con_stat_'+app.id).html(result.consumed_messages.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-          $('#pub_stat_'+app.id).html(result.published_messages.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-          $('#wait_stat_'+app.id).html(result.messages_waiting.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-          $('#storage_stat_'+app.id).html(percentFull.toString()+' %');
-          if(parseInt(percentFull) > 90){
-            $('#storage_stat_'+app.id).parent().parent().addClass('alert-danger').removeClass('alert-success');
+          var percentFull = parseFloat((wait / 20000) * 100).toFixed(2);
+          $('#con_stat_' + app.id).html(result.consumed_messages.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+          $('#pub_stat_' + app.id).html(result.published_messages.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+          $('#wait_stat_' + app.id).html(result.messages_waiting.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+          $('#storage_stat_' + app.id).html(percentFull.toString() + ' %');
+          if (parseInt(percentFull) > 90) {
+            $('#storage_stat_' + app.id).parent().parent().addClass('alert-danger').removeClass('alert-success');
           } else {
-            $('#storage_stat_'+app.id).parent().parent().addClass('alert-success').removeClass('alert-danger');
+            $('#storage_stat_' + app.id).parent().parent().addClass('alert-success').removeClass('alert-danger');
           }
         });
-        $(document).on('click', '#deleteSubscribed', function(e) {
-            e.preventDefault();
-            $(this).closest('tr').remove();
-        });
-        $('#newSubscribe').on('click', function(e) {
+        $(document).on('click', '#deleteSubscribed', function (e) {
           e.preventDefault();
-          $.get('/api/topic', function(result) {
+          $(this).closest('tr').remove();
+        });
+        $('#newSubscribe').on('click', function (e) {
+          e.preventDefault();
+          $.get('/api/topic', function (result) {
             $('.topicSubscribeList').html('');
             var loadedSubs = [];
-            $('.subscribedTopicRow').each(function(sub){
+            $('.subscribedTopicRow').each(function (sub) {
               loadedSubs.push($('.subscribedTopicRow')[sub].id);
             });
-            $.each(result, function(idx, topic) {
-               if (loadedSubs.indexOf(topic.id) == -1) {
+            $.each(result, function (idx, topic) {
+              if (loadedSubs.indexOf(topic.id) == -1) {
                 $('.topicSubscribeList').append('<option value="' + topic.id + '">' + topic.name + '</option>');
-               }
+              }
             });
           });
         });
-        $('#subscribedAdd').on('click', function(e) {
+        $('#subscribedAdd').on('click', function (e) {
           e.preventDefault();
           var tid = $('.topicSubscribeList option:selected').val();
-          $.get('/api/topic/' + tid, function(result) {
+          $.get('/api/topic/' + tid, function (result) {
             $('#listSubscribedTopics').append('<tr id="' + result.id + '" class="subscribedTopicRow">  \
                 <th scope="row">' + result.id + '</th>  \
                 <td><a href="#/topics/' + result.id + '">' + result.name + '</a></td>  \
-                <td><span id="saved_mapping_'+result.id+'" style="display:none"></span><button sub_id="'+result.id+'"  data-toggle="modal" data-target="#configMessageMapModal" type="button" class="btn btn-info add_config" id="viewConfigMessageMapping">Configure MessageMapping</button><br /> \
-                <div>(Number of Map Configurations: <span class="currentMapCount_'+result.id+'">0</span>)</div> <div id="toSaveFilters" class="' + result.id + '" style="display:none;" /></td> \
-                <td><button type="button" class="btn btn-danger" id="deleteSubscribed">Remove Topic</button></td>  \
+                <td><span id="saved_mapping_'+ result.id + '" style="display:none"></span><button sub_id="' + result.id + '"  data-toggle="modal" data-target="#configMessageMapModal" type="button" class="requirewrite btn btn-info add_config" id="viewConfigMessageMapping">Configure MessageMapping</button><br /> \
+                <div>(Number of Map Configurations: <span class="currentMapCount_'+ result.id + '">0</span>)</div> <div id="toSaveFilters" class="' + result.id + '" style="display:none;" /></td> \
+                <td><button type="button" class="requirewrite btn btn-danger" id="deleteSubscribed">Remove Topic</button></td>  \
               </tr>');
+            checkpermissions();
           });
           $('#newSubscribeTopicModal').find(".close").click();
         });
         //End Subscribed Topics
         //Start Owned Topics
-        app.ownedTopics.split(",").forEach(function(topic) {
-          if(topic.length > 1){
-            $.get('/api/topic/' + topic, function(result) {
+        app.ownedTopics.split(",").forEach(function (topic) {
+          if (topic.length > 1) {
+            $.get('/api/topic/' + topic, function (result) {
               $('#listOwnedTopics').append('<tr id="' + result.id + '" class="ownedTopicRow">  \
                   <th scope="row">' + result.id + '</th>  \
                   <td><a href="#/topics/' + result.id + '">' + result.name + '</a></td>  \
-                  <td><button  type="button" class="btn btn-danger" id="deleteOwned">Remove Topic</button></td>  \
+                  <td><button  type="button" class="requirewrite btn btn-danger" id="deleteOwned">Remove Topic</button></td>  \
                 </tr>');
+              checkpermissions();
             });
           }
         });
-        $(document).on('click', '#deleteOwned', function(e) {
-            e.preventDefault();
-            $(this).closest('tr').remove();
-        });
-        $('#newTopic').on('click', function(e) {
+        $(document).on('click', '#deleteOwned', function (e) {
           e.preventDefault();
-          $.get('/api/topic', function(result) {
+          $(this).closest('tr').remove();
+        });
+        $('#newTopic').on('click', function (e) {
+          e.preventDefault();
+          $.get('/api/topic', function (result) {
             var owned_topics = [];
-            $.get('/api/application', function(Apps){
-              Apps.forEach(function(Amulti){
-                Amulti.ownedTopics.toString().split(',').forEach(function(A){
-                owned_topics.push(A);
+            $.get('/api/application', function (Apps) {
+              Apps.forEach(function (Amulti) {
+                Amulti.ownedTopics.toString().split(',').forEach(function (A) {
+                  owned_topics.push(A);
                 });
               });
-            $('.topicList').html('');
-            $.each(result, function(idx, topic) {
-              if(owned_topics.indexOf(topic.id) == -1){
-                $('.topicList').append('<option value="' + topic.id + '">' + topic.name + '</option>');
-              }
-            });
+              $('.topicList').html('');
+              $.each(result, function (idx, topic) {
+                if (owned_topics.indexOf(topic.id) == -1) {
+                  $('.topicList').append('<option value="' + topic.id + '">' + topic.name + '</option>');
+                }
+              });
             });
           });
         });
-        $('#ownedAdd').on('click', function(e) {
+        $('#ownedAdd').on('click', function (e) {
           e.preventDefault();
           var tid = $('.topicList option:selected').val();
-          $.get('/api/topic/' + tid, function(result) {
+          $.get('/api/topic/' + tid, function (result) {
             $('#listOwnedTopics').append('<tr id="' + result.id + '" class="ownedTopicRow">  \
                 <th scope="row">' + result.id + '</th>  \
                 <td><a href="#/topics/' + result.id + '">' + result.name + '</a></td>  \
-                <td><button type="button" class="btn btn-danger" id="deleteOwned">Remove Topic</button></td>  \
+                <td><button type="button" class="requirewrite btn btn-danger" id="deleteOwned">Remove Topic</button></td>  \
               </tr>');
+            checkpermissions();
           });
           $('#newTopicModal').find(".close").click();
         });
         //End Owned Topics
-        $('#deleteApplication').on('click', function(e) {
+        $('#deleteApplication').on('click', function (e) {
           e.preventDefault();
           $.ajax({
             url: '/api/application/' + id,
             type: 'DELETE'
           });
-          setTimeout(function(){
+          setTimeout(function () {
             window.location.hash = '#/applications';
           }, 3000);
         });
-        $('#saveApplication').on('click', function(e) {
+        $('#saveApplication').on('click', function (e) {
           e.preventDefault();
-          var currentTopicIds = $.unique($.map($(".ownedTopicRow"), function(n, i) {
+          var currentTopicIds = $.unique($.map($(".ownedTopicRow"), function (n, i) {
             return n.id;
           }));
-          var subscribedTopicIds = $.unique($.map($(".subscribedTopicRow"), function(n, i) {
+          var subscribedTopicIds = $.unique($.map($(".subscribedTopicRow"), function (n, i) {
             return n.id;
           }));
-					var pushMessages = false;
-					if ($('#enablePushMessages').html() == "Disable Push Messages") {
-					  pushMessages = true;
-					}
-					var subArray = [];
-					$(subscribedTopicIds).each(function(i){
-					  var id = subscribedTopicIds[i];
-						var val = $('#saved_mapping_'+subscribedTopicIds[i]).text();
-						if (val.length > 2){
-							subArray.push({ "id": id, "value": JSON.parse(val) });
-						}
-					}).promise().done(function(e){
-					var pushUrl = $('#pushUrl').val().trim();
-					if ( pushUrl.includes('localhost') ||
-					     pushUrl.includes('msgmap') ||
-							 pushUrl.includes('127.0.0.1') ){
-					   $('#appError').html('Push URL Is Invalid');
-						 $('#appError').addClass('alert alert-danger');
-					} else {
-          $.ajax({
-            url: '/api/application/' + id,
-            type: 'PUT',
-            contentType: "application/json",
-            data: {
-						  "pushMessages": pushMessages,
-							"pushUrl": $('#pushUrl').val(),
-							"pushRetries": $('#pushRetries').val(),
-							"pushStatusCode": $('#pushStatusCode').val(),
-							"pushHeaders": $('#pushHeaders').val(),
-              "subscribedTopics": subscribedTopicIds.join(","),
-              "ownedTopics": currentTopicIds.join(","),
-              "name": $('#appName').val(),
-							"filters": JSON.stringify(subArray),
-              "description": $('#appDescription').val(),
-              "encryption": $('#EncryptionValue').val()
-            },
-            success: function(){
-              window.location.hash = '#/applications';
+          var pushMessages = false;
+          if ($('#enablePushMessages').html() == "Disable Push Messages") {
+            pushMessages = true;
+          }
+          checkpermissions();
+          var subArray = [];
+          $(subscribedTopicIds).each(function (i) {
+            var id = subscribedTopicIds[i];
+            var val = $('#saved_mapping_' + subscribedTopicIds[i]).text();
+            if (val.length > 2) {
+              subArray.push({ "id": id, "value": JSON.parse(val) });
+            }
+          }).promise().done(function (e) {
+            var pushUrl = $('#pushUrl').val().trim();
+            //should we remove this check?
+            if (pushUrl.includes('localhost') ||
+              pushUrl.includes('msgmap') ||
+              pushUrl.includes('127.0.0.1')) {
+              $('#appError').html('Push URL Is Invalid');
+              $('#appError').addClass('alert alert-danger');
+            } else {
+              $.ajax({
+                url: '/api/application/' + id,
+                type: 'PUT',
+                contentType: "application/json",
+                data: {
+                  "pushMessages": pushMessages,
+                  "pushUrl": $('#pushUrl').val(),
+                  "pushRetries": $('#pushRetries').val(),
+                  "pushStatusCode": $('#pushStatusCode').val(),
+                  "pushHeaders": $('#pushHeaders').val(),
+                  "subscribedTopics": subscribedTopicIds.join(","),
+                  "ownedTopics": currentTopicIds.join(","),
+                  "name": $('#appName').val(),
+                  "filters": JSON.stringify(subArray),
+                  "description": $('#appDescription').val(),
+                  "encryption": $('#EncryptionValue').val()
+                },
+                success: function () {
+                  window.location.hash = '#/applications';
+                }
+              });
             }
           });
-					}
-					});
         });
-        $('#cancelApplication').on('click', function(e) {
+        $('#cancelApplication').on('click', function (e) {
           e.preventDefault();
           window.location.hash = '#/applications';
         });
@@ -586,25 +594,25 @@ $('.apikey-copy').click(function (e) {
     } else {
       $('#newApp').show();
       //UI for seeing All Applications
-      $.get('/api/application', function(result) {
+      $.get('/api/application', function (result) {
         $('.cards-container').html('');
         $('.cards-container').empty();
-        $.each(result, function(idx, app) {
+        $.each(result, function (idx, app) {
           var Pub = "";
           var Sub = "";
-					var Push = "";
-					var Encrypt = "";
-					var Mapping = "";
+          var Push = "";
+          var Encrypt = "";
+          var Mapping = "";
           if (app.ownedTopics.length > 0)
-            Pub = '<button type="button" class="btn btn-primary">Publisher</button>';
+            Pub = '<button type="button" class="requirewrite btn btn-primary">Publisher</button>';
           if (app.subscribedTopics.length > 0)
-            Sub = '<button type="button" class="btn btn-success">Subscriber</button>';
-					if (app.pushMessages == "true")
-					  Push = '<button type="button" class="btn btn-default">Push Messages</button>';
-					if (app.encrypt.length > 0)
-					  Encrypt = '<button type="button" class="btn btn-warning">Encryption</button>';
-					if (app.filters.length > 5)
-					  Mapping = '<button type="button" class="btn btn-danger">Message Mapping</button>';
+            Sub = '<button type="button" class="requirewrite btn btn-success">Subscriber</button>';
+          if (app.pushMessages == "true")
+            Push = '<button type="button" class="requirewrite btn btn-default">Push Messages</button>';
+          if (app.encrypt.length > 0)
+            Encrypt = '<button type="button" class="requirewrite btn btn-warning">Encryption</button>';
+          if (app.filters.length > 5)
+            Mapping = '<button type="button" class="requirewrite btn btn-danger">Message Mapping</button>';
           var addApp = '<!-- Card --> \
                         <div class="card"> \
                             <!-- Card Header --> \
@@ -614,7 +622,8 @@ $('.apikey-copy').click(function (e) {
                                     <h5> \
                                     <span class="app-name"><a class="appNameFull" href="#/applications/' + app.id + '">' + app.name + '</a></span> \
                                     </h5> \
-																		<div class="btn-toolbar">'+Pub+Sub+Push+Encrypt+Mapping+'</div> \
+                                    <p>API KEY: ' + app.apiKeys + '</p> \
+																		<div class="requirewrite btn-toolbar">'+ Pub + Sub + Push + Encrypt + Mapping + '</div> \
                                 </div> \
                                 <!-- /card short description --> \
                             </div> \
@@ -628,31 +637,28 @@ $('.apikey-copy').click(function (e) {
                         <!-- /card -->';
           $('#noData').hide();
           $('.cards-container').append(addApp);
+          checkpermissions();
         });
       });
 
-      $('#appNameAdd').click(function(e) {
+      $('#appNameAdd').click(function (e) {
         e.preventDefault();
         var appN = $('#appName').val().trim();
         var namecheck = false;
-        $('.appNameFull').each(function(e){
+        $('.appNameFull').each(function (e) {
           checkname = $(this).html().trim();
           if (checkname == appN) {
             namecheck = true;
           }
         });
-        if ((namecheck == false) && (appN.length > 0)){
-        $.post('/api/application', {
-          appName: $('#appName').val()
-        }, function(app) {
-           if ("Error" in app){
-            $('#appNameError').html(app.Error);
-            $('#appNameError').show();
-          } else {
-          $('#appModal').find(".close").click();
-          var Pub = '<span class="badge badge-primary" style="display:none">Publisher</span>';
-          var Sub = '<span class="badge badge-warning" style="display:none">Subscriber</span>';
-          var addApp = '<!-- Card --> \
+        if ((namecheck == false) && (appN.length > 0)) {
+          $.post('/api/application', {
+            appName: $('#appName').val()
+          }, function (app) {
+            $('#appModal').find(".close").click();
+            var Pub = '<span class="badge badge-primary" style="display:none">Publisher</span>';
+            var Sub = '<span class="badge badge-warning" style="display:none">Subscriber</span>';
+            var addApp = '<!-- Card --> \
                         <div class="card"> \
                             <!-- Card Header --> \
                             <div class="card-header"> \
@@ -673,19 +679,18 @@ $('.apikey-copy').click(function (e) {
                             <!-- /card content --> \
                         </div> \
                         <!-- /card -->';
-          $('#appName').val('');
-          $('#noData').hide();
-          $('.cards-container').append(addApp);
-        }
-        });
+            $('#appName').val('');
+            $('#noData').hide();
+            $('.cards-container').append(addApp);
+          });
         } else {
           $('#appNameError').html("Application Name is already in use");
           $('#appNameError').show();
         }
       });
     }
+    checkpermissions();
   }
-
 };
 
 //Pull Application id from Route

@@ -1,0 +1,82 @@
+Version 2.0 for MessageMap
+ --- New Evolution of the Application
+ -- Take the Application management and control to the next level
+
+Full version Opensource it.
+-- No cluster management for storage
+-- Running Old UI
+-- Requirements:
+--- memory 8 GB 2x4
+--- CPU 2 Core
+--- Erlang 23
+--- OS Supported
+----- Linux, FreeBSD, (OpenBSD when erlang 23 is supported)
+-- TODO:
+---- Build in User Management!!!
+---- Add code documentation
+---- Move to Github
+---- Create Ports for FreeBSD
+---- Create Packages for RPM and DEB based
+---- Execute with Linux using systemd
+
+Public Cloud creation
+ -- Come with new UI for interacting with the application
+ -- Public Cloud to order or just send messages
+ --- Public version of the application setup
+ - Setup Cluster Configuration,
+  -- 2 servers
+  - Cluster Locations:
+  --- Type - High Frequency
+  -- Cluster Locations:
+  --- Los Angeles
+  --- Sydney
+  --- Toronto
+  -- Server Cost and specs
+  -- Cost: $25 per month ($75 per cluster)
+  --- 2 CPU, 4GB Memory, 30 TB Bandwidth, 128 GB Storage
+  --- OS: FreeBSD 12.1
+  -- External Admin manager application for:
+  --- Cluster auto Expand
+  --- Auto renew SSL Certs every 30 days
+  -- Charging customers:
+  ---- MessageMap
+  ----- 1 Million Requests at $.20 (start charging at .01 = 50,000)
+  ----- Max Payload: 512 KB
+  ------- Bandwidth at 1 Million Requests:
+  ------- $1,000 Income
+  ------- 0.45 TB of Transfer
+  ------ STILL BE MAKING A PROFIT!!!
+  -------- Income Before Extra cost: $63,000
+  ---- AWS
+  ----- 1 Million Requests at $.40
+  ----- Max Payload: 256 KB
+
+Fully Public or Offer Hosted???
+
+Admin site more of a Portal Design for public,
+Or can Setup Own Clusters with own Portal setup.
+
+-- For application to support this create:
+-- Permissions:
+- Admin
+- Workspace_Admin
+-- Admin Workspaces Created by Org
+-- Admin users
+- User
+-- Create build Application configurations
+
+
+Host Private:
+-- Add Nodes
+-- Move Application payload to X servers
+-- More cluster management
+-- With Table Storage be able to set nodes for mirroring data or no mirroring data, customer call
+
+
+
+Setup Install Release:
+./rebar3 as prod tar
+cp _build/prod/rel/messagemap/messagemap-0.0.1.tar.gz /tmp/
+cd /tmp
+tar -xzvf messagemap-0.0.1.tar.gz
+./bin/messagemap start

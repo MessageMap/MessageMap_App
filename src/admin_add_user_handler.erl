@@ -11,21 +11,29 @@
 -export([init/2]).
 
 init(Req, Opts) ->
-  % TODO: Add Claims ladder
-  % { Claims, Req2 } = tools:verifyAuthAdmin(Req),
+  { Claims, _ } = tools:verifyAuth(Req),
+  IsAdmin = tools:requireAdmin(erlang:is_map(Claims), Claims),
   Method = cowboy_req:method(Req),
-  %io:format("Claims: ~p~n", [Claims]),
-  Result = processRequest(Method, "REPLACE_CLAIMS", Req),
-  io:format("Result: ~p~n", [Result]),
+  response(IsAdmin, Method, Req, Opts).
+
+% Internal functions
+response(<<"Bad">>, _, Req, Opts) ->
+  ReqFinal = cowboy_req:reply(200, tools:resp_headers(),
+      jiffy:encode(#{ result => <<"Invalid Authorization">> }),
+      Req),
+  {ok, ReqFinal, Opts};
+response(_, Method, Req, Opts) ->
+  Result = processRequest(Method, Req),
   ReqFinal = cowboy_req:reply(200, tools:resp_headers(),
       Result,
       Req),
   {ok, ReqFinal, Opts}.
 
 % Internal functions
-processRequest(<<"POST">>, _, Req) ->
+processRequest(<<"POST">>, Req) ->
   {ok, Body, _} = cowboy_req:read_urlencoded_body(Req),
-  {_, Username} = lists:keyfind(<<"user">>, 1, Body),
+  {_, Username} = lists:keyfind(<<"email">>, 1, Body),
+  {_, Permissions} = lists:keyfind(<<"permissions">>, 1, Body),
   {_, Password} = lists:keyfind(<<"password">>, 1, Body),
   tools:log("info", io_lib:format("New User: ~p~n", [Username])),
   if
@@ -34,12 +42,9 @@ processRequest(<<"POST">>, _, Req) ->
     Password =:= 1 ->
       jiffy:encode(#{ "Error" => "Bad Password"});
     true ->
-      U = lists:flatten(base64:decode_to_string(Username)),
-      P = lists:flatten(base64:decode_to_string(Password)),
-      DelCheck = lists:nth(1, string:tokens(U, "_")),
-      if
-        DelCheck =/= "DEL!" ->
-          database:storeDB(U, U, ["Admin"], P)
-      end,
+      database:storeDB(binary_to_list(Username),
+        binary_to_list(Username),
+        [binary_to_list(Permissions)],
+        binary_to_list(Password)),
       jiffy:encode(#{ update => true })
   end.

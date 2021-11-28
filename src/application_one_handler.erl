@@ -13,11 +13,20 @@
 init(Req, Opts) ->
   { Claims, Req2 } = tools:verifyAuth(Req),
   Method = cowboy_req:method(Req),
+  response(Claims, Method, Req, Opts).
+
+% Internal functions
+response(<<"Bad">>, Method, Req, Opts) ->
+  ReqFinal = cowboy_req:reply(200, tools:resp_headers(),
+      jiffy:encode(#{ result => <<"Invalid Authorization">> }),
+      Req),
+  {ok, ReqFinal, Opts};
+response(Claims, Method, Req, Opts) ->
   AppId = cowboy_req:binding(appId, Req),
   Result = processRequest(Method, Claims, AppId, Req),
   ReqFinal = cowboy_req:reply(200, tools:resp_headers(),
       Result,
-      Req2),
+      Req),
   {ok, ReqFinal, Opts}.
 
 % Internal functions

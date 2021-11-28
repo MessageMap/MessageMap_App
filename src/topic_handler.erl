@@ -1,6 +1,6 @@
 %%%-------------------------------------------------------------------
 %%% @author Benjamin Adams
-%%% @copyright (C) 2017, Ethan Solutions
+%%% @copyright (C) 2017, MessageMap LLC
 %%% @doc
 %%%  Return to the user contents of their token
 %%% @end
@@ -12,15 +12,22 @@
 
 init(Req, Opts) ->
   { Claims, Req2 } = tools:verifyAuth(Req),
-  % redirect if Claims = Bad
   Method = cowboy_req:method(Req),
-  Result = processRequest(Method, Claims, Req),
-  { ok, ReqFinal } = cowboy_req:reply(200, tools:resp_headers(),
-      Result,
-      Req2),
-  {ok, ReqFinal, Opts}.
+  response(Claims, Method, Req2, Opts).
 
 % Internal functions
+response(<<"Bad">>, Method, Req, Opts) ->
+  ReqFinal = cowboy_req:reply(200, tools:resp_headers(),
+      jiffy:encode(#{ result => <<"Invalid Authorization">> }),
+      Req),
+  {ok, ReqFinal, Opts};
+response(Claims, Method, Req, Opts) ->
+  Result = processRequest(Method, Claims, Req),
+  ReqFinal = cowboy_req:reply(200, tools:resp_headers(),
+      Result,
+      Req),
+  {ok, ReqFinal, Opts}.
+
 processRequest(<<"POST">>, _, Req) ->
   {ok, Body, _} = cowboy_req:read_urlencoded_body(Req),
   {_, TopicName} = lists:keyfind(<<"topicName">>, 1, Body),

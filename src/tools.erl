@@ -9,67 +9,80 @@
 -module(tools).
 
 -export([log/2]).
--export([osStats/0, pull_global_stats/0, resp_headers/0, integer_check/1, verifyAuthAdmin/1, verifyAuth/1, version/0, convertDateTime/1, pullAppLimit/0]).
--export([logmap/2]).
+-export([configFile/1]).
+-export([generate_string/1]).
+-export([pull_global_stats/0]).
+-export([resp_headers/0]).
+-export([integer_check/1, verifyAuth/1, version/0, convertDateTime/1]).
+-export([requireAdmin/2]).
 
 -define(server, "MessageMap.io").
 -define(version, "0.1.0").
--define(hostname, os:getenv("MM_HOSTNAME")).
--define(loggly, "https://logs-01.loggly.com/inputs/a6f62204-c858-423f-8cf1-725f9149cd30/tag/http/").
 
 resp_headers()->
   #{
-    <<"Content-Type">> => <<"application/json">>,
-    <<"Company">> => <<"MessageMap.io">>,
-    <<"Server">> => <<?server>>,
-    <<"Version">> => <<?version>>
+    <<"content-type">> => <<"application/json">>,
+    <<"company">> => <<"MessageMap.io">>, % TODO: can change this to be multi tenent?
+    <<"server">> => <<?server>>,
+    <<"connection">> => <<"close">>,
+    <<"version">> => <<?version>>
   }.
 
-osStats() ->
-  [{_,_,Disk},_] = disksup:get_disk_data(),
-  Cpu = cpu_sup:avg1(),
-  Mem = memsup:get_sysmem_high_watermark(),
-  Usage = #{
-    "cpu" => Cpu,
-    "disk" => Disk,
-    "mem" => Mem
-  },
-  Limit = ((Cpu < 400) and (Disk < 90) and (Mem < 90)),
-  { Limit, Usage }.
+generate_string(Length) ->
+  AllowedChars = "qwertyuioplkjhgfdsdsazxcvbnm1234567890QWERTYUIOPLKJHGFDSAZXCVBNM,.?;[]{}=+",
+  lists:foldl(fun(_, Acc) ->
+          [lists:nth(rand:uniform(length(AllowedChars)),
+                     AllowedChars)]
+              ++ Acc
+  end, [], lists:seq(1, Length)).
 
-logmap(Level, Log) ->
-  Data = #{
-    <<"host">> => list_to_binary(?hostname),
-    <<"level">> => list_to_binary(Level),
-    <<"detail">> => Log
-  },
-  spawn(fun() ->
-    httpc:request(post, {?loggly, [], "application/json", jiffy:encode(Data)}, [], [])
-  end).
+configFile("dataNodes") ->
+  [node()];
+configFile("nodes") ->
+  [node()];
+configFile(FieldName) ->
+  Config = "/etc/messagemap/messagemap.conf",
+  FileFound = filelib:is_regular(Config),
+  if
+    FileFound == false ->
+      log("ERROR", io:format("No Configuration File: ~p", [Config])),
+      erlang:error("No Configuration File: ~p", [Config]);
+    true ->
+      true
+  end,
+  erlang:binary_to_list(maps:get(FieldName, readlines(Config))).
+
+requireAdmin(true, Claims) ->
+  validateAdmin(maps:get(<<"roles">>, Claims));
+requireAdmin(_, _) ->
+  <<"Bad">>.
+
+validateAdmin([<<"Admin">>]) ->
+  true;
+validateAdmin(_) ->
+  <<"Bad">>.
 
 log(Level="info", MsgRaw)->
   Msg = erlang:binary_to_list(erlang:iolist_to_binary(MsgRaw)),
-  MsgWrite = erlang:binary_to_list(erlang:iolist_to_binary(io_lib:format('{ "host": "~s", "level": "~s", "msg": ~p }', [?hostname, Level, Msg]))),
-  os:cmd("logger -t msgmap " ++ MsgWrite).
+  MsgWrite = erlang:binary_to_list(erlang:iolist_to_binary(io_lib:format('["~s"] - ~p~n', [ Level, Msg]))),
+  {ok, L} = file:open(configFile("log_dir") ++"/messagemap.log", [append]),
+  io:format(L, "~s", [MsgWrite]).
 
 verifyAuth(Req) ->
+  Method = cowboy_req:method(Req),
   #{messageMapAuth := AuthValue } = cowboy_req:match_cookies([{messageMapAuth, [], <<"Bad">>}], Req),
   if
     AuthValue == <<"Bad">> ->
       { AuthValue, Req };
     true ->
       Claims = encryption:ewtDecode(AuthValue),
-      { Claims, Req }
-  end.
-
-verifyAuthAdmin(Req) ->
-  #{adminMessageMapAuth := AuthValue } = cowboy_req:match_cookies([{adminMessageMapAuth, [], <<"Bad">>}], Req),
-  if
-    AuthValue == <<"Bad">> ->
-      { AuthValue, Req };
-    true ->
-      Claims = encryption:adminEwtDecode(AuthValue),
-      { Claims, Req }
+      Permissions = maps:get(<<"roles">>, Claims),
+      if 
+        ((Permissions == [<<"Read">>]) andalso (Method /= [<<"GET">>] )) ->
+          { <<"Bad">>, Req};
+        true ->
+          { Claims, Req }
+      end
   end.
 
 integer_check({ Num, <<>>}) ->
@@ -103,15 +116,29 @@ pull_global_stats() ->
         end, Apps),
     Result.
 
-pullAppLimit() ->
-  {_, Size, _} = lists:nth(2, disksup:get_disk_data()),
-  if
-     Size > 640000000 ->
-       200;
-     Size > 300000000 ->
-       100;
-     Size > 150000000 ->
-       50;
-     true ->
-       20
-  end.
+readlines(FileName) ->
+    Result = maps:new(),
+    {ok, Device} = file:open(FileName, [read]),
+    Final = try get_all_lines(Device, Result)
+      after file:close(Device)
+    end,
+    Final.
+
+get_all_lines(Device, R) ->
+    case io:get_line(Device, "") of
+        eof  -> R;
+        Line ->
+          Tokens = string:tokens(Line, "="),
+          if
+            length(Tokens) == 2 ->
+              get_all_lines(
+                Device,
+                maps:put(
+                  lists:nth(1, Tokens),
+                  lists:nth(1, re:replace(lists:nth(2, Tokens), "[\r\n]", [])),
+                  R
+                ));
+            true ->
+              get_all_lines(Device, R)
+          end
+    end.

@@ -25,7 +25,6 @@ filter(Action, PathElements, FullData, OldName) ->
         is_list(Data) =:= false ->
             [ FinalElement ] = PathElements,
             { SubData } = Data,
-            tools:logmap("info", #{ <<"TypeMapping">> => Action }),
             runNewAction(binary:bin_to_list(Action), FinalElement, SubData, OldName);
         length(PathElements) > 0 ->
             Element = lists:nth(1, PathElements),

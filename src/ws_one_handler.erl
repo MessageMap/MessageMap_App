@@ -18,7 +18,7 @@ init(Req, Opts)->
   {cowboy_websocket, Req, Opts}.
 
 websocket_init(State) ->
-  erlang:start_timer(1000, self(), <<"Hello!">>),
+  erlang:start_timer(1000, self(), <<"Welcome to MessageMap!">>),
   {[], State}.
 
 websocket_handle({text, _}, State) ->
@@ -36,9 +36,7 @@ websocket_info(_Info, State) ->
   {[], State}.
 
 %Internal functions
-%%TODO: Add Internal Again for just one Id
 pullData() ->
-%  tools:log("debug", io_lib:format("Needed in ws one: Req: ~p Id: ~p", [Req, Id])),
   [{_,_,Published}] = mnesia:dirty_read({counter_published, all}),
   [{_,_,Consumed}] = mnesia:dirty_read({counter_consumed, all}),
   {[{<<"applications">>,mnesia:table_info(applications, size)},
