@@ -11,6 +11,7 @@
 -export([start/0, stop/0]).
 
 -define(cnf_cookie, tools:configFile("cookie")).
+-define(send_data, tools:configFile("upload_stats")).
 
 start() ->
   net_kernel:start([shell, shortnames]),
@@ -22,6 +23,8 @@ start() ->
   tools:log("info", "Boot_Start - Startup Script Has Finished"),
   tools:log("info", "Boot_Start - Welcome to MessageMap !!"),
   {ok, Version} = maps:find(<<"version">>, jiffy:decode(tools:version(), [return_maps])),
+  tools:send_data(?send_data),
+  timer:apply_interval(timer:hms(10,0,0), tools, send_data, [?send_data]),
   tools:log("info", io_lib:format("Boot_Start - Version: ~s", [erlang:binary_to_list(Version)])).
 
 stop() ->

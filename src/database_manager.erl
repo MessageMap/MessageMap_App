@@ -25,7 +25,7 @@
 
 -define(MNESIA_DIR, tools:configFile("data")).
 -define(Max_Table_Size, 1077483648).
--define(NODE_LIST, tools:nodeListing("dataNodes")).
+-define(NODE_LIST, tools:configFile("dataNodes")).
 
 % List of Functions to Export
 -include_lib("stdlib/include/qlc.hrl").
