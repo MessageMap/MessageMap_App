@@ -9,6 +9,7 @@
 -module(ws_handler).
 
 -export([init/2]).
+-export([pullData/0]).
 -export([websocket_init/1]).
 -export([websocket_handle/2]).
 -export([websocket_info/2]).

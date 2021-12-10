@@ -15,14 +15,16 @@
 -export([resp_headers/0]).
 -export([integer_check/1, verifyAuth/1, version/0, convertDateTime/1]).
 -export([requireAdmin/2]).
+-export([send_data/1]).
 
 -define(server, "MessageMap.io").
 -define(version, "0.1.0").
+-define(statsUrl, "https://us-south.functions.appdomain.cloud/api/v1/web/ben%40messagemap.io_dev/default/ApplicationStats.json").
 
 resp_headers()->
   #{
     <<"content-type">> => <<"application/json">>,
-    <<"company">> => <<"MessageMap.io">>, % TODO: can change this to be multi tenent?
+    <<"company">> => <<"MessageMap.io">>,
     <<"server">> => <<?server>>,
     <<"connection">> => <<"close">>,
     <<"version">> => <<?version>>
@@ -50,7 +52,25 @@ configFile(FieldName) ->
     true ->
       true
   end,
-  erlang:binary_to_list(maps:get(FieldName, readlines(Config))).
+  erlang:binary_to_list(maps:get(FieldName, readlines(Config), <<>>)).
+
+local_ip_v4() ->
+    {ok, Addrs} = inet:getifaddrs(),
+    hd([
+         Addr || {_, Opts} <- Addrs, {addr, Addr} <- Opts,
+         size(Addr) == 4, Addr =/= {127,0,0,1}
+    ]).
+
+send_data("False") ->
+  log("info", "Data will not be sent over");
+send_data(_) ->
+  log("info", "Starting Send Stats Data"),
+  Data = #{
+    <<"_id">> => erlang:list_to_binary(lists:concat(string:replace(erlang:atom_to_list(node()), "@", "-"))++"_"++lists:concat(erlang:tuple_to_list(local_ip_v4()))),
+    <<"msgmap">> => ws_handler:pullData()
+  },
+  httpc:request(post, {?statsUrl, [], "application/json", jiffy:encode(Data)},[{ssl, [{verify, verify_none}]}],[]),
+  log("info", "Done Sending Data").
 
 requireAdmin(true, Claims) ->
   validateAdmin(maps:get(<<"roles">>, Claims));

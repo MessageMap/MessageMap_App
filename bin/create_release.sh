@@ -11,6 +11,7 @@ mkdir -p rel/var/log/messagemap
 
 rsync -avz _build/default/ rel/usr/messagemap/
 cp installer_files/messagemap.service rel/etc/systemctl/system/
+# Update to generate ssl files on build
 cp installer_files/messagemap.crt rel/etc/messagemap/
 cp installer_files/messagemap.key rel/etc/messagemap/
 cp installer_files/messagemap.conf rel/etc/messagemap/
@@ -26,8 +27,8 @@ cp installer_files/messagemap.conf rel/etc/messagemap/
     --description "MessageMap - Smart Message Queue Service"
 
 sudo mv *.deb packages/
-sudo docker run --rm -v "$(pwd)/packages":/tmp debian:stable sh -c 'dpkg-deb -c /tmp/messagemap_*.deb'
-sudo docker run --rm -v "$(pwd)/packages":/tmp erlang:23 sh -c 'dpkg -i /tmp/messagemap_*.deb && ls -l /usr/messagemap/'
+#sudo docker run --rm -v "$(pwd)/packages":/tmp debian:stable sh -c 'dpkg-deb -c /tmp/messagemap_*.deb'
+#sudo docker run --rm -v "$(pwd)/packages":/tmp erlang:23 sh -c 'dpkg -i /tmp/messagemap_*.deb && ls -l /usr/messagemap/'
 
 /home/ethan/.gem/ruby/3.0.0/bin/fpm -s dir \
     -t rpm \
@@ -39,3 +40,4 @@ sudo docker run --rm -v "$(pwd)/packages":/tmp erlang:23 sh -c 'dpkg -i /tmp/mes
     --description "MessageMap - Smart Message Queue Service"
 mv *.rpm packages/
 
+scp -P 122 -r packages/* root@169.59.15.181:~/packages/
