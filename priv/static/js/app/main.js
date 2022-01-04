@@ -91,6 +91,7 @@ var loadVersion = function () {
     url: '/api/version'
   }).then(function (data) {
     $('#version').text(data.version);
+    $('#year').text(new Date().getFullYear());
   });
 };
 
