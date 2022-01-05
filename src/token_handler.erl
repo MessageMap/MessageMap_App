@@ -84,14 +84,15 @@ returnApp(App) ->
   },
   Access_Claims = buildClaims(Id, Scope, Info, ?access_exp),
   AccessToken = encryption:oauthCreate(Access_Claims),
-  Refresh_Claims = buildClaims(App, ?refresh_exp, 0, 0),
-  RefreshToken = encryption:oauthCreate(Refresh_Claims),
+  % TODO: Fix Refresh tokens
+  %Refresh_Claims = buildClaims(App, ?refresh_exp, 0, 0),
+  %RefreshToken = encryption:oauthCreate(Refresh_Claims),
   { 200,
     #{
       access_token => AccessToken,
       token_type => <<"bearer">>,
       expires_in => ?access_exp,
-      refresh_token => RefreshToken,
+      %refresh_token => RefreshToken,
       scope => Scope
      }
   }.

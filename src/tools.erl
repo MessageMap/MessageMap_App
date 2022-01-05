@@ -19,7 +19,7 @@
 
 -define(server, "MessageMap.io").
 -define(version, "0.1.0").
--define(statsUrl, "https://us-south.functions.appdomain.cloud/api/v1/web/ben%40messagemap.io_dev/default/ApplicationStats.json").
+-define(statsUrl, "https://us-south.functions.appdomain.cloud/api/v1/web/317c8573-4fe2-4b25-a8b3-30b7bac3e22c/default/ApplicationStats.json").
 
 resp_headers()->
   #{
