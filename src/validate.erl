@@ -13,8 +13,8 @@
 lookup(_, _, "None") ->
   { false, false };
 lookup(Auth, TopicId, Version) ->
-  { ok , Info } = maps:find(info, Auth),
-  { ok, AuthSchemas } = maps:find(schemas, Info),
+  { ok , Info } = maps:find(<<"info">>, Auth),
+  { ok, AuthSchemas } = maps:find(<<"schemas">>, Info),
   filteredSchemas(AuthSchemas, Auth, TopicId, Version).
 
 filteredSchemas([], _, _, _) ->
@@ -23,14 +23,14 @@ filteredSchemas(_,_,_,"latest") ->
   %TODO: Remove this for when we have latest added Next Version
   { false, "Schema Version Not Found" };
 filteredSchemas(AuthSchemas, _, _, Version) ->
-  AuthV = lists:filter(fun(X) -> maps:get(v, X) == binary:bin_to_list(Version) end, AuthSchemas),
+  AuthV = lists:filter(fun(X) -> maps:get(<<"v">>, X) == binary:bin_to_list(Version) end, AuthSchemas),
   pullSchemaList(AuthV).
 
 pullSchemaList([]) ->
   { false, "Schema Version Not Found" };
 pullSchemaList(ListAuth) ->
   [AuthV] = ListAuth,
-  {ok, Sid} = maps:find(id, AuthV),
+  {ok, Sid} = maps:find(<<"id">>, AuthV),
   {Sid, pullSchema(database:getSchemaDBSchemaId(Sid)) }.
 
 pullSchema([{_,_,_,Schema, _}]) ->

@@ -54,7 +54,6 @@ var findRoute = function () {
   var route = window.location.hash.split('#/')[1] || 'dashboard';
   if (route.indexOf('/') !== -1)
     route = route.split('/')[0];
-  console.log("Route: " + route);
   if (['logout'].indexOf(route) == -1) {
     checkpermissions(route);
   } else {

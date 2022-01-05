@@ -65,3 +65,8 @@ resultConversion([]) ->
   ["0"];
 resultConversion([{_,_,Result}]) ->
   lists:flatten(io_lib:format("~p", [Result])).
+
+check_response([{_,_,Result}]) ->
+  Result;
+check_response(_) ->
+  0.
