@@ -1,23 +1,23 @@
-{application, messagemap,
- [{description, "Message Map Next generation Message Queue application"},
-  {vsn, "0.0.1"},
-  {registered, []},
-  {mod, { messagemap_app, []}},
-  {applications,
-   [kernel,
-    stdlib,
-    jose,
-    sasl,
-    ranch,
-    cowboy,
-    mnesia,
-    jiffy,
-    jesse,
-    uuid
-   ]},
-  {env,[]},
-  {modules, []},
-  {maintainers, [ "Ben@MessageMap.io" ]},
-  {licenses, ["Apache 2.0"]},
-  {links, []}
- ]}.
+{application, messagemap, [
+    {description, "Message Map Next generation Message Queue application"},
+    {vsn, "0.1.0"},
+    {registered, []},
+    {mod, {messagemap_app, []}},
+    {applications, [
+        kernel,
+        stdlib,
+        jose,
+        sasl,
+        ranch,
+        cowboy,
+        mnesia,
+        jiffy,
+        jesse,
+        uuid
+    ]},
+    {env, []},
+    {modules, []},
+    {maintainers, ["Ben@MessageMap.io"]},
+    {licenses, ["Apache 2.0"]},
+    {links, []}
+]}.

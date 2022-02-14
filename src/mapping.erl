@@ -1,6 +1,6 @@
 %%%-------------------------------------------------------------------
-%%% @author Ben Adams
-%%% @copyright (C) 2020, MessageMap.IO LLC
+%%% @author Ben Adams - Ben@MessageMap.IO
+%%% @copyright (C) 2017-2022, MessageMap LLC
 %%% @doc
 %%% Mapping module to convert payload to required mapping value
 %%% @end
@@ -20,11 +20,11 @@ runNewAction("rename", Key, Data, NewName) ->
     lists:merge(NewData, [{NewName, Value}]).
 
 filter(Action, PathElements, FullData, OldName) ->
-    { Data } = FullData,
+    {Data} = FullData,
     if
         is_list(Data) =:= false ->
-            [ FinalElement ] = PathElements,
-            { SubData } = Data,
+            [FinalElement] = PathElements,
+            {SubData} = Data,
             runNewAction(binary:bin_to_list(Action), FinalElement, SubData, OldName);
         length(PathElements) > 0 ->
             Element = lists:nth(1, PathElements),
@@ -35,8 +35,8 @@ filter(Action, PathElements, FullData, OldName) ->
                 SearchResult /= false ->
                     NewData = proplists:get_value(Element, Data),
                     LoopData = proplists:delete(Element, Data),
-                    SubResult = [ { Element, { filter(Action, SubPathElements, {NewData}, OldName) } } ],
-                    { lists:merge(LoopData, SubResult) };
+                    SubResult = [{Element, {filter(Action, SubPathElements, {NewData}, OldName)}}],
+                    {lists:merge(LoopData, SubResult)};
                 true ->
                     {Data}
             end;
@@ -44,65 +44,68 @@ filter(Action, PathElements, FullData, OldName) ->
             {Data}
     end.
 
-
-
 findPath(Data, Key, Path) ->
-  if
-    is_list(Data) ->
-	  	KeyList = proplists:get_keys(Data),
-		  KeyFound = lists:member(Key, KeyList),
-		  if
-			  KeyFound ->
-		  		 lists:merge(Path, [Key]);
-			  length(KeyList) > 0 ->
-		  		 lists:map(fun(X) ->
-             SubListing = proplists:get_value(X, Data),
-             if
-               is_tuple(SubListing) ->
-                 {NewSub}  = SubListing,
-                 findPath(NewSub, Key, lists:merge(Path, [X]));
-               true ->
-                 []
-             end
-             end, KeyList );
-			  true ->
-				   lists:flatten(Path)
-      end;
-    true ->
-      lists:flatten(Path)
-  end.
-
+    if
+        is_list(Data) ->
+            KeyList = proplists:get_keys(Data),
+            KeyFound = lists:member(Key, KeyList),
+            if
+                KeyFound ->
+                    lists:merge(Path, [Key]);
+                length(KeyList) > 0 ->
+                    lists:map(
+                        fun(X) ->
+                            SubListing = proplists:get_value(X, Data),
+                            if
+                                is_tuple(SubListing) ->
+                                    {NewSub} = SubListing,
+                                    findPath(NewSub, Key, lists:merge(Path, [X]));
+                                true ->
+                                    []
+                            end
+                        end,
+                        KeyList
+                    );
+                true ->
+                    lists:flatten(Path)
+            end;
+        true ->
+            lists:flatten(Path)
+    end.
 
 convertFilter({Filter}, {SubData}) ->
     Type = proplists:get_value(<<"type">>, Filter),
     Value = proplists:get_value(<<"value">>, Filter),
     CurrentName = proplists:get_value(<<"key">>, Filter, false),
     Key_list = proplists:get_keys(SubData),
-    KeyFound = if
-      CurrentName =:= false ->
-        lists:member(Value, Key_list);
-      true ->
-        lists:member(CurrentName, Key_list)
-    end,
-    ActionResult = if
-      KeyFound ->
-        if 
-          CurrentName =:= false ->
-            runNewAction(binary:bin_to_list(Type), Value, SubData, false);
-          true ->
-            runNewAction(binary:bin_to_list(Type), CurrentName, SubData, Value)
-        end;
-      true ->
-        { Result } = if 
-           CurrentName =:= false ->
-             Path = lists:flatten(findPath(SubData, Value, [])),
-             filter(Type, Path, { SubData }, false);
-           true ->
-             Path = lists:flatten(findPath(SubData, CurrentName, [])),
-             filter(Type, Path, { SubData}, Value)
+    KeyFound =
+        if
+            CurrentName =:= false ->
+                lists:member(Value, Key_list);
+            true ->
+                lists:member(CurrentName, Key_list)
         end,
-        Result
-    end,
+    ActionResult =
+        if
+            KeyFound ->
+                if
+                    CurrentName =:= false ->
+                        runNewAction(binary:bin_to_list(Type), Value, SubData, false);
+                    true ->
+                        runNewAction(binary:bin_to_list(Type), CurrentName, SubData, Value)
+                end;
+            true ->
+                {Result} =
+                    if
+                        CurrentName =:= false ->
+                            Path = lists:flatten(findPath(SubData, Value, [])),
+                            filter(Type, Path, {SubData}, false);
+                        true ->
+                            Path = lists:flatten(findPath(SubData, CurrentName, [])),
+                            filter(Type, Path, {SubData}, Value)
+                    end,
+                Result
+        end,
     {ActionResult};
 convertFilter(_, Data) ->
     Data.
@@ -111,9 +114,9 @@ msgMapper(Filter, Data) ->
     if
         length(Filter) > 0 ->
             msgMapper(
-                 lists:reverse(lists:droplast(lists:reverse(Filter))),
-                 convertFilter(lists:nth(1, Filter), Data)
+                lists:reverse(lists:droplast(lists:reverse(Filter))),
+                convertFilter(lists:nth(1, Filter), Data)
             );
-         true ->
+        true ->
             Data
     end.
