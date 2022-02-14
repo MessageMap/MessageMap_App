@@ -1,6 +1,6 @@
 %%%-------------------------------------------------------------------
-%%% @author Benjamin Adams
-%%% @copyright (C) 2017, MessageMap.io
+%%% @author Ben Adams - Ben@MessageMap.IO
+%%% @copyright (C) 2017-2022, MessageMap LLC
 %%% @doc
 %%%  This file is to track the version number deployed for end user lookup
 %%% @end
@@ -10,8 +10,11 @@
 
 -export([init/2]).
 
-init(Req, Opts)->
-  Req2 = cowboy_req:reply(200, tools:resp_headers(),
-    tools:version(),
-    Req),
-  {ok, Req2, Opts}.
+init(Req, Opts) ->
+    Req2 = cowboy_req:reply(
+        200,
+        tools:resp_headers(),
+        tools:version(),
+        Req
+    ),
+    {ok, Req2, Opts}.

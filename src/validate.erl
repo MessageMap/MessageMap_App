@@ -1,6 +1,6 @@
 %%%-------------------------------------------------------------------
-%%% @author Benjamin Adams
-%%% @copyright (C) 2020, MessageMap.io
+%%% @author Ben Adams - Ben@MessageMap.IO
+%%% @copyright (C) 2017-2022, MessageMap LLC
 %%% @doc
 %%%  Used to validate post payload with version
 %%% @end
@@ -11,44 +11,53 @@
 -export([lookup/3, schema/2]).
 
 lookup(_, _, "None") ->
-  { false, false };
+    {false, false};
 lookup(Auth, TopicId, Version) ->
-  { ok , Info } = maps:find(<<"info">>, Auth),
-  { ok, AuthSchemas } = maps:find(<<"schemas">>, Info),
-  filteredSchemas(AuthSchemas, Auth, TopicId, Version).
+    {ok, Info} = maps:find(<<"info">>, Auth),
+    {ok, AuthSchemas} = maps:find(<<"schemas">>, Info),
+    filteredSchemas(AuthSchemas, Auth, TopicId, Version).
 
 filteredSchemas([], _, _, _) ->
-  { false, "Schema Version Not Found" };
-filteredSchemas(_,_,_,"latest") ->
-  %TODO: Remove this for when we have latest added Next Version
-  { false, "Schema Version Not Found" };
+    {false, "Schema Version Not Found"};
+filteredSchemas(_, _, _, "latest") ->
+    %TODO: Remove this for when we have latest added Next Version
+    {false, "Schema Version Not Found"};
 filteredSchemas(AuthSchemas, _, _, Version) ->
-  AuthV = lists:filter(fun(X) -> maps:get(<<"v">>, X) == binary:bin_to_list(Version) end, AuthSchemas),
-  pullSchemaList(AuthV).
+    AuthV = lists:filter(
+        fun(X) -> maps:get(<<"v">>, X) == binary:bin_to_list(Version) end, AuthSchemas
+    ),
+    pullSchemaList(AuthV).
 
 pullSchemaList([]) ->
-  { false, "Schema Version Not Found" };
+    {false, "Schema Version Not Found"};
 pullSchemaList(ListAuth) ->
-  [AuthV] = ListAuth,
-  {ok, Sid} = maps:find(<<"id">>, AuthV),
-  {Sid, pullSchema(database:getSchemaDBSchemaId(Sid)) }.
+    [AuthV] = ListAuth,
+    {ok, Sid} = maps:find(<<"id">>, AuthV),
+    {Sid, pullSchema(database:getSchemaDBSchemaId(Sid))}.
 
-pullSchema([{_,_,_,Schema, _}]) ->
-  Schema;
+pullSchema([{_, _, _, Schema, _}]) ->
+    Schema;
 pullSchema(_) ->
-  "Schema Not Found".
+    "Schema Not Found".
 
 schema(Schema, Payload) ->
-  validateSchema(catch jiffy:decode(Schema), Payload).
+    validateSchema(catch jiffy:decode(Schema), Payload).
 
-validateSchema({ error, _}, _) ->
-  error;
+validateSchema({error, _}, _) ->
+    error;
 validateSchema(S, Payload) ->
-  {Result, Detail} = jesse:validate_with_schema(S, Payload),
-  if
-    Result == error ->
-      tools:log("info", io_lib:format('{ "Type": "Json Schema Validation", "Result": "~p", "Detail": "~p"}', [Result, Detail]));
-    true ->
-      true
-  end,
-  Result.
+    {Result, Detail} = jesse:validate_with_schema(S, Payload),
+    if
+        Result == error ->
+            tools:log(
+                "info",
+                io_lib:format(
+                    '{ "Type": "Json Schema Validation", "Result": "~p", "Detail": "~p"}', [
+                        Result, Detail
+                    ]
+                )
+            );
+        true ->
+            true
+    end,
+    Result.

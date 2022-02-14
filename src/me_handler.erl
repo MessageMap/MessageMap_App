@@ -1,6 +1,6 @@
 %%%-------------------------------------------------------------------
-%%% @author Benjamin Adams
-%%% @copyright (C) 2017, MessageMap.io
+%%% @author Ben Adams - Ben@MessageMap.IO
+%%% @copyright (C) 2017-2022, MessageMap LLC
 %%% @doc
 %%%  Return to the user contents of their token
 %%% @end
@@ -11,8 +11,11 @@
 -export([init/2]).
 
 init(Req, Opts) ->
-  { Claims, Req2 } = tools:verifyAuth(Req),
-  ReqFinal = cowboy_req:reply(200, tools:resp_headers(),
-      jiffy:encode(Claims),
-      Req2),
-  { ok, ReqFinal, Opts}.
+    {Claims, Req2} = tools:verifyAuth(Req),
+    ReqFinal = cowboy_req:reply(
+        200,
+        tools:resp_headers(),
+        jiffy:encode(Claims),
+        Req2
+    ),
+    {ok, ReqFinal, Opts}.
