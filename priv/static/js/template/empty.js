@@ -1,7 +1,6 @@
 var controller = {
-    'template' : '',
-    'script': function(){
-        }
+    'template': '',
+    'script': function () {}
 };
 
 //start actions

@@ -1,4 +1,3 @@
-//TODO: Hide global Add Application for One
 //  Add Application name for trail
 var controller = {
   'template': '<!-- Secondary header --> \
@@ -85,18 +84,18 @@ var controller = {
                             <div class="form-group">  \
                                 <label class="col-sm-2 control-label">API Key: </label>  \
                                 <div class="col-sm-10">  \
-                  <span class="label label-default" style="font-size:12px">#############################</label><button class="apikey-copy btn btn-success" v='+ app.apiKeys + '>Copy API KEY</button>  \
+                  <span class="label label-default" style="font-size:12px">#############################</label><button class="apikey-copy btn btn-success" v=' + app.apiKeys + '>Copy API KEY</button>  \
                                 </div>  \
                             </div> \
                             <div class="line-dashed"></div> \
                 <div class="col-sm-4">  \
-                  <div class="well well-lg text-center alert alert-info"><h1>Published<br /><span id="pub_stat_'+ app.id + '">0</span></h1></div> \
+                  <div class="well well-lg text-center alert alert-info"><h1>Published<br /><span id="pub_stat_' + app.id + '">0</span></h1></div> \
                 </div> \
                 <div class="col-sm-4">  \
-                  <div class="well well-lg text-center alert alert-info"><h1>Consumed<br /><span id="con_stat_'+ app.id + '">0</span></h1></div> \
+                  <div class="well well-lg text-center alert alert-info"><h1>Consumed<br /><span id="con_stat_' + app.id + '">0</span></h1></div> \
                 </div> \
                 <div class="col-sm-4">  \
-                  <div class="well well-lg text-center alert alert-info"><h1>Waiting<br /><span id="wait_stat_'+ app.id + '">0</span></h1></div> \
+                  <div class="well well-lg text-center alert alert-info"><h1>Waiting<br /><span id="wait_stat_' + app.id + '">0</span></h1></div> \
                 </div> \
                             <div class="line-dashed"></div> \
                         <div class=""> \
@@ -155,24 +154,24 @@ var controller = {
 												<div class="form-group"> \
 												<label class="col-sm-2 control-label">Url To Push Messages Too: </label> \
 												<div class="col-sm-10"> \
-												<input type="text" placeholder="Placeholder" id="pushUrl" value="'+ app.pushUrl + '" class="form-control"> \
+												<input type="text" placeholder="Placeholder" id="pushUrl" value="' + app.pushUrl + '" class="form-control"> \
 												</div> \
 												</div> \
 												<div class="form-group"> \
 												<label class="col-sm-2 control-label">Number of Retries before Fail: </label> \
 												<div class="col-sm-10"> \
 												Messages will retry every 1 second.  If failer for all all the retrie countes messages will be held for pull.<br /> \
-												<input type="text" style="width:50px;" id="pushRetries" value="'+ app.pushRetries + '" class="form-control"></div> \
+												<input type="text" style="width:50px;" id="pushRetries" value="' + app.pushRetries + '" class="form-control"></div> \
 												</div> \
 												<div class="form-group"> \
 												<label class="col-sm-2 control-label">Status Code For Success: </label> \
-												<div class="col-sm-10"><input type="text" id="pushStatusCode" value="'+ app.pushStatusCode + '" class="form-control"></div> \
+												<div class="col-sm-10"><input type="text" id="pushStatusCode" value="' + app.pushStatusCode + '" class="form-control"></div> \
 												</div> \
 												<div class="form-group"> \
 												<label class="col-sm-2 control-label">Headers to Use for Final Endpoint: </label> \
 												<div class="col-sm-10"> \
 												<pre>Example: <br \>User-Agent: MessageMap.IO - Client-Push;<br />MessageMap-Subsriber: Subscriber;</pre> \
-												<textarea class="form-control" id="pushHeaders">'+ app.pushHeaders + '</textarea> \
+												<textarea class="form-control" id="pushHeaders">' + app.pushHeaders + '</textarea> \
 												</div> \
 												</div> \
 												</div> \
@@ -311,7 +310,9 @@ var controller = {
         });
         $('#addEncryption').click(function (e) {
           //Validate Key Here
-          $.post('/api/validateEncryption', { 'encrypt': $('#EncryptionValue').val() }, function (data, status) {
+          $.post('/api/validateEncryption', {
+            'encrypt': $('#EncryptionValue').val()
+          }, function (data, status) {
             if (data.result == "good") {
               $('#encryptionModal').find(".close").click();
               $('#encryptionModal').hide();
@@ -322,15 +323,15 @@ var controller = {
             $('#encryptionModal').find(".close").click();
           });
         });
-$('.apikey-copy').click(function (e) {
-  e.preventDefault();
-  
-  var $temp = $("<input>");
-  $("body").append($temp);
-  $temp.val($(this).attr('v')).select();
-  document.execCommand("copy");
-  $temp.remove();
-});
+        $('.apikey-copy').click(function (e) {
+          e.preventDefault();
+
+          var $temp = $("<input>");
+          $("body").append($temp);
+          $temp.val($(this).attr('v')).select();
+          document.execCommand("copy");
+          $temp.remove();
+        });
         //Start Subscribed Topics
         app.subscribedTopics.split(",").forEach(function (topic) {
           if (topic.length > 1) {
@@ -338,11 +339,11 @@ $('.apikey-copy').click(function (e) {
               $('#listSubscribedTopics').append('<tr id="' + result.id + '" class="subscribedTopicRow">  \
                   <th scope="row">' + result.id + '</th>  \
                   <td><a href="#/topics/' + result.id + '">' + result.name + '</a></td>  \
-                   <td><span id="saved_mapping_'+ result.id + '" style="display:none"></span><button sub_id="' + result.id + '" data-toggle="modal" data-target="#configMessageMapModal" type="button" class="requirewrite btn btn-info add_config" id="viewConfigMessageMapping">Configure MessageMapping</button><br /> \
-                      <div>(Number of Elements: <span class="currentMapCount_'+ result.id + '">0</span>)</div> <div id="toSaveFilters" style="display:none;" /></td> \
+                   <td><span id="saved_mapping_' + result.id + '" style="display:none"></span><button sub_id="' + result.id + '" data-toggle="modal" data-target="#configMessageMapModal" type="button" class="requirewrite btn btn-info add_config" id="viewConfigMessageMapping">Configure MessageMapping</button><br /> \
+                      <div>(Number of Elements: <span class="currentMapCount_' + result.id + '">0</span>)</div> <div id="toSaveFilters" style="display:none;" /></td> \
                   <td><button  type="button" class="requirewrite btn btn-danger" id="deleteSubscribed">Remove Topic</button></td>  \
                 </tr>');
-                checkpermissions();
+              checkpermissions();
             }).promise().done(function (e) {
               $.each($.parseJSON(app.filter), function (ind, sub) {
                 $('#saved_mapping_' + sub['id']).text(JSON.stringify(sub['value']));
@@ -414,11 +415,18 @@ $('.apikey-copy').click(function (e) {
             if ($.inArray(mapping[1].split('|')[0].toLowerCase().trim(), ["masking", "remove"]) > -1) {
               var type = mapping[1].split("|")[0].toLowerCase().trim();
               var value = mapping[2].toLowerCase().trim().replace("clear", "");
-              result.push({ "type": type, "value": value });
+              result.push({
+                "type": type,
+                "value": value
+              });
             } else if ($.inArray(mapping[1].split('|')[0].toLowerCase().trim(), ["rename"]) > -1) {
               var old = mapping[2].trim();
               var value = mapping[3].trim().replace("Clear", "");
-              result.push({ "type": "rename", "key": old.split('|')[0].trim(), "value": value });
+              result.push({
+                "type": "rename",
+                "key": old.split('|')[0].trim(),
+                "value": value
+              });
             }
           });
           $('#saved_mapping_' + sub_id).text(JSON.stringify(result));
@@ -464,8 +472,8 @@ $('.apikey-copy').click(function (e) {
             $('#listSubscribedTopics').append('<tr id="' + result.id + '" class="subscribedTopicRow">  \
                 <th scope="row">' + result.id + '</th>  \
                 <td><a href="#/topics/' + result.id + '">' + result.name + '</a></td>  \
-                <td><span id="saved_mapping_'+ result.id + '" style="display:none"></span><button sub_id="' + result.id + '"  data-toggle="modal" data-target="#configMessageMapModal" type="button" class="requirewrite btn btn-info add_config" id="viewConfigMessageMapping">Configure MessageMapping</button><br /> \
-                <div>(Number of Map Configurations: <span class="currentMapCount_'+ result.id + '">0</span>)</div> <div id="toSaveFilters" class="' + result.id + '" style="display:none;" /></td> \
+                <td><span id="saved_mapping_' + result.id + '" style="display:none"></span><button sub_id="' + result.id + '"  data-toggle="modal" data-target="#configMessageMapModal" type="button" class="requirewrite btn btn-info add_config" id="viewConfigMessageMapping">Configure MessageMapping</button><br /> \
+                <div>(Number of Map Configurations: <span class="currentMapCount_' + result.id + '">0</span>)</div> <div id="toSaveFilters" class="' + result.id + '" style="display:none;" /></td> \
                 <td><button type="button" class="requirewrite btn btn-danger" id="deleteSubscribed">Remove Topic</button></td>  \
               </tr>');
             checkpermissions();
@@ -551,7 +559,10 @@ $('.apikey-copy').click(function (e) {
             var id = subscribedTopicIds[i];
             var val = $('#saved_mapping_' + subscribedTopicIds[i]).text();
             if (val.length > 2) {
-              subArray.push({ "id": id, "value": JSON.parse(val) });
+              subArray.push({
+                "id": id,
+                "value": JSON.parse(val)
+              });
             }
           }).promise().done(function (e) {
             var pushUrl = $('#pushUrl').val().trim();
@@ -623,7 +634,7 @@ $('.apikey-copy').click(function (e) {
                                     <span class="app-name"><a class="appNameFull" href="#/applications/' + app.id + '">' + app.name + '</a></span> \
                                     </h5> \
                                     <p>API KEY: ' + app.apiKeys + '</p> \
-																		<div class="requirewrite btn-toolbar">'+ Pub + Sub + Push + Encrypt + Mapping + '</div> \
+																		<div class="requirewrite btn-toolbar">' + Pub + Sub + Push + Encrypt + Mapping + '</div> \
                                 </div> \
                                 <!-- /card short description --> \
                             </div> \

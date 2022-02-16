@@ -236,7 +236,7 @@ var controller = {
           var schemaVersion = $('#schemaVersion').val();
           var schemaAlreadyFound = false;
           // Test value is version number
-          if (! /^\d*\.?\d*\.?\d*\.?\d*$/.test(schemaVersion)) {
+          if (!/^\d*\.?\d*\.?\d*\.?\d*$/.test(schemaVersion)) {
             schemaAlreadyFound = true;
           }
           $('.schemaVersions').each(function (e) {
@@ -307,8 +307,7 @@ var controller = {
               }
             });
             window.location.hash = '#/topics';
-          }
-          else {
+          } else {
             $(".deleteWarning").show();
             $(".deleteWarning").addClass("alert alert-warning");
             $(".deleteWarning").html("Invalid Topic Name");

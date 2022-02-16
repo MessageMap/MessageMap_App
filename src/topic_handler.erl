@@ -16,7 +16,7 @@ init(Req, Opts) ->
     response(Claims, Method, Req2, Opts).
 
 % Internal functions
-response(<<"Bad">>, Method, Req, Opts) ->
+response(<<"Bad">>, _, Req, Opts) ->
     ReqFinal = cowboy_req:reply(
         200,
         tools:resp_headers(),
