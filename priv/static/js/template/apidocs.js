@@ -1,5 +1,5 @@
 var controller = {
-    'template' : '<!-- Secondary header --> \
+    'template': '<!-- Secondary header --> \
                       <div class="header-secondary row gray-bg"> \
                           <div class="col-lg-12"> \
                               <div class="page-heading clearfix"> \
@@ -56,8 +56,7 @@ var controller = {
                                           </li> </ul> \
                                               </div> \
                       </div>',
-    'script': function(){
-        }
+    'script': function () {}
 };
 
 //start actions

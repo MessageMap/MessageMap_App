@@ -1,8 +1,8 @@
 var controller = {
-    'template' : '',
-    'script': function(){
-          $.get('/api/logout');
-          window.location.hash = '#/login';
+    'template': '',
+    'script': function () {
+        $.get('/api/logout');
+        window.location.hash = '#/login';
     }
 };
 

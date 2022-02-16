@@ -1,5 +1,5 @@
 var controller = {
-    'template' : '<div class="login-container"> \
+  'template': '<div class="login-container"> \
 	<div class="login-branding"> \
 		<!-- Place Logo here when We have one --> \
     <img src="static/images/logos/cover.png" alt="MessageMap" title="MessageMap.io"> \
@@ -20,25 +20,28 @@ var controller = {
 			<p class="text-center">Feedback/Questions to: <a href="mailto:support@MessageMap.io">Support@Messagemap.io</a></p> \
 		</form> \
 	</div>',
-    'script': function(){
-        $('.page-sidebar').hide();
-        $('.main-header').hide();
-        $('.footer-main').hide();
-        $('#btn-login').click(function(e){
-          e.preventDefault();
-          var user = $('#Username').val();
-          var pass = $('#Password').val();
-          $.post('/api/auth', { 'username': user, 'password': pass }, function(result){
-            if(result.request)
-              window.location.hash = '#/dashboard';
-            else
-              $('.error').html('<h3 style="color:red">Invalid Username/Password</h3>');
-          });
-        });
-    }
+  'script': function () {
+    $('.page-sidebar').hide();
+    $('.main-header').hide();
+    $('.footer-main').hide();
+    $('#btn-login').click(function (e) {
+      e.preventDefault();
+      var user = $('#Username').val();
+      var pass = $('#Password').val();
+      $.post('/api/auth', {
+        'username': user,
+        'password': pass
+      }, function (result) {
+        if (result.request)
+          window.location.hash = '#/dashboard';
+        else
+          $('.error').html('<h3 style="color:red">Invalid Username/Password</h3>');
+      });
+    });
+  }
 };
 
-if(window.location.hash !== '#/login')
+if (window.location.hash !== '#/login')
   window.location.hash = '#/login';
 
 //start actions

@@ -1,10 +1,11 @@
 function loadScript(url) {
-  var script = document.createElement('script'), done = false,
+  var script = document.createElement('script'),
+    done = false,
     head = document.getElementsByTagName("head")[0];
   script.src = url;
   script.onload = script.onreadystatechange = function () {
     if (!done && (!this.readyState ||
-      this.readyState == "loaded" || this.readyState == "complete")) {
+        this.readyState == "loaded" || this.readyState == "complete")) {
       done = true;
 
       // IE memory leak
@@ -25,8 +26,7 @@ var checkpermissions = function (route = null) {
           loadScript('/static/js/template/' + route + '.js');
         }
         $('#username').text(result.name);
-        if ($.inArray("Admin", result.roles) == 0) {
-        } else if ($.inArray("Read/Write", result.roles) == 0) {
+        if ($.inArray("Admin", result.roles) == 0) {} else if ($.inArray("Read/Write", result.roles) == 0) {
           $('.requireadmin').remove();
         } else {
           $('.requirewrite').prop("disabled", true);

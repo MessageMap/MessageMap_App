@@ -89,16 +89,16 @@ var controller = {
 		$.get('/api/application', function (result) {
 			result.forEach(function (app) {
 				$('.application-stats').append('<div class="form-group">  \
-               <h1> <a href="/#/applications/'+ app.id + '">' + app.name + '</a></h1> \
+               <h1> <a href="/#/applications/' + app.id + '">' + app.name + '</a></h1> \
               <div class="line-dashed"></div> \
                 <div class="col-sm-4">  \
-                  <div class="well well-lg text-center alert alert-info"><h1>Published<br /><span id="pub_stat_'+ app.id + '">0</span></h1></div> \
+                  <div class="well well-lg text-center alert alert-info"><h1>Published<br /><span id="pub_stat_' + app.id + '">0</span></h1></div> \
                 </div> \
                 <div class="col-sm-4">  \
-                  <div class="well well-lg text-center alert alert-info"><h1>Consumed<br /><span id="con_stat_'+ app.id + '">0</span></h1></div> \
+                  <div class="well well-lg text-center alert alert-info"><h1>Consumed<br /><span id="con_stat_' + app.id + '">0</span></h1></div> \
                 </div> \
                 <div class="col-sm-4">  \
-                  <div class="well well-lg text-center alert alert-info"><h1>Waiting<br /><span id="wait_stat_'+ app.id + '">0</span></h1></div> \
+                  <div class="well well-lg text-center alert alert-info"><h1>Waiting<br /><span id="wait_stat_' + app.id + '">0</span></h1></div> \
                 </div> \
                 </div>');
 			});
