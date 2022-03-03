@@ -60,8 +60,8 @@ pullData() ->
         {<<"applications">>, mnesia:table_info(applications, size)},
         {<<"topics">>, mnesia:table_info(topics, size)},
         {<<"schemas">>, mnesia:table_info(tblschemas, size)},
-        {<<"totalMessagesPublished">>, Published},
-        {<<"totalMessagesConsumed">>, Consumed},
+        {<<"totalMessagesPublished">>, list_to_integer(Published)},
+        {<<"totalMessagesConsumed">>, list_to_integer(Consumed)},
         {<<"appstats">>, AppStats}
     ]}.
 
