@@ -72,19 +72,20 @@ stop(_State) ->
 %% Internal functions
 %%====================================================================
 % TODO: Fix this for enabling ssl
-starter("True", Dispatch) ->
-    {ok, _} = cowboy:start_tls(
-        https,
-        [
-            {port, ?port},
-            {cacertfile, "/etc/ssl/certs/ca-certificates.crt"},
-            {certfile, ?certfile},
-            {keyfile, ?keyfile}
-        ],
-        #{
-            env => #{dispatch => Dispatch}
-        }
-    );
+%starter("True", Dispatch) ->
+%    {ok, _} = cowboy:start_tls(
+%        https,
+%        [
+%            {port, ?port},
+%            {cacertfile, "/etc/ssl/certs/ca-certificates.crt"},
+%            {certfile, ?certfile},
+%            {keyfile, ?keyfile}
+%        ],
+%        #{
+%            env => #{dispatch => Dispatch}
+%        }
+%    );
+% END OF TODO FIX SSL
 starter(_, Dispatch) ->
     {ok, _} = cowboy:start_clear(http, [{port, ?port}], #{
         env => #{dispatch => Dispatch}
