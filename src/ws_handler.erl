@@ -67,6 +67,6 @@ pullData() ->
 
 %Internal functions
 resultConversion([]) ->
-    ["0"];
+    "0";
 resultConversion([{_, _, Result}]) ->
     lists:flatten(io_lib:format("~p", [Result])).
