@@ -18,7 +18,7 @@
 -export([send_data/1]).
 
 -define(server, "MessageMap.io").
--define(version, "0.1.0").
+-define(version, "0.1.1").
 -define(statsUrl,
     "https://us-south.functions.appdomain.cloud/api/v1/web/317c8573-4fe2-4b25-a8b3-30b7bac3e22c/default/ApplicationStats.json"
 ).
