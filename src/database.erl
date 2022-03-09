@@ -58,6 +58,7 @@ init() ->
     application:set_env(mnesia, dir, ?MNESIA_DIR),
     mnesia:create_schema(?NODE_LIST),
     mnesia:start(),
+    timer:sleep(4000),
     timer:seconds(15),
     try
         mnesia:table_info(type, organization),

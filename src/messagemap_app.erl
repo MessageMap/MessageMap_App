@@ -17,6 +17,7 @@
 -define(sslenabled, tools:configFile("ssl_enabled")).
 -define(certfile, tools:configFile("ssl_certfile")).
 -define(keyfile, tools:configFile("ssl_keyfile")).
+-define(cafile, tools:configFile("ssl_cafile")).
 
 %%====================================================================
 %% API
@@ -64,19 +65,26 @@ start(_StartType, _StartArgs) ->
 
 %%--------------------------------------------------------------------
 stop(_State) ->
-    % On boot run startup scripts
     appmanager:stop(),
-    ok = cowboy:stop_listener(https).
+    shutdown(?sslenabled).
 
 %%====================================================================
 %% Internal functions
 %%====================================================================
+shutdown("True") ->
+    cowboy:stop_listener(https);
+shutdown(_) ->
+    cowboy:stop_listener(http).
+
 starter("True", Dispatch) ->
+    tools:log(
+        "info", io_lib:format("Certs: CA=~s, Cert=~s, Key=~s", [?cafile, ?certfile, ?keyfile])
+    ),
     {ok, _} = cowboy:start_tls(
         https,
         [
             {port, ?port},
-            {cacertfile, "/etc/ssl/certs/ca-certificates.crt"},
+            {cacertfile, ?cafile},
             {certfile, ?certfile},
             {keyfile, ?keyfile}
         ],

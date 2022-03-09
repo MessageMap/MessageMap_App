@@ -62,7 +62,7 @@ configFile(FieldName) ->
         true ->
             true
     end,
-    erlang:binary_to_list(maps:get(FieldName, readlines(Config), <<>>)).
+    string:trim(erlang:binary_to_list(maps:get(FieldName, readlines(Config), <<>>))).
 
 local_ip_v4() ->
     {ok, Addrs} = inet:getifaddrs(),
