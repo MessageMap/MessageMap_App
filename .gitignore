@@ -23,4 +23,6 @@ rel/
 *.rpm
 *.deb
 
+.idea/
+
 @eaDir
