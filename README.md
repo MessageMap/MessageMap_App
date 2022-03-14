@@ -16,8 +16,8 @@
 
 Requirements for MessageMap:
 - Erlang version 20 - 24
-- Memory Usage of 1 GB
-- Hard Drive storage of 2 GB
+- Min - Memory Usage of 1 GB
+- Min - Hard Drive storage of 2 GB
 
 Install Erlang for OS or from: https://www.erlang-solutions.com/downloads/
 
