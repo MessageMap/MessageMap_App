@@ -2,8 +2,6 @@
 
 ### Simple, Secure and Powerful Message Broker
 
-*   Message Transformation Per Subscriber
-*   Deploy Environments in the cloud your dns
 *   Message Queue Pub/Sub
 *   Subscribers Can Push or Pull From Message Queues
 *   Message Transformation
