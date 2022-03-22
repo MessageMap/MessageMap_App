@@ -95,7 +95,7 @@ B--> E[Removal: Remove Whole Entry of Key Value]
 C--> F[MessageMap Storage]
 D--> F[MessageMap Storage]
 E--> F[MessageMap Storage]
-F --> G[Consuming App Pulls Messages]
+F--> G[Consuming App Pulls Messages]
 ```
 
 ### Pub/Sub Application with Push and Pull fallback
