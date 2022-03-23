@@ -50,20 +50,6 @@ validate(Password, ExistingHash) ->
 
 oauthCreate(Claims) ->
     [JWK, JWS] = setupJWTRequirements(),
-    %   io:format("~n~n====================================~nClaims: ~p~n JWK: ~p~nJWS: ~p~n", [Claims, JWK, JWS]),
-    %   jose_jwt:sign(#{<<"k">> => <<"TXlFbmNyJlB5SU9O">>,<<"kty">> => <<"oct">>},
-    %     #{<<"alg">> => <<"HS256">>}, #{app =>
-    %               #{encrypt =>
-    %                     "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvtAapGh/2B3tBVkhGmtt\nIPukGesnqVRcssl6JJS2zSPr7etJFLzH9lf6QyrC9VS4Wz+EyK9OHx9O5/hDkquK\nku1te870S/YcNIqiaCBLF0ddv6cvvj0DPmZQdIFDRlgjyk9jZrzMuemDXSyTyMET\non/Vuk/M9ZY6+yPMzeVGcffDzHyCg2zp4B0EqkrZWq3An6ePBGzEhrRq8IyeVgfA\ncQCBBkvzn6Fu7ufFxAUGiA2TStKA4TUgxaYTCbIy5hhumbMGqdaPzmwFrX1w01nQ\nOeXAWCPqOgqRss0R4u6itOENZ0YF5FlChEEj2N64qNdg6wQoI639hpxPcxQzhgCM\noQIDAQAB\n-----END PUBLIC KEY-----",
-    %                 filters => <<"[]">>,
-    %                 id => "79e3da79-ec28-44a0-a3db-9f33b80f9800",
-    %                 name => "qespshwadetphnrscersijygo",ownedTopics => [],
-    %                 pushHeaders => <<>>,pushMessages => <<"false">>,
-    %                 pushRetries => <<>>,pushStatusCode => <<>>,pushUrl => <<>>,
-    %                 subscribedTopics => "55c7814d-6d3b-4e39-a617-a01a45bc9dc4"},
-    %           <<"exp">> => 63808458540,<<"iss">> => <<"MessageMap - App">>})
-    %  JWK: #{<<"k">> => <<"TXlFbmNyJlB5SU9O">>,<<"kty">> => <<"oct">>}
-    % JWS: #{<<"alg">> => <<"HS256">>}
     Signed = jose_jwt:sign(JWK, JWS, Claims),
     {_, Value} = jose_jws:compact(Signed),
     Value.

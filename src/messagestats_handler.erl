@@ -12,7 +12,6 @@
 
 init(Req, Opts) ->
     Method = cowboy_req:method(Req),
-    %{ Version, _} = cowboy_req:binding(version, Req), TODO: Add to e used with stats
     Topic = cowboy_req:binding(topic, Req),
     AuthToken = cowboy_req:header(<<"authorization">>, Req, []),
     Auth = encryption:ewtDecode(AuthToken),
