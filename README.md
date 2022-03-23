@@ -21,16 +21,17 @@ Install Erlang for OS or from: https://www.erlang-solutions.com/downloads/
 
 #### Install from RPM
 ```bash
-# dnf install -y https://download.messagemap.io/packages/messagemap-0.1.1-1.x86_64.rpm
+# dnf install -y https://messagemap.ewr1.vultrobjects.com/messagemap-0.1.1-1.x86_64.rpm
 ```
 #### Install from DEB
 ```bash
-# wget https://download.messagemap.io/packages/messagemap-0.1.1-1_amd64.deb -O /tmp/MessageMap.deb 
+# wget https://messagemap.ewr1.vultrobjects.com/messagemap_0.1.1-1_amd64.deb -O /tmp/MessageMap.deb
 # sudo dpkg -i /tmp/MessageMap.deb 
 ```
 #### Install from Source Code
 ```bash
 # ./rebar3 compile
+# ./rebar3 shell
 ```
 
 ## How to Configure
